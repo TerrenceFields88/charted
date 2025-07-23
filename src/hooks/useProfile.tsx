@@ -35,18 +35,13 @@ export const useProfile = () => {
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
-        if (fetchError.code === 'PGRST116') {
-          // No profile found, this is normal for new users
-          setProfile(null);
-        } else {
-          throw fetchError;
-        }
-      } else {
-        setProfile(data);
+        throw fetchError;
       }
+      
+      setProfile(data);
     } catch (err) {
       console.error('Error fetching profile:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
