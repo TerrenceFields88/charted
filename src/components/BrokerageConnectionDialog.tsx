@@ -37,13 +37,14 @@ export const BrokerageConnectionDialog = () => {
   const [formData, setFormData] = useState({
     broker_name: '',
     account_id: '',
-    api_key: '',
+    username: '',
+    password: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.broker_name || !formData.account_id) {
+    if (!formData.broker_name || !formData.account_id || !formData.username || !formData.password) {
       toast({
         title: 'Error',
         description: 'Please fill in all required fields',
@@ -55,7 +56,8 @@ export const BrokerageConnectionDialog = () => {
     const result = await addAccount({
       broker_name: formData.broker_name,
       account_id: formData.account_id,
-      api_key: formData.api_key,
+      username: formData.username,
+      password: formData.password,
     });
 
     if (result) {
@@ -67,7 +69,7 @@ export const BrokerageConnectionDialog = () => {
         description: `${selectedBroker?.label} ${accountType} account connected successfully`,
       });
       setOpen(false);
-      setFormData({ broker_name: '', account_id: '', api_key: '' });
+      setFormData({ broker_name: '', account_id: '', username: '', password: '' });
     }
   };
 
@@ -186,16 +188,28 @@ export const BrokerageConnectionDialog = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="api_key">API Key (Optional)</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="api_key"
+                id="username"
+                value={formData.username}
+                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                placeholder="Enter your login username"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
                 type="password"
-                value={formData.api_key}
-                onChange={(e) => setFormData(prev => ({ ...prev, api_key: e.target.value }))}
-                placeholder="Enter your API key"
+                value={formData.password}
+                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                placeholder="Enter your login password"
+                required
               />
               <p className="text-xs text-muted-foreground">
-                API keys are securely encrypted and never shared
+                Login credentials are securely encrypted and never shared
               </p>
             </div>
 

@@ -62,8 +62,10 @@ export type Database = {
           id: string
           is_active: boolean | null
           last_sync_at: string | null
+          password_encrypted: string | null
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
           account_id: string
@@ -73,8 +75,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_sync_at?: string | null
+          password_encrypted?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
           account_id?: string
@@ -84,8 +88,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_sync_at?: string | null
+          password_encrypted?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: []
       }

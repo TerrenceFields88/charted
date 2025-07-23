@@ -52,7 +52,8 @@ export const useBrokerageAccount = () => {
   const addAccount = async (accountData: {
     broker_name: string;
     account_id: string;
-    api_key?: string;
+    username: string;
+    password: string;
   }) => {
     if (!user) return null;
 
@@ -63,7 +64,8 @@ export const useBrokerageAccount = () => {
           user_id: user.id,
           broker_name: accountData.broker_name,
           account_id: accountData.account_id,
-          api_key_encrypted: accountData.api_key, // In real app, this should be encrypted
+          username: accountData.username,
+          password_encrypted: accountData.password, // In real app, this should be encrypted
         })
         .select()
         .single();
