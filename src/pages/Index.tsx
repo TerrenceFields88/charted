@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
+import { MarketTicker } from '@/components/MarketTicker';
 import { FeedPage } from '@/components/FeedPage';
 import { MarketsPage } from '@/components/MarketsPage';
 import { CreatePage } from '@/components/CreatePage';
@@ -28,6 +29,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Market Ticker */}
+      <MarketTicker />
+      
       <div className="max-w-md mx-auto relative">
         {renderContent()}
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />

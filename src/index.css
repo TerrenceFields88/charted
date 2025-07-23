@@ -108,6 +108,38 @@ All colors MUST be HSL.
 @layer base {
   * {
     @apply border-border;
+/* Market ticker animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 120s linear infinite;
+}
+
+/* TradingView widget styling */
+.tradingview-widget-container {
+  font-family: inherit !important;
+}
+
+.tradingview-widget-copyright {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.blue-text {
+  color: hsl(var(--primary)) !important;
+  text-decoration: none;
+}
+
+.blue-text:hover {
+  color: hsl(var(--primary)/0.8) !important;
+}
   }
 
   body {
