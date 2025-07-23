@@ -384,38 +384,47 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          connected_brokers: Json | null
           created_at: string | null
           display_name: string | null
           follower_count: number | null
           following_count: number | null
           id: string
+          total_accounts: number | null
           updated_at: string | null
           user_id: string
           username: string
+          verified_trader: boolean | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          connected_brokers?: Json | null
           created_at?: string | null
           display_name?: string | null
           follower_count?: number | null
           following_count?: number | null
           id?: string
+          total_accounts?: number | null
           updated_at?: string | null
           user_id: string
           username: string
+          verified_trader?: boolean | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          connected_brokers?: Json | null
           created_at?: string | null
           display_name?: string | null
           follower_count?: number | null
           following_count?: number | null
           id?: string
+          total_accounts?: number | null
           updated_at?: string | null
           user_id?: string
           username?: string
+          verified_trader?: boolean | null
         }
         Relationships: []
       }
