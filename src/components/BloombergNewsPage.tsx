@@ -48,10 +48,10 @@ export const BloombergNewsPage = () => {
   };
 
   const marketSummary = {
-    sp500: { value: '4,783.45', change: '+12.34', changePercent: '+0.26%', isPositive: true },
-    nasdaq: { value: '15,034.86', change: '-45.67', changePercent: '-0.30%', isPositive: false },
-    dow: { value: '37,123.45', change: '+89.12', changePercent: '+0.24%', isPositive: true },
-    oil: { value: '$78.45', change: '+1.23', changePercent: '+1.59%', isPositive: true }
+    sp500: { value: '6,124.78', change: '+42.15', changePercent: '+0.69%', isPositive: true },
+    nasdaq: { value: '20,845.32', change: '-67.89', changePercent: '-0.32%', isPositive: false },
+    dow: { value: '44,267.91', change: '+156.23', changePercent: '+0.35%', isPositive: true },
+    oil: { value: '$92.30', change: '+1.45', changePercent: '+1.59%', isPositive: true }
   };
 
   return (
