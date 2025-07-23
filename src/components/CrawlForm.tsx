@@ -25,40 +25,6 @@ export const CrawlForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [crawlResult, setCrawlResult] = useState<CrawlResult | null>(null);
-  const [showApiKeyInput, setShowApiKeyInput] = useState(!FirecrawlService.getApiKey());
-
-  const handleApiKeySave = async () => {
-    if (!apiKey.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid API key",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    const isValid = await FirecrawlService.testApiKey(apiKey);
-    
-    if (isValid) {
-      FirecrawlService.saveApiKey(apiKey);
-      setShowApiKeyInput(false);
-      toast({
-        title: "Success",
-        description: "API key saved successfully",
-        duration: 3000,
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: "Invalid API key. Please check and try again.",
-        variant: "destructive",
-        duration: 3000,
-      });
-    }
-    setIsLoading(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,17 +33,6 @@ export const CrawlForm = () => {
     setCrawlResult(null);
     
     try {
-      const apiKey = FirecrawlService.getApiKey();
-      if (!apiKey) {
-        toast({
-          title: "Error",
-          description: "Please set your API key first",
-          variant: "destructive",
-          duration: 3000,
-        });
-        return;
-      }
-
       console.log('Starting crawl for URL:', url);
       const result = await FirecrawlService.crawlWebsite(url);
       
@@ -147,53 +102,7 @@ export const CrawlForm = () => {
     }
   };
 
-  if (showApiKeyInput) {
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="w-5 h-5" />
-            Setup Firecrawl API
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Enter your Firecrawl API key to scrape Bloomberg news
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="apiKey">Firecrawl API Key</Label>
-            <Input
-              id="apiKey"
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="fc-..."
-              required
-            />
-          </div>
-          <Button
-            onClick={handleApiKeySave}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Validating..." : "Save API Key"}
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Get your API key from{" "}
-            <a 
-              href="https://www.firecrawl.dev" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              firecrawl.dev
-            </a>
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
+  // Always show the main interface since API key is managed server-side
   return (
     <div className="space-y-6">
       <Card className="w-full max-w-md mx-auto">
@@ -202,6 +111,9 @@ export const CrawlForm = () => {
             <Globe className="w-5 h-5" />
             News Scraper
           </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            API key is securely managed through Supabase
+          </p>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
