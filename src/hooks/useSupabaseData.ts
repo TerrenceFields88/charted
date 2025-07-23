@@ -91,65 +91,153 @@ export interface Community {
   created_at: string;
 }
 
-// Hook for fetching posts
+// Hook for fetching posts with real-time updates
 export const usePosts = () => {
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles:user_id (
+            id,
+            user_id,
+            username,
+            display_name,
+            avatar_url,
+            bio,
+            follower_count,
+            following_count,
+            created_at
+          ),
+          communities:community_id (
+            id,
+            name,
+            avatar_url
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Transform Supabase posts to Social posts
+      const transformedPosts = (data || []).map(transformSupabasePost);
+      setPosts(transformedPosts);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('posts')
-          .select(`
-            *,
-            profiles:user_id (
-              id,
-              user_id,
-              username,
-              display_name,
-              avatar_url,
-              bio,
-              follower_count,
-              following_count,
-              created_at
-            ),
-            communities:community_id (
-              id,
-              name,
-              avatar_url
-            )
-          `)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        
-        // Transform Supabase posts to Social posts
-        const transformedPosts = (data || []).map(transformSupabasePost);
-        setPosts(transformedPosts);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPosts();
 
-    // Set up realtime subscription
+    // Set up realtime subscription for new posts
     const channel = supabase
-      .channel('posts-changes')
+      .channel('posts-realtime')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'posts'
         },
-        () => {
-          fetchPosts();
+        async (payload) => {
+          console.log('New post received:', payload);
+          
+          // Fetch the complete post data with profile information
+          const { data: newPostData, error } = await supabase
+            .from('posts')
+            .select(`
+              *,
+              profiles:user_id (
+                id,
+                user_id,
+                username,
+                display_name,
+                avatar_url,
+                bio,
+                follower_count,
+                following_count,
+                created_at
+              ),
+              communities:community_id (
+                id,
+                name,
+                avatar_url
+              )
+            `)
+            .eq('id', payload.new.id)
+            .single();
+
+          if (!error && newPostData) {
+            const transformedPost = transformSupabasePost(newPostData);
+            setPosts(prevPosts => [transformedPost, ...prevPosts]);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'posts'
+        },
+        async (payload) => {
+          console.log('Post updated:', payload);
+          
+          // Fetch the updated post data with profile information
+          const { data: updatedPostData, error } = await supabase
+            .from('posts')
+            .select(`
+              *,
+              profiles:user_id (
+                id,
+                user_id,
+                username,
+                display_name,
+                avatar_url,
+                bio,
+                follower_count,
+                following_count,
+                created_at
+              ),
+              communities:community_id (
+                id,
+                name,
+                avatar_url
+              )
+            `)
+            .eq('id', payload.new.id)
+            .single();
+
+          if (!error && updatedPostData) {
+            const transformedPost = transformSupabasePost(updatedPostData);
+            setPosts(prevPosts => 
+              prevPosts.map(post => 
+                post.id === transformedPost.id ? transformedPost : post
+              )
+            );
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'posts'
+        },
+        (payload) => {
+          console.log('Post deleted:', payload);
+          setPosts(prevPosts => 
+            prevPosts.filter(post => post.id !== payload.old.id)
+          );
         }
       )
       .subscribe();
@@ -159,7 +247,7 @@ export const usePosts = () => {
     };
   }, []);
 
-  return { posts, loading, error, refetch: () => window.location.reload() };
+  return { posts, loading, error, refetch: fetchPosts };
 };
 
 // Hook for fetching user profile

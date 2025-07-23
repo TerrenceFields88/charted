@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { usePostActions } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,7 @@ interface CreatePostFormProps {
 export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { createPost } = usePostActions();
   const [content, setContent] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
   const [predictionText, setPredictionText] = useState('');
@@ -31,21 +33,12 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
     try {
       setLoading(true);
 
-      const postData = {
-        user_id: user.id,
-        content: content.trim(),
-        image_url: photos.length > 0 ? photos[0] : null, // For now, use first photo
-        prediction_text: predictionText || null,
-        prediction_confidence: predictionText ? predictionConfidence : null,
-      };
-
-      const { error } = await supabase
-        .from('posts')
-        .insert(postData);
-
-      if (error) {
-        throw error;
-      }
+      await createPost(
+        content.trim(),
+        predictionText || undefined,
+        predictionText ? predictionConfidence : undefined,
+        undefined // community_id
+      );
 
       // Reset form
       setContent('');

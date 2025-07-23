@@ -1,3 +1,4 @@
+
 import { PostCard } from './PostCard';
 import { usePosts } from '@/hooks/useSupabaseData';
 import { RefreshCw } from 'lucide-react';
@@ -31,7 +32,7 @@ export const FeedPage = () => {
 
       {/* Feed */}
       <div className="px-4 py-4">
-        {loading ? (
+        {loading && posts.length === 0 ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="p-4 bg-card rounded-lg border space-y-3">
@@ -55,9 +56,22 @@ export const FeedPage = () => {
             No posts yet. Create the first one!
           </div>
         ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))
+          <>
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+            {loading && (
+              <div className="mt-4 p-4 bg-card rounded-lg border">
+                <div className="flex items-center space-x-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
