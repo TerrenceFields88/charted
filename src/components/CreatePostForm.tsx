@@ -9,10 +9,14 @@ import { PhotoUploader } from '@/components/PhotoUploader';
 import { TradingViewMiniChart } from '@/components/TradingViewChart';
 import { useToast } from '@/hooks/use-toast';
 import { Send, TrendingUp, Camera } from 'lucide-react';
+import { validateContent, validatePredictionConfidence, sanitizeContent, sanitizeErrorMessage, VALIDATION_LIMITS, RateLimiter } from '@/lib/validation';
 
 interface CreatePostFormProps {
   onPostCreated?: () => void;
 }
+
+// Rate limiter for post creation (max 5 posts per minute)
+const postRateLimiter = new RateLimiter(5, 60000);
 
 export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
   const { user } = useAuth();
@@ -25,17 +29,92 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
   const [loading, setLoading] = useState(false);
   const [showChart, setShowChart] = useState(false);
   const [chartSymbol, setChartSymbol] = useState('NASDAQ:AAPL');
+  const [contentError, setContentError] = useState<string | null>(null);
+  const [predictionError, setPredictionError] = useState<string | null>(null);
+
+  // Validation handlers
+  const handleContentChange = (value: string) => {
+    setContent(value);
+    const error = validateContent(value, VALIDATION_LIMITS.POST_CONTENT);
+    setContentError(error);
+  };
+
+  const handlePredictionChange = (value: string) => {
+    setPredictionText(value);
+    if (value.trim()) {
+      const error = validateContent(value, VALIDATION_LIMITS.PREDICTION_TEXT);
+      setPredictionError(error);
+    } else {
+      setPredictionError(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !content.trim()) return;
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Please log in to create a post",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Rate limiting check
+    if (!postRateLimiter.isAllowed(user.id)) {
+      const remainingTime = Math.ceil(postRateLimiter.getRemainingTime(user.id) / 1000);
+      toast({
+        title: "Rate limit exceeded",
+        description: `Too many posts. Please wait ${remainingTime} seconds.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate content
+    const contentValidationError = validateContent(content, VALIDATION_LIMITS.POST_CONTENT);
+    if (contentValidationError) {
+      setContentError(contentValidationError);
+      toast({
+        title: "Validation Error",
+        description: contentValidationError,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate prediction text if provided
+    if (predictionText.trim()) {
+      const predictionValidationError = validateContent(predictionText, VALIDATION_LIMITS.PREDICTION_TEXT);
+      if (predictionValidationError) {
+        setPredictionError(predictionValidationError);
+        toast({
+          title: "Validation Error",
+          description: predictionValidationError,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Validate confidence
+    const confidenceError = validatePredictionConfidence(predictionText ? predictionConfidence : null);
+    if (confidenceError) {
+      toast({
+        title: "Validation Error",
+        description: confidenceError,
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       setLoading(true);
 
       await createPost(
-        content.trim(),
-        predictionText || undefined,
+        sanitizeContent(content.trim()),
+        predictionText.trim() ? sanitizeContent(predictionText.trim()) : undefined,
         predictionText ? predictionConfidence : undefined,
         undefined // community_id
       );
@@ -46,6 +125,8 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
       setPredictionText('');
       setPredictionConfidence(50);
       setShowChart(false);
+      setContentError(null);
+      setPredictionError(null);
 
       toast({
         title: "Success",
@@ -57,7 +138,7 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
       console.error('Error creating post:', error);
       toast({
         title: "Error",
-        description: "Failed to create post. Please try again.",
+        description: sanitizeErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -80,10 +161,18 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
             <Textarea
               placeholder="What's your market view? Share your analysis, trades, or predictions..."
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => handleContentChange(e.target.value)}
               rows={4}
               required
+              maxLength={VALIDATION_LIMITS.POST_CONTENT.max}
+              className={contentError ? 'border-destructive' : ''}
             />
+            {contentError && (
+              <p className="text-sm text-destructive mt-1">{contentError}</p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              {content.length}/{VALIDATION_LIMITS.POST_CONTENT.max} characters
+            </p>
           </div>
 
           {/* Photo Uploader */}
@@ -106,9 +195,17 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
             <Textarea
               placeholder="Enter your market prediction or price target..."
               value={predictionText}
-              onChange={(e) => setPredictionText(e.target.value)}
+              onChange={(e) => handlePredictionChange(e.target.value)}
               rows={2}
+              maxLength={VALIDATION_LIMITS.PREDICTION_TEXT.max}
+              className={predictionError ? 'border-destructive' : ''}
             />
+            {predictionError && (
+              <p className="text-sm text-destructive mt-1">{predictionError}</p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              {predictionText.length}/{VALIDATION_LIMITS.PREDICTION_TEXT.max} characters
+            </p>
             
             {predictionText && (
               <div className="space-y-2">
@@ -164,7 +261,7 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={loading || !content.trim()}
+            disabled={loading || !content.trim() || !!contentError || !!predictionError}
           >
             <Send className="w-4 h-4 mr-2" />
             {loading ? 'Posting...' : 'Share Post'}

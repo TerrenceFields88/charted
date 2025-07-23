@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X, Image } from 'lucide-react';
+import { validateImageFile, validateImageContent, generateSecureFilename, sanitizeErrorMessage } from '@/lib/validation';
 
 interface PhotoUploaderProps {
   onPhotosChange: (urls: string[]) => void;
@@ -25,13 +26,38 @@ export const PhotoUploader = ({
   const uploadPhoto = async (file: File): Promise<string | null> => {
     if (!user) return null;
 
+    // Validate file
+    const fileError = validateImageFile(file);
+    if (fileError) {
+      toast({
+        title: "Invalid file",
+        description: fileError,
+        variant: "destructive",
+      });
+      return null;
+    }
+
+    // Validate image content
+    const contentError = await validateImageContent(file);
+    if (contentError) {
+      toast({
+        title: "Invalid image",
+        description: contentError,
+        variant: "destructive",
+      });
+      return null;
+    }
+
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}-${Math.random()}.${fileExt}`;
+      // Generate secure filename
+      const secureFileName = generateSecureFilename(file.name, user.id);
 
       const { error: uploadError } = await supabase.storage
         .from('photos')
-        .upload(fileName, file);
+        .upload(secureFileName, file, {
+          cacheControl: '3600',
+          upsert: false // Prevent overwriting for security
+        });
 
       if (uploadError) {
         throw uploadError;
@@ -39,11 +65,16 @@ export const PhotoUploader = ({
 
       const { data } = supabase.storage
         .from('photos')
-        .getPublicUrl(fileName);
+        .getPublicUrl(secureFileName);
 
       return data.publicUrl;
     } catch (error) {
       console.error('Error uploading photo:', error);
+      toast({
+        title: "Upload failed",
+        description: sanitizeErrorMessage(error),
+        variant: "destructive",
+      });
       return null;
     }
   };
