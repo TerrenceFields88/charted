@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import { CommunityCard } from './CommunityCard';
-import { mockCommunityPosts } from '@/data/mockUsers';
 import { CommunityPost } from '@/types/social';
+import { useCommunityPosts } from '@/hooks/useCommunityPosts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { CreatePostForm } from './CreatePostForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Search, Filter, Plus } from 'lucide-react';
 
 export const CommunityPage = () => {
-  const [posts, setPosts] = useState<CommunityPost[]>(mockCommunityPosts);
+  const { posts, loading, error, refetch } = useCommunityPosts();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const categories = [
     { id: 'all', label: 'All', count: posts.length },
@@ -35,10 +38,25 @@ export const CommunityPage = () => {
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold">Community</h1>
-          <Button size="sm" className="h-8">
-            <Plus className="w-4 h-4 mr-1" />
-            Post
-          </Button>
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="h-8">
+                <Plus className="w-4 h-4 mr-1" />
+                Post
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create Community Post</DialogTitle>
+              </DialogHeader>
+              <CreatePostForm 
+                onPostCreated={() => {
+                  setIsCreateDialogOpen(false);
+                  refetch();
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
         
         {/* Search */}
@@ -81,36 +99,71 @@ export const CommunityPage = () => {
 
           <TabsContent value="hot">
             <div className="space-y-4">
-              {filteredPosts.map((post) => (
-                <CommunityCard key={post.id} post={post} />
-              ))}
-              {filteredPosts.length === 0 && (
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading posts...
+                </div>
+              ) : error ? (
+                <div className="text-center py-8 text-destructive">
+                  Error loading posts: {error}
+                </div>
+              ) : filteredPosts.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   No posts found matching your criteria
                 </div>
+              ) : (
+                filteredPosts.map((post) => (
+                  <CommunityCard key={post.id} post={post} />
+                ))
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="new">
             <div className="space-y-4">
-              {[...filteredPosts]
-                .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-                .map((post) => (
-                  <CommunityCard key={post.id} post={post} />
-                ))
-              }
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading posts...
+                </div>
+              ) : error ? (
+                <div className="text-center py-8 text-destructive">
+                  Error loading posts: {error}
+                </div>
+              ) : filteredPosts.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No posts found matching your criteria
+                </div>
+              ) : (
+                [...filteredPosts]
+                  .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+                  .map((post) => (
+                    <CommunityCard key={post.id} post={post} />
+                  ))
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="top">
             <div className="space-y-4">
-              {[...filteredPosts]
-                .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes))
-                .map((post) => (
-                  <CommunityCard key={post.id} post={post} />
-                ))
-              }
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading posts...
+                </div>
+              ) : error ? (
+                <div className="text-center py-8 text-destructive">
+                  Error loading posts: {error}
+                </div>
+              ) : filteredPosts.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No posts found matching your criteria
+                </div>
+              ) : (
+                [...filteredPosts]
+                  .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes))
+                  .map((post) => (
+                    <CommunityCard key={post.id} post={post} />
+                  ))
+              )}
             </div>
           </TabsContent>
         </Tabs>
