@@ -103,24 +103,54 @@ export const usePosts = () => {
       setLoading(true);
       setError(null);
       
-      // Query posts and separately get profile data
-      const { data, error } = await supabase
+      // Fetch posts with separate profile lookup
+      const { data: postsData, error: postsError } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profiles!posts_user_id_fkey(username, display_name, avatar_url, follower_count, following_count)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      if (postsError) {
+        console.error('Supabase posts error:', postsError);
+        throw postsError;
       }
       
-      console.log('Raw posts data:', data);
+      console.log('Raw posts data:', postsData);
       
-      // Transform Supabase posts to Social posts
-      const transformedPosts = (data || []).map(transformSupabasePost);
+      if (!postsData || postsData.length === 0) {
+        setPosts([]);
+        return;
+      }
+
+      // Get unique user IDs from posts
+      const userIds = [...new Set(postsData.map(post => post.user_id))];
+      
+      // Fetch profiles for these user IDs
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url, follower_count, following_count')
+        .in('user_id', userIds);
+
+      if (profilesError) {
+        console.error('Supabase profiles error:', profilesError);
+        // Continue without profile data
+      }
+
+      console.log('Profiles data:', profilesData);
+      
+      // Create a map of user_id to profile
+      const profileMap = new Map();
+      (profilesData || []).forEach(profile => {
+        profileMap.set(profile.user_id, profile);
+      });
+      
+      // Combine posts with their profile data
+      const postsWithProfiles = postsData.map(post => ({
+        ...post,
+        profiles: profileMap.get(post.user_id) || null
+      }));
+      
+      // Transform to Social posts format
+      const transformedPosts = postsWithProfiles.map(transformSupabasePost);
       console.log('Transformed posts:', transformedPosts);
       
       setPosts(transformedPosts);
@@ -184,17 +214,35 @@ export const usePosts = () => {
   // Helper function to fetch a single post with profile data
   const fetchPostWithProfile = async (postId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch the post
+      const { data: postData, error: postError } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profiles!posts_user_id_fkey(username, display_name, avatar_url, follower_count, following_count)
-        `)
+        .select('*')
         .eq('id', postId)
         .maybeSingle();
 
-      if (error) throw error;
-      return transformSupabasePost(data);
+      if (postError) throw postError;
+      if (!postData) return null;
+
+      // Fetch the profile for this post's user
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url, follower_count, following_count')
+        .eq('user_id', postData.user_id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        // Continue without profile data
+      }
+
+      // Combine post with profile
+      const postWithProfile = {
+        ...postData,
+        profiles: profileData || null
+      };
+
+      return transformSupabasePost(postWithProfile);
     } catch (err) {
       console.error('Error fetching post with profile:', err);
       return null;
