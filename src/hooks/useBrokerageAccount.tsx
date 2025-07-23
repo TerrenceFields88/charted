@@ -6,7 +6,7 @@ interface BrokerageAccount {
   id: string;
   user_id: string;
   broker_name: string;
-  account_id: string;
+  username: string;
   is_active: boolean;
   last_sync_at: string | null;
   created_at: string;
@@ -51,7 +51,6 @@ export const useBrokerageAccount = () => {
 
   const addAccount = async (accountData: {
     broker_name: string;
-    account_id: string;
     username: string;
     password: string;
   }) => {
@@ -63,7 +62,6 @@ export const useBrokerageAccount = () => {
         .insert({
           user_id: user.id,
           broker_name: accountData.broker_name,
-          account_id: accountData.account_id,
           username: accountData.username,
           password_encrypted: accountData.password, // In real app, this should be encrypted
         })
@@ -104,6 +102,30 @@ export const useBrokerageAccount = () => {
     }
   };
 
+  const removeAccount = async (accountId: string) => {
+    if (!user) return false;
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('brokerage_accounts')
+        .update({ is_active: false })
+        .eq('id', accountId)
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      // Remove from local state
+      setAccounts(prev => prev.filter(account => account.id !== accountId));
+      return true;
+    } catch (err) {
+      console.error('Error removing brokerage account:', err);
+      setError(err instanceof Error ? err.message : 'Failed to remove account');
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchAccounts();
   }, [user]);
@@ -115,6 +137,7 @@ export const useBrokerageAccount = () => {
     fetchAccounts,
     addAccount,
     syncAccount,
+    removeAccount,
     refetch: fetchAccounts,
   };
 };
