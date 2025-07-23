@@ -55,7 +55,7 @@ export type Database = {
       }
       brokerage_accounts: {
         Row: {
-          account_id: string
+          account_id: string | null
           api_key_encrypted: string | null
           broker_name: string
           created_at: string
@@ -68,7 +68,7 @@ export type Database = {
           username: string | null
         }
         Insert: {
-          account_id: string
+          account_id?: string | null
           api_key_encrypted?: string | null
           broker_name: string
           created_at?: string
@@ -81,7 +81,7 @@ export type Database = {
           username?: string | null
         }
         Update: {
-          account_id?: string
+          account_id?: string | null
           api_key_encrypted?: string | null
           broker_name?: string
           created_at?: string

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useBrokerageAccount } from '@/hooks/useBrokerageAccount';
-import { Link, RefreshCw, Plus, CheckCircle } from 'lucide-react';
+import { Link, RefreshCw, Plus, CheckCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const SUPPORTED_BROKERS = [
@@ -31,12 +31,11 @@ const SUPPORTED_BROKERS = [
 ];
 
 export const BrokerageConnectionDialog = () => {
-  const { accounts, loading, addAccount, syncAccount } = useBrokerageAccount();
+  const { accounts, loading, addAccount, syncAccount, removeAccount } = useBrokerageAccount();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     broker_name: '',
-    account_id: '',
     username: '',
     password: '',
   });
@@ -44,7 +43,7 @@ export const BrokerageConnectionDialog = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.broker_name || !formData.account_id || !formData.username || !formData.password) {
+    if (!formData.broker_name || !formData.username || !formData.password) {
       toast({
         title: 'Error',
         description: 'Please fill in all required fields',
@@ -55,7 +54,6 @@ export const BrokerageConnectionDialog = () => {
 
     const result = await addAccount({
       broker_name: formData.broker_name,
-      account_id: formData.account_id,
       username: formData.username,
       password: formData.password,
     });
@@ -69,7 +67,7 @@ export const BrokerageConnectionDialog = () => {
         description: `${selectedBroker?.label} ${accountType} account connected successfully`,
       });
       setOpen(false);
-      setFormData({ broker_name: '', account_id: '', username: '', password: '' });
+      setFormData({ broker_name: '', username: '', password: '' });
     }
   };
 
@@ -79,6 +77,16 @@ export const BrokerageConnectionDialog = () => {
       title: 'Synced',
       description: 'Account data synchronized successfully',
     });
+  };
+
+  const handleRemove = async (accountId: string, brokerName: string) => {
+    const success = await removeAccount(accountId);
+    if (success) {
+      toast({
+        title: 'Account Removed',
+        description: `${brokerName} account disconnected successfully`,
+      });
+    }
   };
 
   return (
@@ -111,7 +119,7 @@ export const BrokerageConnectionDialog = () => {
                         <div>
                           <div className="font-medium">{account.broker_name}</div>
                           <div className="text-sm text-muted-foreground">
-                            Account: {account.account_id}
+                            Username: {account.username}
                           </div>
                         </div>
                       </div>
@@ -125,6 +133,13 @@ export const BrokerageConnectionDialog = () => {
                           onClick={() => handleSync(account.id)}
                         >
                           <RefreshCw className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemove(account.id, account.broker_name)}
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
@@ -174,17 +189,6 @@ export const BrokerageConnectionDialog = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="account_id">Account ID</Label>
-              <Input
-                id="account_id"
-                value={formData.account_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, account_id: e.target.value }))}
-                placeholder="Enter your account ID"
-                required
-              />
             </div>
 
             <div className="space-y-2">

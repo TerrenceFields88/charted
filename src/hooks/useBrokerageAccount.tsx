@@ -63,6 +63,7 @@ export const useBrokerageAccount = () => {
           user_id: user.id,
           broker_name: accountData.broker_name,
           username: accountData.username,
+          account_id: accountData.username, // Use username as account_id for now
           password_encrypted: accountData.password, // In real app, this should be encrypted
         })
         .select()
