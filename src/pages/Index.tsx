@@ -6,6 +6,7 @@ import { MarketsPage } from '@/components/MarketsPage';
 import { CreatePage } from '@/components/CreatePage';
 import { CommunityPage } from '@/components/CommunityPage';
 import { ProfilePage } from '@/components/ProfilePage';
+import { UserSearchPage } from '@/components/UserSearchPage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
@@ -16,6 +17,8 @@ const Index = () => {
         return <FeedPage />;
       case 'markets':
         return <MarketsPage />;
+      case 'search':
+        return <UserSearchPage />;
       case 'create':
         return <CreatePage />;
       case 'community':
@@ -33,7 +36,9 @@ const Index = () => {
       <MarketTicker />
       
       <div className="max-w-md mx-auto relative">
-        {renderContent()}
+        <div className="px-4 py-6 pb-20">
+          {renderContent()}
+        </div>
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
     </div>
