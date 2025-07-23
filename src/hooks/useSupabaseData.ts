@@ -154,7 +154,7 @@ export const usePosts = () => {
               if (newPost) {
                 setPosts(prevPosts => [newPost, ...prevPosts]);
               }
-            });
+            }).catch(err => console.error('Error fetching new post:', err));
           } else if (payload.eventType === 'UPDATE') {
             // Update existing post
             fetchPostWithProfile(payload.new.id).then(updatedPost => {
@@ -165,7 +165,7 @@ export const usePosts = () => {
                   )
                 );
               }
-            });
+            }).catch(err => console.error('Error fetching updated post:', err));
           } else if (payload.eventType === 'DELETE') {
             // Remove deleted post
             setPosts(prevPosts => 
@@ -204,44 +204,7 @@ export const usePosts = () => {
   return { posts, loading, error, refetch: fetchPosts };
 };
 
-// Hook for fetching user profile
-export const useProfile = (userId?: string) => {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
-
-  const targetUserId = userId || user?.id;
-
-  useEffect(() => {
-    if (!targetUserId) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', targetUserId)
-          .maybeSingle();
-
-        if (error) throw error;
-        setProfile(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [targetUserId]);
-
-  return { profile, loading, error };
-};
+// This useProfile hook is replaced by the dedicated useProfile.tsx file
 
 // Hook for fetching markets
 export const useMarkets = () => {
@@ -329,56 +292,75 @@ export const usePostActions = () => {
   const likePost = async (postId: string) => {
     if (!user) throw new Error('User not authenticated');
 
-    // Check if already liked
-    const { data: existingLike } = await supabase
-      .from('likes')
-      .select('id')
-      .eq('post_id', postId)
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (existingLike) {
-      // Unlike
-      await supabase
+    try {
+      // Check if already liked
+      const { data: existingLike, error: checkError } = await supabase
         .from('likes')
-        .delete()
-        .eq('id', existingLike.id);
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      // Decrement like count using RPC function
-      await supabase.rpc('decrement_post_likes', { post_id: postId });
-    } else {
-      // Like
-      await supabase
-        .from('likes')
-        .insert({
-          post_id: postId,
-          user_id: user.id,
-        });
+      if (checkError) throw checkError;
 
-      // Increment like count using RPC function
-      await supabase.rpc('increment_post_likes', { post_id: postId });
+      if (existingLike) {
+        // Unlike
+        const { error: deleteError } = await supabase
+          .from('likes')
+          .delete()
+          .eq('id', existingLike.id);
+
+        if (deleteError) throw deleteError;
+
+        // Decrement like count using RPC function
+        const { error: rpcError } = await supabase.rpc('decrement_post_likes', { post_id: postId });
+        if (rpcError) throw rpcError;
+      } else {
+        // Like
+        const { error: insertError } = await supabase
+          .from('likes')
+          .insert({
+            post_id: postId,
+            user_id: user.id,
+          });
+
+        if (insertError) throw insertError;
+
+        // Increment like count using RPC function
+        const { error: rpcError } = await supabase.rpc('increment_post_likes', { post_id: postId });
+        if (rpcError) throw rpcError;
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      throw error;
     }
   };
 
   const addComment = async (postId: string, content: string) => {
     if (!user) throw new Error('User not authenticated');
 
-    const { data, error } = await supabase
-      .from('comments')
-      .insert({
-        post_id: postId,
-        content,
-        user_id: user.id,
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('comments')
+        .insert({
+          post_id: postId,
+          content,
+          user_id: user.id,
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
+      if (error) throw error;
 
-    // Increment comment count using RPC function
-    await supabase.rpc('increment_post_comments', { post_id: postId });
+      // Increment comment count using RPC function
+      const { error: rpcError } = await supabase.rpc('increment_post_comments', { post_id: postId });
+      if (rpcError) throw rpcError;
 
-    return data;
+      return data;
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      throw error;
+    }
   };
 
   return { createPost, likePost, addComment };
