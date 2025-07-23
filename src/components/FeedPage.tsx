@@ -1,5 +1,6 @@
 
 import { PostCard } from './PostCard';
+import { NewsWidget } from '@/components/NewsWidget';
 import { usePosts } from '@/hooks/useSupabaseData';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,10 @@ export const FeedPage = () => {
       </div>
 
       {/* Feed */}
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 space-y-6">
+        {/* News Widget */}
+        <NewsWidget maxArticles={3} showHeader={true} />
+
         {loading && posts.length === 0 ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (

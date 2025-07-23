@@ -7,64 +7,22 @@ import { Badge } from '@/components/ui/badge';
 import { NewsCard } from '@/components/NewsCard';
 import { BloombergTVPlayer } from '@/components/BloombergTVPlayer';
 import { CrawlForm } from '@/components/CrawlForm';
+import { useBloombergNews } from '@/hooks/useBloombergNews';
 import { 
   Search, 
   Newspaper, 
   TrendingUp, 
   Globe,
   RefreshCw,
-  Filter
+  Filter,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
-
-// Mock news data for demonstration
-const mockNewsArticles = [
-  {
-    id: '1',
-    title: 'Federal Reserve Signals Potential Rate Cuts Amid Economic Uncertainty',
-    description: 'Fed officials indicate they may consider reducing interest rates in response to slowing economic indicators and inflation concerns.',
-    url: 'https://bloomberg.com/news/fed-rate-cuts',
-    publishedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    source: 'Bloomberg',
-    category: 'Monetary Policy',
-    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop'
-  },
-  {
-    id: '2',
-    title: 'Tech Giants Report Mixed Earnings as AI Investments Surge',
-    description: 'Major technology companies show varied quarterly results while continuing to pour billions into artificial intelligence development.',
-    url: 'https://bloomberg.com/news/tech-earnings',
-    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    source: 'Bloomberg',
-    category: 'Technology',
-    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop'
-  },
-  {
-    id: '3',
-    title: 'Oil Prices Surge on OPEC+ Production Cut Extension',
-    description: 'Crude oil futures jump as OPEC+ announces plans to extend production cuts through the first quarter of next year.',
-    url: 'https://bloomberg.com/news/oil-prices',
-    publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    source: 'Bloomberg',
-    category: 'Energy',
-    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop'
-  },
-  {
-    id: '4',
-    title: 'Dollar Strengthens as Investors Seek Safe Haven Assets',
-    description: 'The US dollar gains against major currencies as global economic uncertainties drive demand for safe haven investments.',
-    url: 'https://bloomberg.com/news/dollar-strength',
-    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-    source: 'Bloomberg',
-    category: 'Currency',
-    imageUrl: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=600&h=400&fit=crop'
-  }
-];
 
 export const BloombergNewsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [articles, setArticles] = useState(mockNewsArticles);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { articles, isLoading, error, lastUpdated, refetch, hasApiKey } = useBloombergNews();
 
   const categories = [
     { value: 'all', label: 'All News' },
@@ -86,10 +44,7 @@ export const BloombergNewsPage = () => {
   });
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsRefreshing(false);
+    await refetch();
   };
 
   const marketSummary = {
@@ -107,15 +62,37 @@ export const BloombergNewsPage = () => {
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Newspaper className="w-5 h-5" />
             Bloomberg News
+            {hasApiKey && (
+              <Badge variant={error ? "destructive" : "secondary"} className="ml-2">
+                {error ? (
+                  <>
+                    <WifiOff className="w-3 h-3 mr-1" />
+                    Offline
+                  </>
+                ) : (
+                  <>
+                    <Wifi className="w-3 h-3 mr-1" />
+                    Live
+                  </>
+                )}
+              </Badge>
+            )}
           </h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
+          <div className="flex items-center gap-2">
+            {lastUpdated && (
+              <span className="text-xs text-muted-foreground">
+                Updated {lastUpdated.toLocaleTimeString()}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         </div>
         
         {/* Search Bar */}
@@ -181,15 +158,32 @@ export const BloombergNewsPage = () => {
 
             {/* News Articles */}
             <div className="space-y-4">
-              {filteredArticles.length === 0 ? (
+              {!hasApiKey ? (
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+                      <Globe className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Setup Required</h3>
+                    <p className="text-muted-foreground text-sm mb-4">
+                      Configure your Firecrawl API key in the News Scraper tab to automatically fetch live Bloomberg news
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : filteredArticles.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
                       <Newspaper className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold mb-2">No Articles Found</h3>
+                    <h3 className="font-semibold mb-2">
+                      {isLoading ? 'Loading News...' : 'No Articles Found'}
+                    </h3>
                     <p className="text-muted-foreground text-sm">
-                      {searchQuery ? `No articles match "${searchQuery}"` : 'No articles available for this category'}
+                      {isLoading ? 'Fetching the latest Bloomberg news' : 
+                       searchQuery ? `No articles match "${searchQuery}"` : 
+                       error ? 'Failed to fetch news. Try refreshing.' :
+                       'No articles available for this category'}
                     </p>
                   </CardContent>
                 </Card>
