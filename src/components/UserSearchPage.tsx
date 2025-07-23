@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { UserProfileView } from '@/components/UserProfileView';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -33,6 +34,17 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
   const [loading, setLoading] = useState(false);
   const [followingUsers, setFollowingUsers] = useState<Set<string>>(new Set());
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  // If a user is selected, show their profile
+  if (selectedUserId) {
+    return (
+      <UserProfileView 
+        userId={selectedUserId} 
+        onBack={() => setSelectedUserId(null)} 
+      />
+    );
+  }
 
   // Fetch users the current user is following
   useEffect(() => {
@@ -291,19 +303,17 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
                 </div>
 
                 {/* Action Buttons */}
-                {onUserSelect && (
-                  <div className="mt-3 pt-3 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onUserSelect(profile.user_id)}
-                      className="w-full"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      View Profile
-                    </Button>
-                  </div>
-                )}
+                <div className="mt-3 pt-3 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedUserId(profile.user_id)}
+                    className="w-full"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    View Profile
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           );
