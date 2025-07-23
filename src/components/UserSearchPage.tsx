@@ -39,16 +39,6 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  // If a user is selected, show their profile
-  if (selectedUserId) {
-    return (
-      <UserProfileView 
-        userId={selectedUserId} 
-        onBack={() => setSelectedUserId(null)} 
-      />
-    );
-  }
-
   // Real-time updates for search results
   useEffect(() => {
     if (searchResults.length > 0) {
@@ -239,6 +229,16 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
       month: 'short'
     });
   };
+
+  // If a user is selected, show their profile
+  if (selectedUserId) {
+    return (
+      <UserProfileView 
+        userId={selectedUserId} 
+        onBack={() => setSelectedUserId(null)} 
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
