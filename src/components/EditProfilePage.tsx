@@ -25,7 +25,7 @@ export const EditProfilePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { profile, updateProfile, loading: profileLoading } = useProfile();
+  const { profile, updateProfile, createProfile, loading: profileLoading } = useProfile();
   const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -90,7 +90,7 @@ export const EditProfilePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !profile) return;
+    if (!user) return;
 
     const updateData = {
       username: formData.username,
@@ -99,7 +99,14 @@ export const EditProfilePage = () => {
       avatar_url: formData.avatar_url || null,
     };
 
-    const result = await updateProfile(updateData);
+    let result;
+    if (profile) {
+      // Update existing profile
+      result = await updateProfile(updateData);
+    } else {
+      // Create new profile
+      result = await createProfile(updateData);
+    }
     
     if (result) {
       toast({
