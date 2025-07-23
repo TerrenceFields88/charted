@@ -53,6 +53,42 @@ export type Database = {
         }
         Relationships: []
       }
+      brokerage_accounts: {
+        Row: {
+          account_id: string
+          api_key_encrypted: string | null
+          broker_name: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          api_key_encrypted?: string | null
+          broker_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          api_key_encrypted?: string | null
+          broker_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -299,11 +335,127 @@ export type Database = {
         }
         Relationships: []
       }
+      trades: {
+        Row: {
+          brokerage_account_id: string | null
+          created_at: string
+          executed_at: string
+          id: string
+          is_profitable: boolean | null
+          price: number
+          profit_loss: number | null
+          quantity: number
+          symbol: string
+          trade_type: string
+          trade_value: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brokerage_account_id?: string | null
+          created_at?: string
+          executed_at: string
+          id?: string
+          is_profitable?: boolean | null
+          price: number
+          profit_loss?: number | null
+          quantity: number
+          symbol: string
+          trade_type: string
+          trade_value: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brokerage_account_id?: string | null
+          created_at?: string
+          executed_at?: string
+          id?: string
+          is_profitable?: boolean | null
+          price?: number
+          profit_loss?: number | null
+          quantity?: number
+          symbol?: string
+          trade_type?: string
+          trade_value?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trades_brokerage_account_id_fkey"
+            columns: ["brokerage_account_id"]
+            isOneToOne: false
+            referencedRelation: "brokerage_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trading_performance: {
+        Row: {
+          brokerage_account_id: string | null
+          created_at: string
+          id: string
+          last_calculated_at: string | null
+          losing_trades: number | null
+          portfolio_return_percentage: number | null
+          portfolio_value: number | null
+          risk_reward_ratio: number | null
+          total_trades: number | null
+          updated_at: string
+          user_id: string
+          win_rate_percentage: number | null
+          winning_trades: number | null
+        }
+        Insert: {
+          brokerage_account_id?: string | null
+          created_at?: string
+          id?: string
+          last_calculated_at?: string | null
+          losing_trades?: number | null
+          portfolio_return_percentage?: number | null
+          portfolio_value?: number | null
+          risk_reward_ratio?: number | null
+          total_trades?: number | null
+          updated_at?: string
+          user_id: string
+          win_rate_percentage?: number | null
+          winning_trades?: number | null
+        }
+        Update: {
+          brokerage_account_id?: string | null
+          created_at?: string
+          id?: string
+          last_calculated_at?: string | null
+          losing_trades?: number | null
+          portfolio_return_percentage?: number | null
+          portfolio_value?: number | null
+          risk_reward_ratio?: number | null
+          total_trades?: number | null
+          updated_at?: string
+          user_id?: string
+          win_rate_percentage?: number | null
+          winning_trades?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_performance_brokerage_account_id_fkey"
+            columns: ["brokerage_account_id"]
+            isOneToOne: false
+            referencedRelation: "brokerage_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      calculate_trading_performance: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       decrement_post_likes: {
         Args: { post_id: string }
         Returns: undefined
