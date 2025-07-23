@@ -157,6 +157,33 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string | null
+          participant_1: string
+          participant_2: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          participant_1: string
+          participant_2: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          participant_1?: string
+          participant_2?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string | null
@@ -242,6 +269,57 @@ export type Database = {
           volume?: number | null
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message_type: string
+          sender_id: string
+          shared_post_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message_type?: string
+          sender_id: string
+          shared_post_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message_type?: string
+          sender_id?: string
+          shared_post_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_shared_post_id_fkey"
+            columns: ["shared_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       posts: {
         Row: {
@@ -459,6 +537,10 @@ export type Database = {
       decrement_post_likes: {
         Args: { post_id: string }
         Returns: undefined
+      }
+      get_or_create_conversation: {
+        Args: { user_1: string; user_2: string }
+        Returns: string
       }
       increment_post_comments: {
         Args: { post_id: string }

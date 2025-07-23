@@ -9,11 +9,12 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Heart, MessageCircle, Share, MoreHorizontal, TrendingUp, TrendingDown, Minus, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Share, MoreHorizontal, TrendingUp, TrendingDown, Minus, Trash2, Send } from 'lucide-react';
 import { Post } from '@/types/social';
 import { useAuth } from '@/hooks/useAuth';
 import { usePostActions } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
+import { SharePostDialog } from '@/components/SharePostDialog';
 import { cn } from '@/lib/utils';
 
 interface PostCardProps {
@@ -27,6 +28,7 @@ export const PostCard = ({ post }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -137,14 +139,18 @@ export const PostCard = ({ post }: PostCardProps) => {
             </div>
           </div>
         </div>
-        {isOwner ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
+              <Send className="w-4 h-4 mr-2" />
+              Share via DM
+            </DropdownMenuItem>
+            {isOwner && (
               <DropdownMenuItem 
                 onClick={handleDeletePost}
                 disabled={isDeleting}
@@ -153,11 +159,9 @@ export const PostCard = ({ post }: PostCardProps) => {
                 <Trash2 className="w-4 h-4 mr-2" />
                 {isDeleting ? 'Deleting...' : 'Delete Post'}
               </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <div className="h-8 w-8" /> // Empty space to maintain layout
-        )}
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Content */}
@@ -230,6 +234,13 @@ export const PostCard = ({ post }: PostCardProps) => {
           <span className="text-xs font-medium">{post.shares}</span>
         </Button>
       </div>
+
+      {/* Share Post Dialog */}
+      <SharePostDialog 
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        postId={post.id}
+      />
     </Card>
   );
 };
