@@ -14,7 +14,252 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          post_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          post_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communities: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: string
+          member_count: number | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          id?: string
+          member_count?: number | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: string
+          member_count?: number | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      follows: {
+        Row: {
+          created_at: string | null
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      markets: {
+        Row: {
+          created_at: string | null
+          current_price: number | null
+          description: string | null
+          id: string
+          market_cap: number | null
+          price_change: number | null
+          title: string
+          updated_at: string | null
+          volume: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_price?: number | null
+          description?: string | null
+          id?: string
+          market_cap?: number | null
+          price_change?: number | null
+          title: string
+          updated_at?: string | null
+          volume?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          current_price?: number | null
+          description?: string | null
+          id?: string
+          market_cap?: number | null
+          price_change?: number | null
+          title?: string
+          updated_at?: string | null
+          volume?: number | null
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          comment_count: number | null
+          community_id: string | null
+          content: string
+          created_at: string | null
+          id: string
+          image_url: string | null
+          like_count: number | null
+          prediction_confidence: number | null
+          prediction_outcome: string | null
+          prediction_text: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment_count?: number | null
+          community_id?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          like_count?: number | null
+          prediction_confidence?: number | null
+          prediction_outcome?: string | null
+          prediction_text?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment_count?: number | null
+          community_id?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          like_count?: number | null
+          prediction_confidence?: number | null
+          prediction_outcome?: string | null
+          prediction_text?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          follower_count: number | null
+          following_count: number | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
