@@ -1,58 +1,132 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useRealTimeData } from '@/hooks/useRealTimeData';
+import { Badge } from '@/components/ui/badge';
+import { useRealTimeMarketData } from '@/hooks/useRealTimeMarketData';
 import { 
-  AlertTriangle,
-  Activity
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  RefreshCw,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
-import { BrokerageConnectionDialog } from '@/components/BrokerageConnectionDialog';
 
 export const MarketsPage = () => {
-  const { futures, isConnected, error } = useRealTimeData();
+  const { marketData, isLoading, error, lastUpdated, refetch } = useRealTimeMarketData();
+
+  const formatPrice = (price: number, type: string) => {
+    if (type === 'forex') return price.toFixed(4);
+    if (type === 'crypto' && price > 1000) return price.toLocaleString();
+    return price.toFixed(2);
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'crypto': return '₿';
+      case 'forex': return '💱';
+      case 'futures': return '📈';
+      default: return '📊';
+    }
+  };
 
   return (
     <div className="pb-20">
       {/* Header */}
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Markets</h1>
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Live Markets
+            <Badge variant={error ? "destructive" : "secondary"} className="ml-2">
+              {error ? (
+                <>
+                  <WifiOff className="w-3 h-3 mr-1" />
+                  Offline
+                </>
+              ) : (
+                <>
+                  <Wifi className="w-3 h-3 mr-1" />
+                  Live
+                </>
+              )}
+            </Badge>
+          </h1>
+          <div className="flex items-center gap-2">
+            {lastUpdated && (
+              <span className="text-xs text-muted-foreground">
+                Updated {lastUpdated.toLocaleTimeString()}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={refetch}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 py-6">
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription className="space-y-4">
-            <div>
-              <p className="font-medium mb-2">No Market Data Available</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Connect your brokerage or prop firm account to access real-time market data and trading insights.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3">
-              <BrokerageConnectionDialog />
-              <div className="text-xs text-muted-foreground">
-                <p>• Real-time market data from your broker</p>
-                <p>• Live portfolio tracking</p>
-                <p>• Professional trading tools</p>
-                <p>• No mock data - only real trading information</p>
-              </div>
-            </div>
-          </AlertDescription>
-        </Alert>
+      <div className="px-4 py-6 space-y-6">
+        {/* Real-time Market Data Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {marketData.map((item) => (
+            <Card key={item.symbol} className="relative">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <span className="text-lg">{getTypeIcon(item.type)}</span>
+                    {item.symbol}
+                  </CardTitle>
+                  <Badge variant="outline" className="text-xs">
+                    {item.type.toUpperCase()}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold">
+                    ${formatPrice(item.price, item.type)}
+                  </div>
+                  <div className={`flex items-center gap-2 text-sm ${
+                    item.change >= 0 ? 'text-bullish' : 'text-bearish'
+                  }`}>
+                    {item.change >= 0 ? (
+                      <TrendingUp className="w-4 h-4" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4" />
+                    )}
+                    <span className="font-medium">
+                      {item.change >= 0 ? '+' : ''}{item.change}
+                    </span>
+                    <span className="font-medium">
+                      ({item.changePercent >= 0 ? '+' : ''}{item.changePercent}%)
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-        <Card className="mt-6">
-          <CardContent className="pt-6 text-center space-y-4">
-            <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
-              <Activity className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Real Trading Data Only</h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                This platform only displays real trading data from your connected accounts. 
-                No simulated or mock data is shown to ensure authentic trading insights.
+        {/* Data Source Info */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                <Activity className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-semibold">Real-Time Market Data</h3>
+              <p className="text-sm text-muted-foreground">
+                Live financial data from Yahoo Finance API. Updates every 30 seconds during market hours.
               </p>
+              {error && (
+                <p className="text-sm text-destructive">
+                  {error} - Showing fallback data
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
