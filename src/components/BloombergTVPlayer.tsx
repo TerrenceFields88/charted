@@ -9,7 +9,7 @@ export const BloombergTVPlayer = () => {
   const [isMuted, setIsMuted] = useState(false);
 
   // Bloomberg TV Live Stream URL (this would be the actual live stream in production)
-  const bloombergTVUrl = "https://www.youtube.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg&autoplay=1&mute=0";
+  // Bloomberg TV requires authentication, so we'll show a placeholder and direct to official site
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -40,58 +40,30 @@ export const BloombergTVPlayer = () => {
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Video Player */}
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-black">
-          <iframe
-            src={bloombergTVUrl}
-            className="w-full h-full"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title="Bloomberg TV Live"
-          />
-          
-          {/* Overlay Controls */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-            <div className="flex items-center justify-between text-white">
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handlePlayPause}
-                  className="text-white hover:bg-white/20"
-                >
-                  {isPlaying ? (
-                    <Pause className="w-4 h-4" />
-                  ) : (
-                    <Play className="w-4 h-4" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMuteToggle}
-                  className="text-white hover:bg-white/20"
-                >
-                  {isMuted ? (
-                    <VolumeX className="w-4 h-4" />
-                  ) : (
-                    <Volume2 className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-sm">Now: Market Overview</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleFullscreen}
-                  className="text-white hover:bg-white/20"
-                >
-                  <Maximize className="w-4 h-4" />
-                </Button>
-              </div>
+        {/* Video Player Placeholder */}
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center">
+          <div className="text-center text-white p-8">
+            <Radio className="w-16 h-16 mx-auto mb-4 animate-pulse" />
+            <h3 className="text-xl font-bold mb-2">Bloomberg TV Live</h3>
+            <p className="text-blue-100 mb-6">
+              Stream live financial news and market coverage
+            </p>
+            <div className="space-y-3">
+              <Button
+                onClick={() => window.open('https://www.bloomberg.com/live/us', '_blank')}
+                className="bg-white text-blue-900 hover:bg-blue-50 w-full"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Watch Live on Bloomberg.com
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => window.open('https://www.bloomberg.com/audio', '_blank')}
+                className="border-white text-white hover:bg-white/10 w-full"
+              >
+                <Radio className="w-4 h-4 mr-2" />
+                Listen to Bloomberg Radio
+              </Button>
             </div>
           </div>
         </div>
@@ -119,24 +91,12 @@ export const BloombergTVPlayer = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open('https://www.bloomberg.com/live/us', '_blank')}
-            className="flex-1"
-          >
-            Watch on Bloomberg.com
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open('https://www.bloomberg.com/audio', '_blank')}
-            className="flex-1"
-          >
-            Bloomberg Radio
-          </Button>
+        {/* Note about streaming */}
+        <div className="bg-muted/50 p-4 rounded-lg">
+          <p className="text-sm text-muted-foreground">
+            <strong>Note:</strong> Bloomberg TV live streaming requires visiting Bloomberg.com directly. 
+            Free users get 30 minutes of live streaming per day. For unlimited access, a Bloomberg subscription is required.
+          </p>
         </div>
       </CardContent>
     </Card>
