@@ -4,29 +4,73 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { useNavigate } from 'react-router-dom';
+import { useProfile } from '@/hooks/useProfile';
 import { 
   Settings, 
   Edit, 
   TrendingUp, 
-  TrendingDown, 
   Users, 
-  Heart,
-  MessageCircle,
   Target,
   Award,
-  Calendar
+  Plus,
+  Heart
 } from 'lucide-react';
-import { mockUsers } from '@/data/mockUsers';
 
 export const ProfilePage = () => {
-  // Using first user as current user for demo
-  const currentUser = mockUsers[0];
-  
+  const navigate = useNavigate();
+  const { profile, loading } = useProfile();
+
+  // Show create profile UI if no profile exists
+  if (loading) {
+    return (
+      <div className="pb-20">
+        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
+          <h1 className="text-xl font-bold">Profile</h1>
+        </div>
+        <div className="px-4 py-6 text-center">
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="pb-20">
+        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
+          <h1 className="text-xl font-bold">Profile</h1>
+        </div>
+        <div className="px-4 py-6">
+          <Card>
+            <CardContent className="pt-6 text-center space-y-4">
+              <Avatar className="w-24 h-24 mx-auto">
+                <AvatarFallback className="text-2xl">
+                  <Plus className="w-8 h-8" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-xl font-bold mb-2">Create Your Profile</h2>
+                <p className="text-muted-foreground mb-4">
+                  Set up your trading profile to start connecting with the community
+                </p>
+                <Button onClick={() => navigate('/edit-profile')}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Profile
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const stats = [
-    { label: 'Portfolio Return', value: `+${currentUser.portfolioReturn}%`, icon: TrendingUp, color: 'text-bullish' },
-    { label: 'Win Rate', value: `${currentUser.winRate}%`, icon: Target, color: 'text-primary' },
-    { label: 'Followers', value: currentUser.followersCount.toLocaleString(), icon: Users, color: 'text-foreground' },
-    { label: 'Following', value: currentUser.followingCount.toLocaleString(), icon: Heart, color: 'text-foreground' },
+    { label: 'Portfolio Return', value: '+24.5%', icon: TrendingUp, color: 'text-bullish' },
+    { label: 'Win Rate', value: '73%', icon: Target, color: 'text-primary' },
+    { label: 'Followers', value: profile.follower_count.toLocaleString(), icon: Users, color: 'text-foreground' },
+    { label: 'Following', value: profile.following_count.toLocaleString(), icon: Heart, color: 'text-foreground' },
   ];
 
   const achievements = [
@@ -48,7 +92,7 @@ export const ProfilePage = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">Profile</h1>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => navigate('/edit-profile')}>
               <Edit className="w-4 h-4 mr-1" />
               Edit
             </Button>
@@ -66,24 +110,24 @@ export const ProfilePage = () => {
             <div className="flex items-start gap-4">
               <div className="relative">
                 <Avatar className="w-20 h-20">
-                  <AvatarImage src={currentUser.avatar} alt={currentUser.displayName} />
-                  <AvatarFallback className="text-2xl">{currentUser.displayName[0]}</AvatarFallback>
+                  <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
+                  <AvatarFallback className="text-2xl">
+                    {(profile.display_name || profile.username)[0].toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
-                {currentUser.isVerified && (
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-primary-foreground rounded-full" />
-                  </div>
-                )}
               </div>
               
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-xl font-bold">{currentUser.displayName}</h2>
+                  <h2 className="text-xl font-bold">{profile.display_name || profile.username}</h2>
                   <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
-                    {currentUser.tradingLevel}
+                    Trader
                   </Badge>
                 </div>
-                <p className="text-muted-foreground mb-3">@{currentUser.username}</p>
+                <p className="text-muted-foreground mb-3">@{profile.username}</p>
+                {profile.bio && (
+                  <p className="text-sm text-muted-foreground mb-3">{profile.bio}</p>
+                )}
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {stats.map((stat) => (
@@ -113,15 +157,15 @@ export const ProfilePage = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Win Rate</span>
-                <span className="font-medium">{currentUser.winRate}%</span>
+                <span className="font-medium">73%</span>
               </div>
-              <Progress value={currentUser.winRate} className="h-2" />
+              <Progress value={73} className="h-2" />
             </div>
             
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Portfolio Return</span>
-                <span className="font-medium text-bullish">+{currentUser.portfolioReturn}%</span>
+                <span className="font-medium text-bullish">+24.5%</span>
               </div>
               <Progress value={75} className="h-2" />
             </div>
