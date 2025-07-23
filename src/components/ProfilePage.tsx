@@ -199,6 +199,9 @@ export const ProfilePage = () => {
               </div>
               <BrokerageConnectionDialog />
             </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Connect your brokerage or prop firm account to track real performance
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             {performanceLoading ? (
@@ -247,7 +250,7 @@ export const ProfilePage = () => {
                 {performanceData.totalTrades === 0 && (
                   <div className="text-center py-4 text-muted-foreground">
                     <p>No trading data available.</p>
-                    <p className="text-sm">Connect your brokerage account to see real performance.</p>
+                    <p className="text-sm">Connect your brokerage or prop firm account to see real performance.</p>
                   </div>
                 )}
               </>

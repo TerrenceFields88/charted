@@ -11,11 +11,21 @@ import { Link, RefreshCw, Plus, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const SUPPORTED_BROKERS = [
-  { value: 'alpaca', label: 'Alpaca Trading', demo: true },
-  { value: 'interactive_brokers', label: 'Interactive Brokers', demo: false },
-  { value: 'td_ameritrade', label: 'TD Ameritrade', demo: false },
-  { value: 'etrade', label: 'E*TRADE', demo: false },
-  { value: 'robinhood', label: 'Robinhood', demo: false },
+  // Traditional Brokerages
+  { value: 'alpaca', label: 'Alpaca Trading', demo: true, type: 'brokerage' },
+  { value: 'interactive_brokers', label: 'Interactive Brokers', demo: false, type: 'brokerage' },
+  { value: 'td_ameritrade', label: 'TD Ameritrade', demo: false, type: 'brokerage' },
+  { value: 'etrade', label: 'E*TRADE', demo: false, type: 'brokerage' },
+  { value: 'robinhood', label: 'Robinhood', demo: false, type: 'brokerage' },
+  
+  // Prop Firms
+  { value: 'ftmo', label: 'FTMO', demo: false, type: 'prop_firm' },
+  { value: 'my_forex_funds', label: 'MyForexFunds', demo: false, type: 'prop_firm' },
+  { value: 'the5ers', label: 'The5%ers', demo: false, type: 'prop_firm' },
+  { value: 'funded_trader', label: 'Funded Trader', demo: false, type: 'prop_firm' },
+  { value: 'apex_trader', label: 'Apex Trader Funding', demo: false, type: 'prop_firm' },
+  { value: 'topstep', label: 'TopstepTrader', demo: false, type: 'prop_firm' },
+  { value: 'earn2trade', label: 'Earn2Trade', demo: false, type: 'prop_firm' },
 ];
 
 export const BrokerageConnectionDialog = () => {
@@ -47,9 +57,12 @@ export const BrokerageConnectionDialog = () => {
     });
 
     if (result) {
+      const selectedBroker = SUPPORTED_BROKERS.find(b => b.value === formData.broker_name);
+      const accountType = selectedBroker?.type === 'prop_firm' ? 'prop firm' : 'brokerage';
+      
       toast({
         title: 'Success',
-        description: 'Brokerage account connected successfully',
+        description: `${selectedBroker?.label} ${accountType} account connected successfully`,
       });
       setOpen(false);
       setFormData({ broker_name: '', account_id: '', api_key: '' });
@@ -69,12 +82,15 @@ export const BrokerageConnectionDialog = () => {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Link className="w-4 h-4 mr-2" />
-          Connect Brokerage
+          Connect Account
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Connect Your Brokerage Account</DialogTitle>
+          <DialogTitle>Connect Trading Account</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Connect your brokerage or prop firm account to sync trading data
+          </p>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -117,22 +133,38 @@ export const BrokerageConnectionDialog = () => {
           {/* Add New Account Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="broker">Broker</Label>
+              <Label htmlFor="broker">Trading Platform</Label>
               <Select
                 value={formData.broker_name}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, broker_name: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select your broker" />
+                  <SelectValue placeholder="Select your trading platform" />
                 </SelectTrigger>
                 <SelectContent>
-                  {SUPPORTED_BROKERS.map((broker) => (
+                  <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                    Brokerages
+                  </div>
+                  {SUPPORTED_BROKERS.filter(broker => broker.type === 'brokerage').map((broker) => (
                     <SelectItem key={broker.value} value={broker.value}>
                       <div className="flex items-center gap-2">
                         {broker.label}
                         {broker.demo && (
                           <Badge variant="secondary" className="text-xs">Demo</Badge>
                         )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                  <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground border-t mt-2 pt-3">
+                    Prop Firms
+                  </div>
+                  {SUPPORTED_BROKERS.filter(broker => broker.type === 'prop_firm').map((broker) => (
+                    <SelectItem key={broker.value} value={broker.value}>
+                      <div className="flex items-center gap-2">
+                        {broker.label}
+                        <Badge variant="outline" className="text-xs border-primary text-primary">
+                          Prop
+                        </Badge>
                       </div>
                     </SelectItem>
                   ))}
