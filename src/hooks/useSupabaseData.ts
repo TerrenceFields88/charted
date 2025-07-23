@@ -103,7 +103,7 @@ export const usePosts = () => {
         .from('posts')
         .select(`
           *,
-          profiles:user_id (
+          profiles!inner(
             id,
             user_id,
             username,
@@ -114,7 +114,7 @@ export const usePosts = () => {
             following_count,
             created_at
           ),
-          communities:community_id (
+          communities(
             id,
             name,
             avatar_url
@@ -155,7 +155,7 @@ export const usePosts = () => {
             .from('posts')
             .select(`
               *,
-              profiles:user_id (
+              profiles!inner(
                 id,
                 user_id,
                 username,
@@ -166,7 +166,7 @@ export const usePosts = () => {
                 following_count,
                 created_at
               ),
-              communities:community_id (
+              communities(
                 id,
                 name,
                 avatar_url
@@ -196,7 +196,7 @@ export const usePosts = () => {
             .from('posts')
             .select(`
               *,
-              profiles:user_id (
+              profiles!inner(
                 id,
                 user_id,
                 username,
@@ -207,7 +207,7 @@ export const usePosts = () => {
                 following_count,
                 created_at
               ),
-              communities:community_id (
+              communities(
                 id,
                 name,
                 avatar_url
