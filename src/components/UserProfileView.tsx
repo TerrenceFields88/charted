@@ -9,6 +9,7 @@ import { PostCard } from '@/components/PostCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePosts } from '@/hooks/useSupabaseData';
+import { useRealTimeProfiles, useRealTimeFollows } from '@/hooks/useRealTimeUpdates';
 import { toast } from '@/hooks/use-toast';
 import { sanitizeErrorMessage } from '@/lib/validation';
 import { 
@@ -44,6 +45,8 @@ interface UserProfileViewProps {
 export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
   const { user } = useAuth();
   const { posts } = usePosts();
+  const { getUpdatedProfile, hasUpdate } = useRealTimeProfiles();
+  const { getFollowStatus, hasUpdate: hasFollowUpdate } = useRealTimeFollows(user?.id);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -51,6 +54,33 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
 
   // Filter posts by the viewed user
   const userPosts = posts.filter(post => post.user.id === userId);
+
+  // Real-time profile updates
+  useEffect(() => {
+    if (hasUpdate(userId)) {
+      const updatedProfile = getUpdatedProfile(userId);
+      if (updatedProfile) {
+        setProfile(prev => prev ? {
+          ...prev,
+          follower_count: updatedProfile.follower_count,
+          following_count: updatedProfile.following_count,
+          display_name: updatedProfile.display_name,
+          bio: updatedProfile.bio,
+          avatar_url: updatedProfile.avatar_url,
+        } : null);
+      }
+    }
+  }, [userId, hasUpdate, getUpdatedProfile]);
+
+  // Real-time follow status updates
+  useEffect(() => {
+    if (user && hasFollowUpdate(userId)) {
+      const followStatus = getFollowStatus(userId);
+      if (followStatus !== null) {
+        setIsFollowing(followStatus);
+      }
+    }
+  }, [user, userId, hasFollowUpdate, getFollowStatus]);
 
   useEffect(() => {
     fetchProfile();
@@ -114,7 +144,7 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
         if (error) throw error;
 
         setIsFollowing(false);
-        setProfile(prev => prev ? { ...prev, follower_count: prev.follower_count - 1 } : null);
+        // Note: Profile counts will be updated automatically by the database trigger and real-time subscription
 
         toast({
           title: "Unfollowed",
@@ -132,7 +162,7 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
         if (error) throw error;
 
         setIsFollowing(true);
-        setProfile(prev => prev ? { ...prev, follower_count: prev.follower_count + 1 } : null);
+        // Note: Profile counts will be updated automatically by the database trigger and real-time subscription
 
         toast({
           title: "Following",

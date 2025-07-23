@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useRealTimeProfiles } from '@/hooks/useRealTimeUpdates';
 
 interface Profile {
   id: string;
@@ -17,12 +18,24 @@ interface Profile {
 
 export const useProfile = () => {
   const { user } = useAuth();
+  const { getUpdatedProfile, hasUpdate } = useRealTimeProfiles();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Check for real-time updates
+  useEffect(() => {
+    if (user && hasUpdate(user.id)) {
+      const updatedProfile = getUpdatedProfile(user.id);
+      if (updatedProfile) {
+        setProfile(updatedProfile);
+      }
+    }
+  }, [user, hasUpdate, getUpdatedProfile]);
+
   const fetchProfile = async () => {
     if (!user) {
+      setProfile(null);
       setLoading(false);
       return;
     }

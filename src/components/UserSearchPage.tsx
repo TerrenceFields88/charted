@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserProfileView } from '@/components/UserProfileView';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRealTimeProfiles, useRealTimeFollows } from '@/hooks/useRealTimeUpdates';
 import { toast } from '@/hooks/use-toast';
 import { validateContent, sanitizeContent, sanitizeErrorMessage, VALIDATION_LIMITS } from '@/lib/validation';
 
@@ -29,6 +30,8 @@ interface UserSearchPageProps {
 
 export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
   const { user } = useAuth();
+  const { getUpdatedProfile, hasUpdate } = useRealTimeProfiles();
+  const { getFollowStatus, hasUpdate: hasFollowUpdate } = useRealTimeFollows(user?.id);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -45,6 +48,56 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
       />
     );
   }
+
+  // Real-time updates for search results
+  useEffect(() => {
+    if (searchResults.length > 0) {
+      setSearchResults(prevResults => 
+        prevResults.map(profile => {
+          // Check for real-time profile updates
+          if (hasUpdate(profile.user_id)) {
+            const updatedProfile = getUpdatedProfile(profile.user_id);
+            if (updatedProfile) {
+              return {
+                ...profile,
+                follower_count: updatedProfile.follower_count,
+                following_count: updatedProfile.following_count,
+                display_name: updatedProfile.display_name,
+                bio: updatedProfile.bio,
+                avatar_url: updatedProfile.avatar_url,
+              };
+            }
+          }
+          return profile;
+        })
+      );
+    }
+  }, [searchResults, hasUpdate, getUpdatedProfile]);
+
+  // Update following status from real-time
+  useEffect(() => {
+    if (user) {
+      setFollowingUsers(prevFollowing => {
+        const newFollowing = new Set(prevFollowing);
+        
+        // Check for real-time follow updates
+        searchResults.forEach(profile => {
+          if (hasFollowUpdate(profile.user_id)) {
+            const followStatus = getFollowStatus(profile.user_id);
+            if (followStatus !== null) {
+              if (followStatus) {
+                newFollowing.add(profile.user_id);
+              } else {
+                newFollowing.delete(profile.user_id);
+              }
+            }
+          }
+        });
+        
+        return newFollowing;
+      });
+    }
+  }, [user, searchResults, hasFollowUpdate, getFollowStatus]);
 
   // Fetch users the current user is following
   useEffect(() => {
