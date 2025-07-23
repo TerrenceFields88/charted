@@ -27,7 +27,7 @@ export const ProfilePage = () => {
   const { profile, loading } = useProfile();
   const { posts } = usePosts();
   const { user } = useAuth();
-  const { getFormattedPerformance, recentTrades, loading: performanceLoading } = useTradingPerformance();
+  const { performance, getFormattedPerformance, recentTrades, loading: performanceLoading } = useTradingPerformance();
   
   // Filter posts by current user
   const userPosts = posts.filter(post => post.user.id === user?.id);
@@ -92,11 +92,27 @@ export const ProfilePage = () => {
     { label: 'Following', value: profile.following_count.toLocaleString(), icon: Heart, color: 'text-foreground' },
   ];
 
-  const achievements = [
-    { title: 'Gold Trader', description: 'Achieved 50+ profitable gold trades', icon: Award, color: 'bg-yellow-500' },
-    { title: 'Community Star', description: '1000+ likes on posts', icon: Heart, color: 'bg-red-500' },
-    { title: 'Analysis Expert', description: 'Top 10% technical analysis accuracy', icon: TrendingUp, color: 'bg-green-500' },
-  ];
+  // Only show real achievements when they have actual trading data
+  const achievements = performance && performance.total_trades > 0 ? [
+    ...(performance.total_trades >= 50 ? [{ 
+      title: 'Active Trader', 
+      description: `Completed ${performance.total_trades} trades`, 
+      icon: Award, 
+      color: 'bg-blue-500' 
+    }] : []),
+    ...(performance.win_rate_percentage >= 70 ? [{ 
+      title: 'High Win Rate', 
+      description: `${performance.win_rate_percentage.toFixed(0)}% win rate achieved`, 
+      icon: TrendingUp, 
+      color: 'bg-green-500' 
+    }] : []),
+    ...(performance.portfolio_return_percentage >= 20 ? [{ 
+      title: 'Profitable Trader', 
+      description: `${performance.portfolio_return_percentage.toFixed(1)}% portfolio return`, 
+      icon: Award, 
+      color: 'bg-yellow-500' 
+    }] : []),
+  ] : [];
 
   // Format recent trades for activity display
   const formatRecentActivity = () => {
@@ -340,21 +356,37 @@ export const ProfilePage = () => {
 
           <TabsContent value="achievements">
             <div className="space-y-4">
-              {achievements.map((achievement, index) => (
-                <Card key={index}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full ${achievement.color} flex items-center justify-center`}>
-                        <achievement.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{achievement.title}</h3>
-                        <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                      </div>
+              {achievements.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6 text-center space-y-4">
+                    <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                      <Award className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">No Achievements Yet</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Connect your trading account and start trading to earn achievements based on real performance.
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ) : (
+                achievements.map((achievement, index) => (
+                  <Card key={index}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full ${achievement.color} flex items-center justify-center`}>
+                          <achievement.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{achievement.title}</h3>
+                          <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 

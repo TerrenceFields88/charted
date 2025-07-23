@@ -222,10 +222,8 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
     );
   }
 
-  // Mock stats for demonstration (in a real app, these would come from analytics)
+  // Only show real data from connected brokers
   const stats = [
-    { label: 'Portfolio Return', value: '+18.3%', icon: TrendingUp, color: 'text-bullish' },
-    { label: 'Win Rate', value: '67%', icon: Target, color: 'text-primary' },
     { label: 'Followers', value: profile.follower_count.toLocaleString(), icon: Users, color: 'text-foreground' },
     { label: 'Following', value: profile.following_count.toLocaleString(), icon: Heart, color: 'text-foreground' },
   ];
