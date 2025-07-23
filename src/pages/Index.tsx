@@ -4,7 +4,7 @@ import { MarketTicker } from '@/components/MarketTicker';
 import { FeedPage } from '@/components/FeedPage';
 import { MarketsPage } from '@/components/MarketsPage';
 import { CreatePage } from '@/components/CreatePage';
-import { CommunityPage } from '@/components/CommunityPage';
+import { BloombergNewsPage } from '@/components/BloombergNewsPage';
 import { ProfilePage } from '@/components/ProfilePage';
 import { UserSearchPage } from '@/components/UserSearchPage';
 
@@ -21,8 +21,8 @@ const Index = () => {
         return <UserSearchPage />;
       case 'create':
         return <CreatePage />;
-      case 'community':
-        return <CommunityPage />;
+      case 'bloomberg-news':
+        return <BloombergNewsPage />;
       case 'profile':
         return <ProfilePage />;
       default:
