@@ -10,8 +10,14 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 0
+      launchShowDuration: 2000,
+      backgroundColor: "#1a1a1a",
+      showSpinner: false
     }
+  },
+  // Use the uploaded Charted logo for app icon
+  appIcon: {
+    source: '/lovable-uploads/16a10ce7-11b4-4088-be90-8fb8158da9d3.png'
   }
 };
 
