@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, UserPlus, Users, MessageCircle } from 'lucide-react';
+import { Search, UserPlus, Users, MessageCircle, Clock, X, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { UserProfileView } from '@/components/UserProfileView';
@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRealTimeProfiles, useRealTimeFollows } from '@/hooks/useRealTimeUpdates';
 import { toast } from '@/hooks/use-toast';
 import { validateContent, sanitizeContent, sanitizeErrorMessage, VALIDATION_LIMITS } from '@/lib/validation';
+import { getRecentSearches, addRecentSearch, clearRecentSearches, removeRecentSearch, RecentSearch } from '@/lib/recentSearches';
 
 interface UserProfile {
   id: string;
@@ -38,6 +39,7 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
   const [followingUsers, setFollowingUsers] = useState<Set<string>>(new Set());
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
 
   // Real-time updates for search results
   useEffect(() => {
@@ -88,6 +90,12 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
       });
     }
   }, [user, searchResults, hasFollowUpdate, getFollowStatus]);
+
+  // Load recent searches on component mount
+  useEffect(() => {
+    const recent = getRecentSearches();
+    setRecentSearches(recent);
+  }, []);
 
   // Fetch users the current user is following
   useEffect(() => {
@@ -230,6 +238,40 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
     });
   };
 
+  const handleViewProfile = (profile: UserProfile) => {
+    // Add to recent searches
+    addRecentSearch({
+      user_id: profile.user_id,
+      username: profile.username,
+      display_name: profile.display_name || undefined,
+      avatar_url: profile.avatar_url || undefined,
+      searched_at: new Date().toISOString()
+    });
+    
+    // Update local state
+    setRecentSearches(getRecentSearches());
+    
+    setSelectedUserId(profile.user_id);
+  };
+
+  const handleViewRecentProfile = (recent: RecentSearch) => {
+    setSelectedUserId(recent.user_id);
+  };
+
+  const handleClearRecentSearches = () => {
+    clearRecentSearches();
+    setRecentSearches([]);
+    toast({
+      title: "Cleared",
+      description: "Recent searches have been cleared.",
+    });
+  };
+
+  const handleRemoveRecentSearch = (userId: string) => {
+    removeRecentSearch(userId);
+    setRecentSearches(getRecentSearches());
+  };
+
   // If a user is selected, show their profile
   if (selectedUserId) {
     return (
@@ -270,6 +312,67 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
 
       {/* Search Results */}
       <div className="space-y-4">
+        {/* Recent Searches - Show when no search query */}
+        {!loading && searchQuery.length === 0 && recentSearches.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Recent Searches
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearRecentSearches}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Clear All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {recentSearches.map((recent) => (
+                <div
+                  key={recent.user_id}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer group"
+                  onClick={() => handleViewRecentProfile(recent)}
+                >
+                  <Avatar className="w-10 h-10 flex-shrink-0">
+                    <AvatarImage src={recent.avatar_url || undefined} />
+                    <AvatarFallback>
+                      {recent.display_name?.[0] || recent.username[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {recent.display_name || recent.username}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      @{recent.username}
+                    </p>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveRecentSearch(recent.user_id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Loading State */}
         {loading && (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -291,10 +394,13 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
           </div>
         )}
 
-        {!loading && searchQuery.length === 0 && (
+        {!loading && searchQuery.length === 0 && recentSearches.length === 0 && (
           <div className="text-center py-8">
             <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">Start typing to search for users</p>
+            <p className="text-muted-foreground mb-2">Start typing to search for users</p>
+            <p className="text-sm text-muted-foreground">
+              Your recent searches will appear here
+            </p>
           </div>
         )}
 
@@ -360,7 +466,7 @@ export const UserSearchPage = ({ onUserSelect }: UserSearchPageProps) => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setSelectedUserId(profile.user_id)}
+                    onClick={() => handleViewProfile(profile)}
                     className="w-full"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
