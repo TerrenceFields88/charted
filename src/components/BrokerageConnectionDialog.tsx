@@ -26,6 +26,8 @@ const SUPPORTED_BROKERS = [
   { value: 'apex_trader', label: 'Apex Trader Funding', demo: false, type: 'prop_firm' },
   { value: 'topstep', label: 'TopstepTrader', demo: false, type: 'prop_firm' },
   { value: 'earn2trade', label: 'Earn2Trade', demo: false, type: 'prop_firm' },
+  { value: 'elite_trader_funding', label: 'Elite Trader Funding', demo: false, type: 'prop_firm' },
+  { value: 'take_profit_trader', label: 'Take Profit Trader', demo: false, type: 'prop_firm' },
 ];
 
 export const BrokerageConnectionDialog = () => {
