@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { Post as SocialPost, User } from '@/types/social';
 
-// Types for our data
+// Types for our data structures that align with Supabase
 export interface Profile {
   id: string;
   user_id: string;
@@ -15,7 +16,8 @@ export interface Profile {
   created_at: string;
 }
 
-export interface Post {
+// Supabase post type with relations
+interface SupabasePost {
   id: string;
   user_id: string;
   content: string;
@@ -34,6 +36,39 @@ export interface Post {
     avatar_url?: string;
   };
 }
+
+// Helper function to transform Supabase post to Social post
+const transformSupabasePost = (supabasePost: any): SocialPost => {
+  const profile = supabasePost.profiles;
+  
+  const user: User = {
+    id: profile?.user_id || supabasePost.user_id,
+    username: profile?.username || 'unknown',
+    displayName: profile?.display_name || profile?.username || 'Unknown User',
+    avatar: profile?.avatar_url || '',
+    isVerified: false, // Default for now
+    followersCount: profile?.follower_count || 0,
+    followingCount: profile?.following_count || 0,
+    tradingLevel: 'Beginner', // Default for now
+    portfolioReturn: 0, // Default for now
+    winRate: 0 // Default for now
+  };
+
+  return {
+    id: supabasePost.id,
+    user,
+    content: supabasePost.content,
+    image: supabasePost.image_url,
+    timestamp: new Date(supabasePost.created_at),
+    likes: supabasePost.like_count,
+    comments: supabasePost.comment_count,
+    shares: 0, // Default for now
+    isLiked: false, // Will be determined by user context
+    type: 'text', // Default for now
+    tags: [], // Default for now
+    sentiment: 'neutral' // Default for now
+  };
+};
 
 export interface Market {
   id: string;
@@ -58,7 +93,7 @@ export interface Community {
 
 // Hook for fetching posts
 export const usePosts = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,7 +125,10 @@ export const usePosts = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setPosts(data || []);
+        
+        // Transform Supabase posts to Social posts
+        const transformedPosts = (data || []).map(transformSupabasePost);
+        setPosts(transformedPosts);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -264,8 +302,7 @@ export const usePostActions = () => {
         .delete()
         .eq('id', existingLike.id);
 
-      // Decrement like count
-      await supabase.rpc('decrement_post_likes', { post_id: postId });
+      // TODO: Decrement like count using RPC function
     } else {
       // Like
       await supabase
@@ -275,8 +312,7 @@ export const usePostActions = () => {
           user_id: user.id,
         });
 
-      // Increment like count
-      await supabase.rpc('increment_post_likes', { post_id: postId });
+      // TODO: Increment like count using RPC function
     }
   };
 
@@ -295,8 +331,7 @@ export const usePostActions = () => {
 
     if (error) throw error;
 
-    // Increment comment count
-    await supabase.rpc('increment_post_comments', { post_id: postId });
+    // TODO: Increment comment count using RPC function
 
     return data;
   };
