@@ -167,10 +167,34 @@ export const ProfilePage = () => {
                   <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
                     Trader
                   </Badge>
+                  {profile.verified_trader && (
+                    <Badge variant="default" className="bg-bullish text-white">
+                      Verified
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-muted-foreground mb-3">@{profile.username}</p>
                 {profile.bio && (
                   <p className="text-sm text-muted-foreground mb-3">{profile.bio}</p>
+                )}
+
+                {/* Connected Brokers Display */}
+                {profile.connected_brokers && Array.isArray(profile.connected_brokers) && profile.connected_brokers.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Connected Accounts</p>
+                    <div className="flex flex-wrap gap-1">
+                      {profile.connected_brokers.slice(0, 3).map((broker: any, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {broker.broker_name?.replace(/_/g, ' ') || 'Unknown Broker'}
+                        </Badge>
+                      ))}
+                      {profile.connected_brokers.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{profile.connected_brokers.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
                 )}
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
