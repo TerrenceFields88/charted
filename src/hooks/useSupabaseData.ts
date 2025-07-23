@@ -103,12 +103,12 @@ export const usePosts = () => {
       setLoading(true);
       setError(null);
       
-      // Simple query with LEFT JOIN to get profile data
+      // Query posts and separately get profile data
       const { data, error } = await supabase
         .from('posts')
         .select(`
           *,
-          profiles!left(username, display_name, avatar_url, follower_count, following_count)
+          profiles!posts_user_id_fkey(username, display_name, avatar_url, follower_count, following_count)
         `)
         .order('created_at', { ascending: false });
 
@@ -188,10 +188,10 @@ export const usePosts = () => {
         .from('posts')
         .select(`
           *,
-          profiles!left(username, display_name, avatar_url, follower_count, following_count)
+          profiles!posts_user_id_fkey(username, display_name, avatar_url, follower_count, following_count)
         `)
         .eq('id', postId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return transformSupabasePost(data);
