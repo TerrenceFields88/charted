@@ -39,11 +39,11 @@ interface SupabasePost {
 
 // Helper function to transform Supabase post to Social post
 const transformSupabasePost = (supabasePost: any): SocialPost => {
-  const profile = supabasePost.profiles;
+  const profile = supabasePost.profiles?.[0] || null;
   
   const user: User = {
     id: profile?.user_id || supabasePost.user_id,
-    username: profile?.username || 'unknown',
+    username: profile?.username || 'user' + supabasePost.user_id.slice(-4),
     displayName: profile?.display_name || profile?.username || 'Unknown User',
     avatar: profile?.avatar_url || '',
     isVerified: false, // Default for now
@@ -103,7 +103,7 @@ export const usePosts = () => {
         .from('posts')
         .select(`
           *,
-          profiles!inner(
+          profiles(
             id,
             user_id,
             username,
@@ -155,7 +155,7 @@ export const usePosts = () => {
             .from('posts')
             .select(`
               *,
-              profiles!inner(
+              profiles(
                 id,
                 user_id,
                 username,
@@ -196,7 +196,7 @@ export const usePosts = () => {
             .from('posts')
             .select(`
               *,
-              profiles!inner(
+              profiles(
                 id,
                 user_id,
                 username,
