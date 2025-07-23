@@ -6,6 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
+import { usePosts } from '@/hooks/useSupabaseData';
+import { useAuth } from '@/hooks/useAuth';
+import { PostCard } from '@/components/PostCard';
 import { 
   Settings, 
   Edit, 
@@ -20,6 +23,11 @@ import {
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { profile, loading } = useProfile();
+  const { posts } = usePosts();
+  const { user } = useAuth();
+  
+  // Filter posts by current user
+  const userPosts = posts.filter(post => post.user.id === user?.id);
 
   // Show create profile UI if no profile exists
   if (loading) {
@@ -252,13 +260,21 @@ export const ProfilePage = () => {
           </TabsContent>
 
           <TabsContent value="posts">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center text-muted-foreground">
-                  Your posts will appear here
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              {userPosts.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center text-muted-foreground">
+                      No posts yet. Share your first trading insight!
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                userPosts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
