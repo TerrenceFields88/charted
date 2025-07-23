@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,9 +25,8 @@ export const EditProfilePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { profile, updateProfile, loading: profileLoading } = useProfile();
   const [uploading, setUploading] = useState(false);
-  const [profile, setProfile] = useState<Profile | null>(null);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -36,39 +36,15 @@ export const EditProfilePage = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      fetchProfile();
+    if (profile) {
+      setFormData({
+        username: profile.username || '',
+        display_name: profile.display_name || '',
+        bio: profile.bio || '',
+        avatar_url: profile.avatar_url || ''
+      });
     }
-  }, [user]);
-
-  const fetchProfile = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-
-      if (data) {
-        setProfile(data);
-        setFormData({
-          username: data.username || '',
-          display_name: data.display_name || '',
-          bio: data.bio || '',
-          avatar_url: data.avatar_url || ''
-        });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+  }, [profile]);
 
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -114,44 +90,29 @@ export const EditProfilePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !profile) return;
 
-    try {
-      setLoading(true);
+    const updateData = {
+      username: formData.username,
+      display_name: formData.display_name || null,
+      bio: formData.bio || null,
+      avatar_url: formData.avatar_url || null,
+    };
 
-      const updateData = {
-        username: formData.username,
-        display_name: formData.display_name || null,
-        bio: formData.bio || null,
-        avatar_url: formData.avatar_url || null,
-      };
-
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: user.id,
-          ...updateData
-        });
-
-      if (error) {
-        throw error;
-      }
-
+    const result = await updateProfile(updateData);
+    
+    if (result) {
       toast({
         title: "Success",
         description: "Profile updated successfully!",
       });
-
       navigate('/profile');
-    } catch (error) {
-      console.error('Error updating profile:', error);
+    } else {
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -261,10 +222,10 @@ export const EditProfilePage = () => {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={loading || !formData.username.trim()}
+                disabled={profileLoading || !formData.username.trim()}
               >
                 <Save className="w-4 h-4 mr-2" />
-                {loading ? 'Saving...' : 'Save Profile'}
+                {profileLoading ? 'Saving...' : 'Save Profile'}
               </Button>
             </form>
           </CardContent>
