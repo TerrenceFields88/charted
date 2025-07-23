@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react';
 import { PostCard } from './PostCard';
-import { mockPosts } from '@/data/mockUsers';
-import { Post } from '@/types/social';
+import { usePosts } from '@/hooks/useSupabaseData';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const FeedPage = () => {
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { posts, loading, error, refetch } = usePosts();
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    // Simulate loading new posts
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsRefreshing(false);
+  const handleRefresh = () => {
+    refetch();
   };
 
   return (
@@ -26,19 +21,44 @@ export const FeedPage = () => {
             variant="ghost"
             size="sm"
             onClick={handleRefresh}
-            disabled={isRefreshing}
+            disabled={loading}
             className="h-8 w-8 p-0"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>
 
       {/* Feed */}
       <div className="px-4 py-4">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="p-4 bg-card rounded-lg border space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+                <Skeleton className="h-20 w-full" />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center text-muted-foreground py-8">
+            Error loading posts: {error}
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            No posts yet. Create the first one!
+          </div>
+        ) : (
+          posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))
+        )}
       </div>
     </div>
   );

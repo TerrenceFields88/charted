@@ -5,6 +5,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePostActions } from '@/hooks/useSupabaseData';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Image, 
   Video, 
@@ -22,6 +25,11 @@ export const CreatePage = () => {
   const [sentiment, setSentiment] = useState<'bullish' | 'bearish' | 'neutral'>('neutral');
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { createPost } = usePostActions();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const popularSymbols = ['GC', 'CL', 'SI', 'HG', 'ZC', 'ZS', 'ES', 'NQ'];
   const popularTags = ['analysis', 'breakout', 'support', 'resistance', 'scalping', 'swing'];
@@ -42,6 +50,31 @@ export const CreatePage = () => {
       case 'bullish': return 'bg-bullish text-primary-foreground';
       case 'bearish': return 'bg-bearish text-primary-foreground';
       default: return 'bg-neutral text-primary-foreground';
+    }
+  };
+
+  const handleCreatePost = async () => {
+    if (!postContent.trim() || !user) return;
+
+    setIsSubmitting(true);
+    try {
+      await createPost(postContent);
+      setPostContent('');
+      setSelectedSymbol('');
+      setSentiment('neutral');
+      setTags([]);
+      toast({
+        title: "Post created!",
+        description: "Your post has been shared successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -172,8 +205,12 @@ export const CreatePage = () => {
                   </div>
                 </div>
 
-                <Button className="w-full" disabled={!postContent.trim()}>
-                  Share Post
+                <Button 
+                  className="w-full" 
+                  disabled={!postContent.trim() || isSubmitting}
+                  onClick={handleCreatePost}
+                >
+                  {isSubmitting ? 'Creating...' : 'Share Post'}
                 </Button>
               </CardContent>
             </Card>

@@ -302,7 +302,8 @@ export const usePostActions = () => {
         .delete()
         .eq('id', existingLike.id);
 
-      // TODO: Decrement like count using RPC function
+      // Decrement like count using RPC function
+      await supabase.rpc('decrement_post_likes', { post_id: postId });
     } else {
       // Like
       await supabase
@@ -312,7 +313,8 @@ export const usePostActions = () => {
           user_id: user.id,
         });
 
-      // TODO: Increment like count using RPC function
+      // Increment like count using RPC function
+      await supabase.rpc('increment_post_likes', { post_id: postId });
     }
   };
 
@@ -331,7 +333,8 @@ export const usePostActions = () => {
 
     if (error) throw error;
 
-    // TODO: Increment comment count using RPC function
+    // Increment comment count using RPC function
+    await supabase.rpc('increment_post_comments', { post_id: postId });
 
     return data;
   };

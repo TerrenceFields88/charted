@@ -1,13 +1,16 @@
 import { useRealTimeData } from "@/hooks/useRealTimeData";
+import { useMarkets } from "@/hooks/useSupabaseData";
 import { FutureCard } from "./FutureCard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Wifi, WifiOff, TrendingUp, TrendingDown, Users } from "lucide-react";
 
 export const MarketsPage = () => {
   const { futures, isConnected } = useRealTimeData();
+  const { markets, loading: marketsLoading } = useMarkets();
   
   const getMarketSentiment = () => {
     const bullishCount = futures.filter(f => f.prediction.direction === 'bullish').length;
