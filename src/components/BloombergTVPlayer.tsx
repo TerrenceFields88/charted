@@ -9,7 +9,7 @@ export const BloombergTVPlayer = () => {
   const [isMuted, setIsMuted] = useState(false);
 
   // Bloomberg TV Live Stream URL (this would be the actual live stream in production)
-  const bloombergTVUrl = "https://www.youtube.com/embed/dp8PhLsUcFE?autoplay=1&mute=1";
+  const bloombergTVUrl = "https://www.youtube.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg&autoplay=1&mute=0";
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);

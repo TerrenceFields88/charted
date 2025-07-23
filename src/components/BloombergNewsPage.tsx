@@ -134,10 +134,9 @@ export const BloombergNewsPage = () => {
         </Card>
 
         <Tabs defaultValue="news" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="news">Latest News</TabsTrigger>
             <TabsTrigger value="live">Bloomberg TV</TabsTrigger>
-            <TabsTrigger value="scraper">News Scraper</TabsTrigger>
           </TabsList>
 
           <TabsContent value="news" className="space-y-4">
@@ -199,22 +198,6 @@ export const BloombergNewsPage = () => {
             <BloombergTVPlayer />
           </TabsContent>
 
-          <TabsContent value="scraper">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="w-5 h-5" />
-                    Real-time News Scraper
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Scrape the latest Bloomberg news and financial data using Firecrawl API
-                  </p>
-                </CardHeader>
-              </Card>
-              <CrawlForm />
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
