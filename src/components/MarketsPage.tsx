@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { TradingViewChart, TradingViewMiniChart } from '@/components/TradingViewChart';
+import { FutureCard } from '@/components/FutureCard';
+import { useRealTimeData } from '@/hooks/useRealTimeData';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -16,6 +19,8 @@ export const MarketsPage = () => {
   const [watchlist, setWatchlist] = useState([
     'NASDAQ:AAPL', 'NASDAQ:GOOGL', 'NASDAQ:MSFT', 'NYSE:TSLA'
   ]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { futures } = useRealTimeData();
 
   const marketData = [
     { 
@@ -78,15 +83,37 @@ export const MarketsPage = () => {
     setWatchlist(watchlist.filter(s => s !== symbol));
   };
 
+  // Filter functions for search
+  const filterBySearch = (items: any[], query: string) => {
+    if (!query) return items;
+    const lowercaseQuery = query.toLowerCase();
+    return items.filter(item => 
+      item.symbol?.toLowerCase().includes(lowercaseQuery) ||
+      item.name?.toLowerCase().includes(lowercaseQuery)
+    );
+  };
+
+  const filteredMarketData = filterBySearch(marketData, searchQuery);
+  const filteredCryptoData = filterBySearch(cryptoData, searchQuery);
+  const filteredForexData = filterBySearch(forexData, searchQuery);
+  const filteredFuturesData = filterBySearch(futures, searchQuery);
+
   return (
     <div className="pb-20">
       {/* Header */}
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">Markets</h1>
-          <Button variant="ghost" size="sm">
-            <Search className="w-4 h-4" />
-          </Button>
+        </div>
+        {/* Search Bar */}
+        <div className="mt-3 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Search markets..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
       </div>
 
@@ -119,16 +146,24 @@ export const MarketsPage = () => {
         </Card>
 
         <Tabs defaultValue="stocks" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="stocks">Stocks</TabsTrigger>
             <TabsTrigger value="crypto">Crypto</TabsTrigger>
             <TabsTrigger value="forex">Forex</TabsTrigger>
+            <TabsTrigger value="futures">Futures</TabsTrigger>
             <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stocks">
             <div className="space-y-3">
-              {marketData.map((stock) => (
+              {filteredMarketData.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">No stocks found matching "{searchQuery}"</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredMarketData.map((stock) => (
                 <Card key={stock.symbol}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -177,13 +212,21 @@ export const MarketsPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="crypto">
             <div className="space-y-3">
-              {cryptoData.map((crypto) => (
+              {filteredCryptoData.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">No cryptocurrencies found matching "{searchQuery}"</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredCryptoData.map((crypto) => (
                 <Card key={crypto.symbol}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -207,13 +250,21 @@ export const MarketsPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="forex">
             <div className="space-y-3">
-              {forexData.map((pair) => (
+              {filteredForexData.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">No forex pairs found matching "{searchQuery}"</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredForexData.map((pair) => (
                 <Card key={pair.symbol}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -237,7 +288,26 @@ export const MarketsPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="futures">
+            <div className="space-y-3">
+              {filteredFuturesData.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">
+                      {searchQuery ? `No futures found matching "${searchQuery}"` : 'No futures data available'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredFuturesData.map((future) => (
+                  <FutureCard key={future.symbol} contract={future} />
+                ))
+              )}
             </div>
           </TabsContent>
 
