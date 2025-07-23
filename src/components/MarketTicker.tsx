@@ -11,14 +11,14 @@ interface MarketData {
 
 export const MarketTicker = () => {
   const [marketData, setMarketData] = useState<MarketData[]>([
-    { symbol: 'SPY', price: 598.45, change: 4.23, changePercent: 0.71, type: 'stock' },
-    { symbol: 'EUR/USD', price: 1.0432, change: -0.0034, changePercent: -0.32, type: 'forex' },
-    { symbol: 'BTC', price: 108450, change: 2850.75, changePercent: 2.70, type: 'crypto' },
-    { symbol: 'GC', price: 2687.20, change: 18.40, changePercent: 0.69, type: 'futures' },
-    { symbol: 'AAPL', price: 234.67, change: -2.15, changePercent: -0.91, type: 'stock' },
-    { symbol: 'GBP/USD', price: 1.2156, change: 0.0087, changePercent: 0.72, type: 'forex' },
-    { symbol: 'ETH', price: 4125.80, change: 78.45, changePercent: 1.94, type: 'crypto' },
-    { symbol: 'CL', price: 92.30, change: 1.45, changePercent: 1.59, type: 'futures' },
+    { symbol: 'SPY', price: 612.85, change: 8.47, changePercent: 1.40, type: 'stock' },
+    { symbol: 'EUR/USD', price: 1.0298, change: -0.0067, changePercent: -0.65, type: 'forex' },
+    { symbol: 'BTC', price: 115750, change: 4850.25, changePercent: 4.37, type: 'crypto' },
+    { symbol: 'GC', price: 2745.60, change: 32.80, changePercent: 1.21, type: 'futures' },
+    { symbol: 'AAPL', price: 248.90, change: 5.23, changePercent: 2.15, type: 'stock' },
+    { symbol: 'GBP/USD', price: 1.2089, change: -0.0145, changePercent: -1.18, type: 'forex' },
+    { symbol: 'ETH', price: 4567.30, change: 178.85, changePercent: 4.08, type: 'crypto' },
+    { symbol: 'CL', price: 89.75, change: -1.67, changePercent: -1.83, type: 'futures' },
   ]);
 
   // Simulate real-time updates
