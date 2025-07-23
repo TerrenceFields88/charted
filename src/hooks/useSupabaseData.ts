@@ -39,19 +39,20 @@ interface SupabasePost {
 
 // Helper function to transform Supabase post to Social post
 const transformSupabasePost = (supabasePost: any): SocialPost => {
-  const profile = supabasePost.profiles?.[0] || null;
+  // Handle both nested profile structure and direct join
+  const profileData = supabasePost.profiles || supabasePost;
   
   const user: User = {
-    id: profile?.user_id || supabasePost.user_id,
-    username: profile?.username || 'user' + supabasePost.user_id.slice(-4),
-    displayName: profile?.display_name || profile?.username || 'Unknown User',
-    avatar: profile?.avatar_url || '',
-    isVerified: false, // Default for now
-    followersCount: profile?.follower_count || 0,
-    followingCount: profile?.following_count || 0,
-    tradingLevel: 'Beginner', // Default for now
-    portfolioReturn: 0, // Default for now
-    winRate: 0 // Default for now
+    id: supabasePost.user_id,
+    username: profileData.username || 'user' + supabasePost.user_id.slice(-4),
+    displayName: profileData.display_name || profileData.username || 'Unknown User',
+    avatar: profileData.avatar_url || '',
+    isVerified: false,
+    followersCount: profileData.follower_count || 0,
+    followingCount: profileData.following_count || 0,
+    tradingLevel: 'Beginner',
+    portfolioReturn: 0,
+    winRate: 0
   };
 
   return {
@@ -60,13 +61,13 @@ const transformSupabasePost = (supabasePost: any): SocialPost => {
     content: supabasePost.content,
     image: supabasePost.image_url,
     timestamp: new Date(supabasePost.created_at),
-    likes: supabasePost.like_count,
-    comments: supabasePost.comment_count,
-    shares: 0, // Default for now
-    isLiked: false, // Will be determined by user context
-    type: 'text', // Default for now
-    tags: [], // Default for now
-    sentiment: 'neutral' // Default for now
+    likes: supabasePost.like_count || 0,
+    comments: supabasePost.comment_count || 0,
+    shares: 0,
+    isLiked: false,
+    type: 'text',
+    tags: [],
+    sentiment: 'neutral'
   };
 };
 
@@ -99,35 +100,32 @@ export const usePosts = () => {
 
   const fetchPosts = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
+      // Simple query with LEFT JOIN to get profile data
       const { data, error } = await supabase
         .from('posts')
         .select(`
           *,
-          profiles(
-            id,
-            user_id,
-            username,
-            display_name,
-            avatar_url,
-            bio,
-            follower_count,
-            following_count,
-            created_at
-          ),
-          communities(
-            id,
-            name,
-            avatar_url
-          )
+          profiles!left(username, display_name, avatar_url, follower_count, following_count)
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Raw posts data:', data);
       
       // Transform Supabase posts to Social posts
       const transformedPosts = (data || []).map(transformSupabasePost);
+      console.log('Transformed posts:', transformedPosts);
+      
       setPosts(transformedPosts);
     } catch (err) {
+      console.error('Error fetching posts:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
@@ -137,107 +135,43 @@ export const usePosts = () => {
   useEffect(() => {
     fetchPosts();
 
-    // Set up realtime subscription for new posts
+    // Simple realtime subscription for posts table
     const channel = supabase
       .channel('posts-realtime')
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'posts'
-        },
-        async (payload) => {
-          console.log('New post received:', payload);
-          
-          // Fetch the complete post data with profile information
-          const { data: newPostData, error } = await supabase
-            .from('posts')
-            .select(`
-              *,
-              profiles(
-                id,
-                user_id,
-                username,
-                display_name,
-                avatar_url,
-                bio,
-                follower_count,
-                following_count,
-                created_at
-              ),
-              communities(
-                id,
-                name,
-                avatar_url
-              )
-            `)
-            .eq('id', payload.new.id)
-            .single();
-
-          if (!error && newPostData) {
-            const transformedPost = transformSupabasePost(newPostData);
-            setPosts(prevPosts => [transformedPost, ...prevPosts]);
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'posts'
-        },
-        async (payload) => {
-          console.log('Post updated:', payload);
-          
-          // Fetch the updated post data with profile information
-          const { data: updatedPostData, error } = await supabase
-            .from('posts')
-            .select(`
-              *,
-              profiles(
-                id,
-                user_id,
-                username,
-                display_name,
-                avatar_url,
-                bio,
-                follower_count,
-                following_count,
-                created_at
-              ),
-              communities(
-                id,
-                name,
-                avatar_url
-              )
-            `)
-            .eq('id', payload.new.id)
-            .single();
-
-          if (!error && updatedPostData) {
-            const transformedPost = transformSupabasePost(updatedPostData);
-            setPosts(prevPosts => 
-              prevPosts.map(post => 
-                post.id === transformedPost.id ? transformedPost : post
-              )
-            );
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
+          event: '*',
           schema: 'public',
           table: 'posts'
         },
         (payload) => {
-          console.log('Post deleted:', payload);
-          setPosts(prevPosts => 
-            prevPosts.filter(post => post.id !== payload.old.id)
-          );
+          console.log('Realtime post change:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            // For new posts, fetch the complete data with profile
+            fetchPostWithProfile(payload.new.id).then(newPost => {
+              if (newPost) {
+                setPosts(prevPosts => [newPost, ...prevPosts]);
+              }
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            // Update existing post
+            fetchPostWithProfile(payload.new.id).then(updatedPost => {
+              if (updatedPost) {
+                setPosts(prevPosts => 
+                  prevPosts.map(post => 
+                    post.id === updatedPost.id ? updatedPost : post
+                  )
+                );
+              }
+            });
+          } else if (payload.eventType === 'DELETE') {
+            // Remove deleted post
+            setPosts(prevPosts => 
+              prevPosts.filter(post => post.id !== payload.old.id)
+            );
+          }
         }
       )
       .subscribe();
@@ -246,6 +180,26 @@ export const usePosts = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Helper function to fetch a single post with profile data
+  const fetchPostWithProfile = async (postId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles!left(username, display_name, avatar_url, follower_count, following_count)
+        `)
+        .eq('id', postId)
+        .single();
+
+      if (error) throw error;
+      return transformSupabasePost(data);
+    } catch (err) {
+      console.error('Error fetching post with profile:', err);
+      return null;
+    }
+  };
 
   return { posts, loading, error, refetch: fetchPosts };
 };
