@@ -3,8 +3,17 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Share, MoreHorizontal, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Heart, MessageCircle, Share, MoreHorizontal, TrendingUp, TrendingDown, Minus, Trash2 } from 'lucide-react';
 import { Post } from '@/types/social';
+import { useAuth } from '@/hooks/useAuth';
+import { usePostActions } from '@/hooks/useSupabaseData';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 interface PostCardProps {
@@ -12,13 +21,49 @@ interface PostCardProps {
 }
 
 export const PostCard = ({ post }: PostCardProps) => {
+  const { user } = useAuth();
+  const { deletePost } = usePostActions();
+  const { toast } = useToast();
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [likeCount, setLikeCount] = useState(post.likes);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
   };
+
+  const handleDeletePost = async () => {
+    if (!user || user.id !== post.user.id) {
+      toast({
+        title: 'Error',
+        description: 'You can only delete your own posts',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      await deletePost(post.id);
+      toast({
+        title: 'Success',
+        description: 'Post deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete post',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Check if current user owns this post
+  const isOwner = user && user.id === post.user.id;
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
@@ -92,9 +137,27 @@ export const PostCard = ({ post }: PostCardProps) => {
             </div>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <MoreHorizontal className="w-4 h-4" />
-        </Button>
+        {isOwner ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={handleDeletePost}
+                disabled={isDeleting}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {isDeleting ? 'Deleting...' : 'Delete Post'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="h-8 w-8" /> // Empty space to maintain layout
+        )}
       </div>
 
       {/* Content */}

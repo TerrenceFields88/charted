@@ -411,5 +411,22 @@ export const usePostActions = () => {
     }
   };
 
-  return { createPost, likePost, addComment };
+  const deletePost = async (postId: string) => {
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId)
+        .eq('user_id', user.id); // Ensure user can only delete their own posts
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      throw error;
+    }
+  };
+
+  return { createPost, likePost, addComment, deletePost };
 };
