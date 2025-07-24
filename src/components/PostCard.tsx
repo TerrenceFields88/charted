@@ -16,6 +16,7 @@ import { usePostActions } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 import { SharePostDialog } from '@/components/SharePostDialog';
 import { TradingViewMiniChart } from '@/components/TradingViewChart';
+import { CommentSection } from '@/components/CommentSection';
 import { cn } from '@/lib/utils';
 
 interface PostCardProps {
@@ -30,6 +31,7 @@ export const PostCard = ({ post }: PostCardProps) => {
   const [likeCount, setLikeCount] = useState(post.likes);
   const [isDeleting, setIsDeleting] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [commentCount, setCommentCount] = useState(post.comments);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -245,15 +247,17 @@ export const PostCard = ({ post }: PostCardProps) => {
         </Button>
 
         <Button variant="ghost" size="sm" className="flex items-center gap-2 h-8 px-3 text-muted-foreground hover:text-foreground">
-          <MessageCircle className="w-4 h-4" />
-          <span className="text-xs font-medium">{post.comments}</span>
-        </Button>
-
-        <Button variant="ghost" size="sm" className="flex items-center gap-2 h-8 px-3 text-muted-foreground hover:text-foreground">
           <Share className="w-4 h-4" />
           <span className="text-xs font-medium">{post.shares}</span>
         </Button>
       </div>
+
+      {/* Comments Section */}
+      <CommentSection 
+        postId={post.id}
+        commentCount={commentCount}
+        onCommentCountChange={setCommentCount}
+      />
 
       {/* Share Post Dialog */}
       <SharePostDialog 
