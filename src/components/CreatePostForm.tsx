@@ -116,7 +116,8 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
         sanitizeContent(content.trim()),
         predictionText.trim() ? sanitizeContent(predictionText.trim()) : undefined,
         predictionText ? predictionConfidence : undefined,
-        undefined // community_id
+        undefined, // community_id
+        photos.length > 0 ? photos[0] : undefined // Use first photo as main image
       );
 
       // Reset form
