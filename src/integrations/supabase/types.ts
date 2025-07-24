@@ -329,6 +329,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          chart_symbol: string | null
           comment_count: number | null
           community_id: string | null
           content: string
@@ -343,6 +344,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          chart_symbol?: string | null
           comment_count?: number | null
           community_id?: string | null
           content: string
@@ -357,6 +359,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          chart_symbol?: string | null
           comment_count?: number | null
           community_id?: string | null
           content?: string

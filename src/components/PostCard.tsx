@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePostActions } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 import { SharePostDialog } from '@/components/SharePostDialog';
+import { TradingViewMiniChart } from '@/components/TradingViewChart';
 import { cn } from '@/lib/utils';
 
 interface PostCardProps {
@@ -195,6 +196,25 @@ export const PostCard = ({ post }: PostCardProps) => {
           )}
         </div>
       )}
+
+      {/* TradingView Chart */}
+      {post.symbol && (
+        <div className="mx-4 mb-4">
+          <div className="border rounded-lg overflow-hidden">
+            <TradingViewMiniChart
+              symbol={post.symbol}
+              height={250}
+              theme="light"
+            />
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <Badge variant="outline" className="text-xs">
+              Chart: {post.symbol}
+            </Badge>
+          </div>
+        </div>
+      )}
+
 
       {post.video && (
         <div className="relative bg-black">

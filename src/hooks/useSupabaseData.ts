@@ -329,6 +329,7 @@ export const usePostActions = () => {
         prediction_confidence: confidence,
         community_id: communityId,
         image_url: imageUrl,
+        chart_symbol: chartSymbol,
         user_id: user.id,
       })
       .select()
