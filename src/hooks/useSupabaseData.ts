@@ -318,7 +318,7 @@ export const useCommunities = () => {
 export const usePostActions = () => {
   const { user } = useAuth();
 
-  const createPost = async (content: string, predictionText?: string, confidence?: number, communityId?: string, imageUrl?: string) => {
+  const createPost = async (content: string, predictionText?: string, confidence?: number, communityId?: string, imageUrl?: string, chartSymbol?: string) => {
     if (!user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase

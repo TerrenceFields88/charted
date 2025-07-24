@@ -93,8 +93,8 @@ export const TradingViewMiniChart = ({
       height: '100%',
       locale: 'en',
       dateRange: '12M',
-      colorTheme: theme,
-      isTransparent: true,
+      colorTheme: 'light', // Force light theme for better text visibility
+      isTransparent: false,
       autosize: true,
       largeChartUrl: ''
     });
