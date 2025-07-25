@@ -11,6 +11,9 @@ import { Link, RefreshCw, Plus, CheckCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const SUPPORTED_BROKERS = [
+  // Trading Platforms
+  { value: 'tradingview', label: 'TradingView', demo: false, type: 'platform' },
+  
   // Traditional Brokerages
   { value: 'alpaca', label: 'Alpaca Trading', demo: true, type: 'brokerage' },
   { value: 'interactive_brokers', label: 'Interactive Brokers', demo: false, type: 'brokerage' },
@@ -60,11 +63,14 @@ export const BrokerageConnectionDialog = () => {
 
     if (result) {
       const selectedBroker = SUPPORTED_BROKERS.find(b => b.value === formData.broker_name);
-      const accountType = selectedBroker?.type === 'prop_firm' ? 'prop firm' : 'brokerage';
+      let accountType = 'account';
+      if (selectedBroker?.type === 'prop_firm') accountType = 'prop firm';
+      else if (selectedBroker?.type === 'platform') accountType = 'platform';
+      else if (selectedBroker?.type === 'brokerage') accountType = 'brokerage';
       
       toast({
         title: 'Success',
-        description: `${selectedBroker?.label} ${accountType} account connected successfully`,
+        description: `${selectedBroker?.label} ${accountType} connected successfully`,
       });
       setOpen(false);
       setFormData({ broker_name: '', username: '', password: '' });
@@ -162,6 +168,19 @@ export const BrokerageConnectionDialog = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                    Trading Platforms
+                  </div>
+                  {SUPPORTED_BROKERS.filter(broker => broker.type === 'platform').map((broker) => (
+                    <SelectItem key={broker.value} value={broker.value}>
+                      <div className="flex items-center gap-2">
+                        {broker.label}
+                        <Badge variant="outline" className="text-xs border-blue-500 text-blue-500">
+                          Platform
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+                  <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground border-t mt-2 pt-3">
                     Brokerages
                   </div>
                   {SUPPORTED_BROKERS.filter(broker => broker.type === 'brokerage').map((broker) => (

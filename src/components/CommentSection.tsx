@@ -61,15 +61,28 @@ export const CommentSection = ({ postId, commentCount, onCommentCountChange }: C
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error fetching comments:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.log('No comments data returned');
+        setComments([]);
+        return;
+      }
 
       // Organize comments with replies
       const commentsMap = new Map();
       const rootComments: Comment[] = [];
 
       data.forEach((comment: any) => {
+        // Handle both nested and flat profile structures
+        const profileData = comment.profiles || comment.profile;
+        
         const commentData = {
           ...comment,
+          profiles: profileData,
           replies: []
         };
         commentsMap.set(comment.id, commentData);
