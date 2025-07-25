@@ -2,14 +2,44 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Activity, TrendingUp, BarChart3, PieChart, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Activity, TrendingUp, BarChart3, PieChart, RefreshCw } from 'lucide-react';
+import { useRealTimeMarketData } from '@/hooks/useRealTimeMarketData';
+import { TechnicalIndicators } from '@/components/TechnicalIndicators';
+import { MarketHeatmap } from '@/components/MarketHeatmap';
+import { MarketTrends } from '@/components/MarketTrends';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const InvestingAnalysisPage = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const { marketData, isLoading, error, lastUpdated, refetch } = useRealTimeMarketData();
 
-  const handleIframeLoad = () => {
-    setIsLoading(false);
+  const handleRefresh = () => {
+    refetch();
   };
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Technical Analysis</h1>
+            <p className="text-muted-foreground">Real-time market analysis and indicators</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground">Failed to load market data</p>
+              <Button onClick={handleRefresh} variant="outline">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -17,13 +47,29 @@ export const InvestingAnalysisPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Technical Analysis</h1>
-          <p className="text-muted-foreground">Real-time market analysis from Investing.com</p>
+          <p className="text-muted-foreground">Real-time market analysis and indicators</p>
         </div>
-        <Badge variant="outline" className="flex items-center gap-1">
-          <Activity className="w-3 h-3" />
-          Live
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Activity className="w-3 h-3" />
+            {isLoading ? 'Updating...' : 'Live'}
+          </Badge>
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            size="sm"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
       </div>
+
+      {lastUpdated && (
+        <p className="text-xs text-muted-foreground">
+          Last updated: {lastUpdated.toLocaleTimeString()}
+        </p>
+      )}
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
@@ -46,107 +92,89 @@ export const InvestingAnalysisPage = () => {
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Market Overview</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="relative">
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  </div>
-                )}
-                <iframe
-                  src="https://www.investing.com/technical-analysis/market-overview"
-                  width="100%"
-                  height="600"
-                  frameBorder="0"
-                  onLoad={handleIframeLoad}
-                  className="w-full"
-                  title="Market Overview"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {isLoading ? (
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <MarketTrends marketData={marketData} />
+          )}
         </TabsContent>
 
         <TabsContent value="heatmap" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Market Heatmap</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="relative">
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  </div>
-                )}
-                <iframe
-                  src="https://www.investing.com/markets/stock-market-movers"
-                  width="100%"
-                  height="600"
-                  frameBorder="0"
-                  onLoad={handleIframeLoad}
-                  className="w-full"
-                  title="Market Heatmap"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {isLoading ? (
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <MarketHeatmap marketData={marketData} />
+          )}
         </TabsContent>
 
         <TabsContent value="trends" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Technical Analysis Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="relative">
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          {isLoading ? (
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Skeleton className="h-32 w-full" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Skeleton className="h-48 w-full" />
+                    <Skeleton className="h-48 w-full" />
+                    <Skeleton className="h-48 w-full" />
                   </div>
-                )}
-                <iframe
-                  src="https://www.investing.com/technical-analysis"
-                  width="100%"
-                  height="600"
-                  frameBorder="0"
-                  onLoad={handleIframeLoad}
-                  className="w-full"
-                  title="Technical Analysis"
-                />
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <MarketTrends marketData={marketData} />
+          )}
         </TabsContent>
 
         <TabsContent value="technical" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Technical Indicators</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="relative">
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  </div>
-                )}
-                <iframe
-                  src="https://www.investing.com/technical-analysis/most-active-stocks"
-                  width="100%"
-                  height="600"
-                  frameBorder="0"
-                  onLoad={handleIframeLoad}
-                  className="w-full"
-                  title="Technical Indicators"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <Skeleton className="h-5 w-16" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-2 w-full" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <Skeleton className="h-12 w-full" />
+                        <Skeleton className="h-12 w-full" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <TechnicalIndicators marketData={marketData} />
+          )}
         </TabsContent>
       </Tabs>
     </div>
