@@ -5,6 +5,7 @@ import { FeedPage } from '@/components/FeedPage';
 import { MarketsPage } from '@/components/MarketsPage';
 import { CreatePage } from '@/components/CreatePage';
 import { BloombergNewsPage } from '@/components/BloombergNewsPage';
+import { InvestingAnalysisPage } from '@/components/InvestingAnalysisPage';
 import { ProfilePage } from '@/components/ProfilePage';
 import { UserSearchPage } from '@/components/UserSearchPage';
 
@@ -23,6 +24,8 @@ const Index = () => {
         return <CreatePage />;
       case 'bloomberg-news':
         return <BloombergNewsPage />;
+      case 'investing-analysis':
+        return <InvestingAnalysisPage />;
       case 'profile':
         return <ProfilePage />;
       default:
