@@ -19,8 +19,6 @@ const Index = () => {
         return <FeedPage />;
       case 'markets':
         return <MarketsPage />;
-      case 'search':
-        return <UserSearchPage />;
       case 'create':
         return <CreatePage />;
       case 'news-analysis':

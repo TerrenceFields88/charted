@@ -1,13 +1,17 @@
 
+import { useState } from 'react';
 import { PostCard } from './PostCard';
 import { NewsWidget } from '@/components/NewsWidget';
 import { usePosts } from '@/hooks/useSupabaseData';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { UserSearchPage } from '@/components/UserSearchPage';
 
 export const FeedPage = () => {
   const { posts, loading, error, refetch } = usePosts();
+  const [showSearch, setShowSearch] = useState(false);
 
   const handleRefresh = () => {
     refetch();
@@ -18,7 +22,17 @@ export const FeedPage = () => {
       {/* Header */}
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Trading Feed</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold">Trading Feed</h1>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSearch(!showSearch)}
+              className="h-8 w-8 p-0"
+            >
+              <Search className="w-4 h-4" />
+            </Button>
+          </div>
           <Button
             variant="ghost"
             size="sm"
@@ -29,6 +43,11 @@ export const FeedPage = () => {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
+        {showSearch && (
+          <div className="mt-3">
+            <UserSearchPage />
+          </div>
+        )}
       </div>
 
       {/* Feed */}

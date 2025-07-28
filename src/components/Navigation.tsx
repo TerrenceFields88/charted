@@ -16,7 +16,6 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const tabs = [
     { id: 'feed', label: 'Feed', icon: Home },
     { id: 'markets', label: 'Markets', icon: TrendingUp },
-    { id: 'search', label: 'Search', icon: Search },
     { id: 'create', label: 'Create', icon: Plus },
     { id: 'news-analysis', label: 'News', icon: Newspaper },
     { id: 'profile', label: 'Profile', icon: User },
