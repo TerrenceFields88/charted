@@ -18,9 +18,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'markets', label: 'Markets', icon: TrendingUp },
     { id: 'search', label: 'Search', icon: Search },
     { id: 'create', label: 'Create', icon: Plus },
-    { id: 'messages', label: 'Messages', icon: MessageCircle },
-    { id: 'bloomberg-news', label: 'News', icon: Newspaper },
-    { id: 'investing-analysis', label: 'Analysis', icon: Activity },
+    { id: 'news-analysis', label: 'News', icon: Newspaper },
     { id: 'profile', label: 'Profile', icon: User },
   ];
 

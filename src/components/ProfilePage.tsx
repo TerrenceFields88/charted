@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { BrokerageConnectionDialog } from '@/components/BrokerageConnectionDialog';
+import { MessagesPage } from '@/components/MessagesPage';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -299,10 +300,11 @@ export const ProfilePage = () => {
         </Card>
 
         <Tabs defaultValue="activity" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
             <TabsTrigger value="posts">My Posts</TabsTrigger>
+            <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
 
           <TabsContent value="activity">
@@ -406,6 +408,10 @@ export const ProfilePage = () => {
                 ))
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="messages">
+            <MessagesPage />
           </TabsContent>
         </Tabs>
       </div>
