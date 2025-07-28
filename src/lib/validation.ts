@@ -22,6 +22,13 @@ export const FILE_VALIDATION = {
 // Username validation regex
 const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
 
+// Trading symbol validation constants
+export const TRADING_SYMBOL_VALIDATION = {
+  ALLOWED_EXCHANGES: ['NASDAQ', 'NYSE', 'BINANCE', 'COINBASE', 'FX_IDC', 'CRYPTO', 'FOREXCOM', 'OANDA'],
+  MAX_SYMBOL_LENGTH: 20,
+  SYMBOL_REGEX: /^[A-Z0-9._-]+$/,
+} as const;
+
 // Content sanitization
 export const sanitizeContent = (content: string): string => {
   if (!content) return '';
@@ -178,6 +185,46 @@ export class RateLimiter {
 }
 
 // Error message sanitization
+// Trading symbol validation
+export const validateTradingSymbol = (symbol: string): string | null => {
+  if (!symbol) return 'Symbol is required';
+  
+  const trimmed = symbol.trim().toUpperCase();
+  
+  if (trimmed.length > TRADING_SYMBOL_VALIDATION.MAX_SYMBOL_LENGTH) {
+    return `Symbol must be no more than ${TRADING_SYMBOL_VALIDATION.MAX_SYMBOL_LENGTH} characters`;
+  }
+  
+  if (!TRADING_SYMBOL_VALIDATION.SYMBOL_REGEX.test(trimmed)) {
+    return 'Symbol contains invalid characters';
+  }
+  
+  // Check if symbol has valid exchange prefix
+  const hasValidExchange = TRADING_SYMBOL_VALIDATION.ALLOWED_EXCHANGES.some(exchange => 
+    trimmed.startsWith(exchange + ':')
+  );
+  
+  if (!hasValidExchange && trimmed.includes(':')) {
+    return 'Invalid exchange prefix';
+  }
+  
+  return null;
+};
+
+// Sanitize trading symbol for safe injection
+export const sanitizeTradingSymbol = (symbol: string): string => {
+  if (!symbol) return 'NASDAQ:AAPL';
+  
+  const trimmed = symbol.trim().toUpperCase();
+  const validation = validateTradingSymbol(trimmed);
+  
+  if (validation) {
+    return 'NASDAQ:AAPL'; // Return safe default
+  }
+  
+  return trimmed;
+};
+
 export const sanitizeErrorMessage = (error: any): string => {
   if (typeof error === 'string') {
     return sanitizeContent(error);

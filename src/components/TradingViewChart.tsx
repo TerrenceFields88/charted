@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { sanitizeTradingSymbol } from '@/lib/validation';
 
 interface TradingViewChartProps {
   symbol?: string;
@@ -25,13 +26,16 @@ export const TradingViewChart = ({
     // Clear any existing content
     container.current.innerHTML = '';
 
+    // Sanitize symbol for security
+    const safeSymbol = sanitizeTradingSymbol(symbol);
+
     const script = document.createElement('script');
     script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
     script.type = 'text/javascript';
     script.async = true;
     script.innerHTML = JSON.stringify({
       autosize: true,
-      symbol: symbol,
+      symbol: safeSymbol,
       interval: interval,
       timezone: 'Etc/UTC',
       theme: theme,
@@ -83,12 +87,15 @@ export const TradingViewMiniChart = ({
 
     container.current.innerHTML = '';
 
+    // Sanitize symbol for security
+    const safeSymbol = sanitizeTradingSymbol(symbol);
+
     const script = document.createElement('script');
     script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
     script.type = 'text/javascript';
     script.async = true;
     script.innerHTML = JSON.stringify({
-      symbol: symbol,
+      symbol: safeSymbol,
       width: '100%',
       height: '100%',
       locale: 'en',
