@@ -18,17 +18,17 @@ export const FeedPage = () => {
   };
 
   return (
-    <div className="pb-20">
+    <div className="pb-20 animate-fade-in">
       {/* Header */}
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold">Trading Feed</h1>
+            <h1 className="text-xl font-semibold">Trading Feed</h1>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowSearch(!showSearch)}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 transition-smooth hover:scale-110"
             >
               <Search className="w-4 h-4" />
             </Button>
@@ -38,13 +38,13 @@ export const FeedPage = () => {
             size="sm"
             onClick={handleRefresh}
             disabled={loading}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 transition-smooth hover:scale-110"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 transition-smooth ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
         {showSearch && (
-          <div className="mt-3">
+          <div className="mt-3 animate-scale-in">
             <UserSearchPage />
           </div>
         )}
