@@ -98,8 +98,8 @@ export const BrokerageConnectionDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Link className="w-4 h-4 mr-2" />
+        <Button variant="outline" size="sm" className="gap-2">
+          <Link className="w-4 h-4" />
           Connect Account
         </Button>
       </DialogTrigger>
