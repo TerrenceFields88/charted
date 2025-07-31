@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 export const NotificationsPage = () => {
+  console.log('NotificationsPage component rendering');
   // Mock notifications data
   const notifications = [
     {
