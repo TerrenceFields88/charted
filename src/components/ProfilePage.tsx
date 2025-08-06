@@ -17,9 +17,11 @@ import {
   Target,
   Award,
   Plus,
-  Heart
+  Heart,
+  RefreshCw
 } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
+import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
 import { BrokerageConnectionDialog } from '@/components/BrokerageConnectionDialog';
 import { MessagesPage } from '@/components/MessagesPage';
 
@@ -29,12 +31,30 @@ export const ProfilePage = () => {
   const { posts } = usePosts();
   const { user } = useAuth();
   const { performance, getFormattedPerformance, recentTrades, loading: performanceLoading } = useTradingPerformance();
+  const { 
+    aggregatedData, 
+    loading: brokerageLoading, 
+    lastUpdate, 
+    hasConnectedAccounts,
+    syncAllAccounts 
+  } = useRealTimeBrokerageData();
   
   // Filter posts by current user
   const userPosts = posts.filter(post => post.user.id === user?.id);
 
-  // Get real trading performance data
-  const performanceData = getFormattedPerformance();
+  // Get real trading performance data - use real-time data if available
+  const performanceData = hasConnectedAccounts && aggregatedData.performanceMetrics 
+    ? {
+        portfolioReturn: aggregatedData.totalPnL >= 0 
+          ? `+${(aggregatedData.totalPnL / aggregatedData.totalEquity * 100).toFixed(2)}%`
+          : `${(aggregatedData.totalPnL / aggregatedData.totalEquity * 100).toFixed(2)}%`,
+        winRate: `${aggregatedData.performanceMetrics.win_rate.toFixed(0)}%`,
+        winningTrades: aggregatedData.recentTrades.filter(t => (t.pnl || 0) > 0).length,
+        losingTrades: aggregatedData.recentTrades.filter(t => (t.pnl || 0) < 0).length,
+        riskRewardRatio: `${aggregatedData.performanceMetrics.profit_factor.toFixed(1)}:1`,
+        totalTrades: aggregatedData.recentTrades.length,
+      }
+    : getFormattedPerformance();
 
   // Show create profile UI if no profile exists
   if (loading) {
@@ -88,9 +108,14 @@ export const ProfilePage = () => {
       icon: TrendingUp, 
       color: performanceData.portfolioReturn.startsWith('+') ? 'text-bullish' : 'text-bearish' 
     },
+    { 
+      label: 'Portfolio Value', 
+      value: hasConnectedAccounts ? `$${aggregatedData.totalEquity.toLocaleString()}` : 'N/A', 
+      icon: Target, 
+      color: 'text-primary' 
+    },
     { label: 'Win Rate', value: performanceData.winRate, icon: Target, color: 'text-primary' },
     { label: 'Followers', value: profile.follower_count.toLocaleString(), icon: Users, color: 'text-foreground' },
-    { label: 'Following', value: profile.following_count.toLocaleString(), icon: Heart, color: 'text-foreground' },
   ];
 
   // Only show real achievements when they have actual trading data
@@ -115,19 +140,23 @@ export const ProfilePage = () => {
     }] : []),
   ] : [];
 
-  // Format recent trades for activity display
+  // Format recent trades for activity display - use real-time data if available
   const formatRecentActivity = () => {
     const activities = [];
     
-    // Add recent trades
-    recentTrades.slice(0, 3).forEach(trade => {
+    // Add recent trades from real-time data if available, otherwise use database trades
+    const tradesToShow = hasConnectedAccounts && aggregatedData.recentTrades.length > 0 
+      ? aggregatedData.recentTrades.slice(0, 5)
+      : recentTrades.slice(0, 3);
+
+    tradesToShow.forEach(trade => {
       activities.push({
         type: 'trade',
         symbol: trade.symbol,
-        action: trade.trade_type === 'buy' ? 'Buy' : 'Sell',
+        action: hasConnectedAccounts ? trade.side : (trade.trade_type === 'buy' ? 'Buy' : 'Sell'),
         price: trade.price,
-        profit_loss: trade.profit_loss,
-        timestamp: new Date(trade.executed_at).toLocaleDateString()
+        profit_loss: trade.pnl || trade.profit_loss,
+        timestamp: new Date(hasConnectedAccounts ? trade.timestamp : trade.executed_at).toLocaleDateString()
       });
     });
 
@@ -237,18 +266,56 @@ export const ProfilePage = () => {
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5" />
                 Trading Performance
+                {hasConnectedAccounts && (
+                  <Badge variant="outline" className="text-bullish border-bullish">
+                    Live Data
+                  </Badge>
+                )}
               </div>
-              <BrokerageConnectionDialog />
+              <div className="flex gap-2">
+                {hasConnectedAccounts && (
+                  <Button variant="outline" size="sm" onClick={syncAllAccounts}>
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Sync
+                  </Button>
+                )}
+                <BrokerageConnectionDialog />
+              </div>
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Connect your brokerage or prop firm account to track real performance
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {hasConnectedAccounts 
+                  ? 'Real-time data from connected accounts'
+                  : 'Connect your brokerage or prop firm account to track real performance'
+                }
+              </p>
+              {lastUpdate && (
+                <span className="text-xs text-muted-foreground">
+                  Last updated: {lastUpdate.toLocaleTimeString()}
+                </span>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {performanceLoading ? (
+            {(performanceLoading || brokerageLoading) ? (
               <div className="text-center text-muted-foreground">Loading performance data...</div>
             ) : (
               <>
+                {hasConnectedAccounts && (
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">${aggregatedData.totalEquity.toLocaleString()}</div>
+                      <div className="text-xs text-muted-foreground">Total Portfolio Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className={`text-2xl font-bold ${aggregatedData.totalPnL >= 0 ? 'text-bullish' : 'text-bearish'}`}>
+                        {aggregatedData.totalPnL >= 0 ? '+' : ''}${aggregatedData.totalPnL.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Daily P&L</div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Win Rate</span>
@@ -288,7 +355,28 @@ export const ProfilePage = () => {
                   </div>
                 </div>
 
-                {performanceData.totalTrades === 0 && (
+                {hasConnectedAccounts && aggregatedData.allPositions.length > 0 && (
+                  <div className="pt-4">
+                    <h4 className="font-medium mb-2">Current Positions</h4>
+                    <div className="space-y-2">
+                      {aggregatedData.allPositions.slice(0, 3).map((position, index) => (
+                        <div key={index} className="flex justify-between items-center p-2 bg-muted/20 rounded">
+                          <div>
+                            <span className="font-medium">{position.symbol}</span>
+                            <span className="text-sm text-muted-foreground ml-2">
+                              {position.quantity} shares @ ${position.current_price.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className={`text-sm font-medium ${position.unrealized_pnl >= 0 ? 'text-bullish' : 'text-bearish'}`}>
+                            {position.unrealized_pnl >= 0 ? '+' : ''}${position.unrealized_pnl.toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {performanceData.totalTrades === 0 && !hasConnectedAccounts && (
                   <div className="text-center py-4 text-muted-foreground">
                     <p>No trading data available.</p>
                     <p className="text-sm">Connect your brokerage or prop firm account to see real performance.</p>

@@ -41,6 +41,8 @@ export const BrokerageConnectionDialog = () => {
     broker_name: '',
     username: '',
     password: '',
+    api_key: '',
+    secret_key: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,6 +61,8 @@ export const BrokerageConnectionDialog = () => {
       broker_name: formData.broker_name,
       username: formData.username,
       password: formData.password,
+      api_key: formData.api_key || undefined,
+      secret_key: formData.secret_key || undefined,
     });
 
     if (result) {
@@ -73,7 +77,7 @@ export const BrokerageConnectionDialog = () => {
         description: `${selectedBroker?.label} ${accountType} connected successfully`,
       });
       setOpen(false);
-      setFormData({ broker_name: '', username: '', password: '' });
+      setFormData({ broker_name: '', username: '', password: '', api_key: '', secret_key: '' });
     }
   };
 
@@ -235,6 +239,38 @@ export const BrokerageConnectionDialog = () => {
                 Login credentials are securely encrypted and never shared
               </p>
             </div>
+
+            {/* API Key fields for supported brokers */}
+            {(formData.broker_name === 'alpaca' || formData.broker_name === 'interactive_brokers') && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="api_key">API Key (Optional)</Label>
+                  <Input
+                    id="api_key"
+                    value={formData.api_key}
+                    onChange={(e) => setFormData(prev => ({ ...prev, api_key: e.target.value }))}
+                    placeholder="Enter your API key"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    API key for enhanced features (optional for basic connection)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="secret_key">Secret Key (Optional)</Label>
+                  <Input
+                    id="secret_key"
+                    type="password"
+                    value={formData.secret_key}
+                    onChange={(e) => setFormData(prev => ({ ...prev, secret_key: e.target.value }))}
+                    placeholder="Enter your secret key"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Secret key for API authentication (optional for basic connection)
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="flex gap-2 pt-2">
               <Button type="submit" disabled={loading} className="flex-1">
