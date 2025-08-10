@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ActivityFeed } from '@/components/ActivityFeed';
 import { 
   Bell, 
   TrendingUp, 
@@ -166,68 +167,44 @@ export const NotificationsPage = () => {
             <TabsTrigger value="trade">Trades</TabsTrigger>
           </TabsList>
 
-          <TabsContent value={activeTab} className="mt-6">
-            <div className="space-y-3">
-              {filteredNotifications.length === 0 ? (
-                <Card>
-                  <CardContent className="pt-6 text-center">
-                    <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
-                      <Bell className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="font-semibold mb-2">No Notifications</h3>
-                    <p className="text-muted-foreground text-sm">
-                      {activeTab === 'unread' 
-                        ? "You're all caught up! No unread notifications."
-                        : `No ${activeTab === 'all' ? '' : activeTab} notifications to display.`
-                      }
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                filteredNotifications.map((notification) => (
-                  <Card 
-                    key={notification.id} 
-                    className={`transition-all cursor-pointer hover:shadow-md ${
-                      !notification.read ? 'bg-primary/5 border-primary/20' : ''
-                    }`}
-                    onClick={() => !notification.read && markAsRead(notification.id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 mt-0.5">
-                          {getNotificationIcon(notification.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <h4 className="font-medium text-sm">{notification.title}</h4>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">
-                                {formatTimestamp(notification.timestamp)}
-                              </span>
-                              {!notification.read && (
-                                <div className="w-2 h-2 bg-primary rounded-full" />
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {notification.message}
-                          </p>
-                          {notification.action && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="text-xs h-7"
-                            >
-                              {notification.action.label}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+          <TabsContent value="all" className="mt-6">
+            <ActivityFeed maxItems={50} />
+          </TabsContent>
+
+          <TabsContent value="unread" className="mt-6">
+            <ActivityFeed maxItems={50} showUnreadOnly={true} />
+          </TabsContent>
+
+          <TabsContent value="market" className="mt-6">
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+                  <TrendingUp className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold mb-2">Market Notifications</h3>
+                <p className="text-muted-foreground text-sm">
+                  Set up price alerts and market notifications in settings
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="social" className="mt-6">
+            <ActivityFeed maxItems={50} />
+          </TabsContent>
+
+          <TabsContent value="trade" className="mt-6">
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+                  <MessageCircle className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold mb-2">Trade Notifications</h3>
+                <p className="text-muted-foreground text-sm">
+                  Connect your brokerage account to see trade confirmations
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 

@@ -13,10 +13,12 @@ import { Heart, MessageCircle, Share, MoreHorizontal, TrendingUp, TrendingDown, 
 import { Post } from '@/types/social';
 import { useAuth } from '@/hooks/useAuth';
 import { usePostActions } from '@/hooks/useSupabaseData';
+import { useRealTimeLikes } from '@/hooks/useRealTimeLikes';
 import { useToast } from '@/hooks/use-toast';
 import { SharePostDialog } from '@/components/SharePostDialog';
 import { TradingViewMiniChart } from '@/components/TradingViewChart';
 import { CommentSection } from '@/components/CommentSection';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import { cn } from '@/lib/utils';
 
 interface PostCardProps {
@@ -26,15 +28,18 @@ interface PostCardProps {
 export const PostCard = ({ post }: PostCardProps) => {
   const { user } = useAuth();
   const { deletePost } = usePostActions();
+  const { toggleLike, isPostLiked } = useRealTimeLikes();
   const { toast } = useToast();
-  const [isLiked, setIsLiked] = useState(post.isLiked);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [isDeleting, setIsDeleting] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(post.comments);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
+  const isLiked = isPostLiked(post.id);
+
+  const handleLike = async () => {
+    await toggleLike(post.id);
+    // Update local count optimistically
     setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
   };
 
@@ -219,14 +224,17 @@ export const PostCard = ({ post }: PostCardProps) => {
 
 
       {post.video && (
-        <div className="relative bg-black">
-          <div className="w-full h-64 flex items-center justify-center">
-            <div className="text-white text-center">
-              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-2 mx-auto">
-                <div className="w-0 h-0 border-l-8 border-r-0 border-t-6 border-b-6 border-l-white border-t-transparent border-b-transparent ml-1" />
-              </div>
-              <p className="text-sm">Trading Video</p>
-            </div>
+        <div className="relative">
+          <VideoPlayer
+            src={post.video}
+            className="w-full h-64"
+            controls={true}
+            poster={post.image}
+          />
+          <div className="absolute top-2 left-2">
+            <Badge className="bg-background/80 text-foreground">
+              Trading Video
+            </Badge>
           </div>
         </div>
       )}

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useRealTimeComments } from '@/hooks/useRealTimeComments';
 import { supabase } from '@/integrations/supabase/client';
 import { MessageCircle, Reply, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -32,86 +33,13 @@ interface CommentSectionProps {
 export const CommentSection = ({ postId, commentCount, onCommentCountChange }: CommentSectionProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [replyText, setReplyText] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const { comments, loading: commentsLoading, refetch } = useRealTimeComments(showComments ? postId : '');
 
-  useEffect(() => {
-    if (showComments) {
-      fetchComments();
-    }
-  }, [showComments, postId]);
-
-  const fetchComments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('comments')
-        .select(`
-          id,
-          content,
-          created_at,
-          user_id,
-          post_id,
-          parent_id,
-          profiles!inner(username, display_name, avatar_url)
-        `)
-        .eq('post_id', postId)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Supabase error fetching comments:', error);
-        throw error;
-      }
-
-      if (!data) {
-        console.log('No comments data returned');
-        setComments([]);
-        return;
-      }
-
-      // Organize comments with replies
-      const commentsMap = new Map();
-      const rootComments: Comment[] = [];
-
-      data.forEach((comment: any) => {
-        // Handle both nested and flat profile structures
-        const profileData = comment.profiles || comment.profile;
-        
-        const commentData = {
-          ...comment,
-          profiles: profileData,
-          replies: []
-        };
-        commentsMap.set(comment.id, commentData);
-
-        if (comment.parent_id === null) {
-          rootComments.push(commentData);
-        }
-      });
-
-      // Add replies to their parent comments
-      data.forEach((comment: any) => {
-        if (comment.parent_id) {
-          const parent = commentsMap.get(comment.parent_id);
-          if (parent) {
-            parent.replies.push(commentsMap.get(comment.id));
-          }
-        }
-      });
-
-      setComments(rootComments);
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load comments',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const handleAddComment = async (content: string, parentId: string | null = null) => {
     if (!user || !content.trim()) return;
@@ -147,7 +75,7 @@ export const CommentSection = ({ postId, commentCount, onCommentCountChange }: C
       onCommentCountChange(commentCount + 1);
       
       // Refresh comments
-      fetchComments();
+      refetch();
 
       toast({
         title: 'Success',

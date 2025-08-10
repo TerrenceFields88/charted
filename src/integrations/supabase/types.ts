@@ -441,6 +441,42 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       trades: {
         Row: {
           brokerage_account_id: string | null
@@ -576,6 +612,16 @@ export type Database = {
       }
       increment_post_likes: {
         Args: { post_id: string }
+        Returns: undefined
+      }
+      log_security_event: {
+        Args: {
+          p_user_id: string
+          p_action: string
+          p_table_name?: string
+          p_record_id?: string
+          p_details?: Json
+        }
         Returns: undefined
       }
       sanitize_content: {
