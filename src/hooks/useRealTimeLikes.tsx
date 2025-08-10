@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 export const useRealTimeLikes = () => {
   const { user } = useAuth();
@@ -73,9 +74,13 @@ export const useRealTimeLikes = () => {
   const toggleLike = async (postId: string) => {
     if (!user) {
       toast({
-        title: 'Authentication required',
-        description: 'Please log in to like posts',
-        variant: 'destructive',
+        title: 'Sign up to like posts',
+        description: 'Create an account to interact with posts',
+        action: (
+          <Button variant="outline" size="sm" onClick={() => window.location.href = '/auth'}>
+            Sign Up
+          </Button>
+        ),
       });
       return;
     }

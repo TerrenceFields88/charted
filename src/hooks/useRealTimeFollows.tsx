@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 export const useRealTimeFollows = () => {
   const { user } = useAuth();
@@ -119,9 +120,13 @@ export const useRealTimeFollows = () => {
   const followUser = async (userId: string) => {
     if (!user) {
       toast({
-        title: 'Authentication required',
-        description: 'Please log in to follow users',
-        variant: 'destructive',
+        title: 'Sign up to follow users',
+        description: 'Create an account to follow other traders',
+        action: (
+          <Button variant="outline" size="sm" onClick={() => window.location.href = '/auth'}>
+            Sign Up
+          </Button>
+        ),
       });
       return;
     }

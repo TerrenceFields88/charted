@@ -194,7 +194,7 @@ export const CommentSection = ({ postId, commentCount, onCommentCountChange }: C
       {showComments && (
         <div className="px-4 pb-4 space-y-4">
           {/* Add Comment */}
-          {user && (
+          {user ? (
             <div className="flex gap-3">
               <Avatar className="w-8 h-8">
                 <AvatarImage src={user.user_metadata?.avatar_url} />
@@ -215,6 +215,13 @@ export const CommentSection = ({ postId, commentCount, onCommentCountChange }: C
                   <Send className="w-3 h-3" />
                 </Button>
               </div>
+            </div>
+          ) : (
+            <div className="text-center p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground mb-2">Sign up to join the conversation</p>
+              <Button variant="outline" size="sm" onClick={() => window.location.href = '/auth'}>
+                Create Account
+              </Button>
             </div>
           )}
 
