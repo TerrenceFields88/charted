@@ -13,11 +13,13 @@ import { useToast } from '@/hooks/use-toast';
 const SUPPORTED_BROKERS = [
   // Trading Platforms
   { value: 'tradingview', label: 'TradingView', demo: false, type: 'platform' },
+  { value: 'tradovate', label: 'Tradovate', demo: false, type: 'platform' },
   
   // Traditional Brokerages
   { value: 'alpaca', label: 'Alpaca Trading', demo: true, type: 'brokerage' },
   { value: 'interactive_brokers', label: 'Interactive Brokers', demo: false, type: 'brokerage' },
   { value: 'td_ameritrade', label: 'TD Ameritrade', demo: false, type: 'brokerage' },
+  { value: 'tradestation', label: 'TradeStation', demo: false, type: 'brokerage' },
   { value: 'etrade', label: 'E*TRADE', demo: false, type: 'brokerage' },
   { value: 'robinhood', label: 'Robinhood', demo: false, type: 'brokerage' },
   
@@ -241,7 +243,7 @@ export const BrokerageConnectionDialog = () => {
             </div>
 
             {/* API Key fields for supported brokers */}
-            {(formData.broker_name === 'alpaca' || formData.broker_name === 'interactive_brokers') && (
+            {(formData.broker_name === 'alpaca' || formData.broker_name === 'interactive_brokers' || formData.broker_name === 'tradovate' || formData.broker_name === 'tradestation') && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="api_key">API Key (Optional)</Label>
