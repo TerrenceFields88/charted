@@ -20,6 +20,7 @@ import { TradingViewMiniChart } from '@/components/TradingViewChart';
 import { CommentSection } from '@/components/CommentSection';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { cn } from '@/lib/utils';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface PostCardProps {
   post: Post;
@@ -153,7 +154,7 @@ export const PostCard = ({ post }: PostCardProps) => {
               <MoreHorizontal className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="z-50 bg-popover text-popover-foreground border border-border">
             <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
               <Send className="w-4 h-4 mr-2" />
               Share via DM
@@ -174,7 +175,7 @@ export const PostCard = ({ post }: PostCardProps) => {
 
       {/* Content */}
       <div className="px-4 pb-3">
-        <p className="text-sm leading-relaxed">{post.content}</p>
+        <p className="text-sm leading-relaxed line-clamp-3">{post.content}</p>
         {post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {post.tags.map((tag) => (
@@ -188,12 +189,14 @@ export const PostCard = ({ post }: PostCardProps) => {
 
       {/* Media */}
       {post.image && (
-        <div className="relative">
-          <img 
-            src={post.image} 
-            alt="Post content" 
-            className="w-full h-64 object-cover"
-          />
+        <div className="relative mx-4 mb-4 overflow-hidden rounded-xl bg-muted">
+          <AspectRatio ratio={4/5}>
+            <img 
+              src={post.image} 
+              alt="Post content" 
+              className="w-full h-full object-cover"
+            />
+          </AspectRatio>
           {post.type === 'chart' && (
             <div className="absolute top-2 left-2">
               <Badge className="bg-background/80 text-foreground">
@@ -224,13 +227,15 @@ export const PostCard = ({ post }: PostCardProps) => {
 
 
       {post.video && (
-        <div className="relative">
-          <VideoPlayer
-            src={post.video}
-            className="w-full h-64"
-            controls={true}
-            poster={post.image}
-          />
+        <div className="relative mx-4 mb-4 overflow-hidden rounded-xl bg-muted">
+          <AspectRatio ratio={4/5}>
+            <VideoPlayer
+              src={post.video}
+              className="w-full h-full"
+              controls={true}
+              poster={post.image}
+            />
+          </AspectRatio>
           <div className="absolute top-2 left-2">
             <Badge className="bg-background/80 text-foreground">
               Trading Video

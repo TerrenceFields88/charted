@@ -211,3 +211,31 @@ All colors MUST be HSL.
 .blue-text:hover {
   color: hsl(var(--primary)/0.8) !important;
 }
+
+/* Line clamp utilities */
+.line-clamp-2 { 
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical; 
+  overflow: hidden; 
+}
+.line-clamp-3 { 
+  display: -webkit-box; 
+  -webkit-line-clamp: 3; 
+  -webkit-box-orient: vertical; 
+  overflow: hidden; 
+}
+
+/* Media helpers */
+.media-box { 
+  position: relative; 
+  overflow: hidden; 
+  border-radius: 0.75rem; 
+  background-color: hsl(var(--muted)); 
+}
+.overlay-center { 
+  position: absolute; 
+  inset: 0; 
+  display: grid; 
+  place-items: center; 
+}
