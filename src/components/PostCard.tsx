@@ -22,6 +22,8 @@ import { VideoPlayer } from '@/components/VideoPlayer';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { SafeZoneOverlay } from '@/components/SafeZoneOverlay';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Link } from 'react-router-dom';
 
 interface PostCardProps {
   post: Post;
@@ -36,6 +38,7 @@ export const PostCard = ({ post }: PostCardProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(post.comments);
+  const [imageOpen, setImageOpen] = useState(false);
 
   const isLiked = isPostLiked(post.id);
 
@@ -114,7 +117,7 @@ export const PostCard = ({ post }: PostCardProps) => {
     <Card className="mb-4 overflow-hidden border-0 shadow-sm bg-card">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-3">
-        <div className="flex items-center space-x-3">
+        <Link to={`/user/${post.user.id}`} className="flex items-center space-x-3 focus:outline-none focus-visible:ring-2 ring-primary/50 rounded-md" aria-label={`View @${post.user.username} profile`}>
           <div className="relative">
             <Avatar className="w-10 h-10">
               <AvatarImage src={post.user.avatar} alt={post.user.displayName} />
@@ -148,7 +151,7 @@ export const PostCard = ({ post }: PostCardProps) => {
               )}
             </div>
           </div>
-        </div>
+        </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -190,7 +193,19 @@ export const PostCard = ({ post }: PostCardProps) => {
 
       {/* Media */}
       {post.image && (
-        <div className="relative group mx-4 mb-4 overflow-hidden rounded-xl bg-muted">
+        <div
+          className="relative group mx-4 mb-4 overflow-hidden rounded-xl bg-muted cursor-zoom-in focus:outline-none focus-visible:ring-2 ring-primary/50"
+          role="button"
+          tabIndex={0}
+          aria-label="View image"
+          onClick={() => setImageOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setImageOpen(true);
+            }
+          }}
+        >
           <AspectRatio ratio={4/5}>
             <img 
               src={post.image} 
@@ -208,6 +223,19 @@ export const PostCard = ({ post }: PostCardProps) => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Image Lightbox */}
+      {post.image && (
+        <Dialog open={imageOpen} onOpenChange={setImageOpen}>
+          <DialogContent className="max-w-[90vw] sm:max-w-3xl p-0 bg-card">
+            <img
+              src={post.image}
+              alt={`Full-size image by ${post.user.displayName}`}
+              className="w-full h-auto object-contain max-h-[85vh]"
+            />
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* TradingView Chart */}

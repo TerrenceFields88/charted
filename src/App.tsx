@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { EditProfilePage } from "@/components/EditProfilePage";
-
+import UserProfile from "./pages/UserProfile";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -28,6 +28,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
