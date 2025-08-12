@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SafeZoneOverlay } from '@/components/SafeZoneOverlay';
 
 interface VideoPlayerProps {
   src: string;
@@ -11,6 +12,10 @@ interface VideoPlayerProps {
   autoPlay?: boolean;
   muted?: boolean;
   loop?: boolean;
+  showSafeZone?: boolean;
+  safeZoneTop?: number;
+  safeZoneBottom?: number;
+  safeZoneSides?: number;
 }
 
 export const VideoPlayer = ({
@@ -21,6 +26,10 @@ export const VideoPlayer = ({
   autoPlay = false,
   muted = false,
   loop = false,
+  showSafeZone = true,
+  safeZoneTop = 64,
+  safeZoneBottom = 96,
+  safeZoneSides = 16,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -145,6 +154,16 @@ export const VideoPlayer = ({
             <Play className="w-8 h-8 text-white ml-1" />
           </div>
         </div>
+      )}
+
+      {/* Safe-zone overlay */}
+      {showSafeZone && (
+        <SafeZoneOverlay
+          visible={showControls || !isPlaying}
+          top={safeZoneTop}
+          bottom={safeZoneBottom}
+          sides={safeZoneSides}
+        />
       )}
     </div>
   );

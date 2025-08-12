@@ -21,6 +21,7 @@ import { CommentSection } from '@/components/CommentSection';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { SafeZoneOverlay } from '@/components/SafeZoneOverlay';
 
 interface PostCardProps {
   post: Post;
@@ -189,7 +190,7 @@ export const PostCard = ({ post }: PostCardProps) => {
 
       {/* Media */}
       {post.image && (
-        <div className="relative mx-4 mb-4 overflow-hidden rounded-xl bg-muted">
+        <div className="relative group mx-4 mb-4 overflow-hidden rounded-xl bg-muted">
           <AspectRatio ratio={4/5}>
             <img 
               src={post.image} 
@@ -197,6 +198,8 @@ export const PostCard = ({ post }: PostCardProps) => {
               className="w-full h-full object-cover"
             />
           </AspectRatio>
+          <SafeZoneOverlay />
+          <SafeZoneOverlay />
           {post.type === 'chart' && (
             <div className="absolute top-2 left-2">
               <Badge className="bg-background/80 text-foreground">
@@ -227,13 +230,14 @@ export const PostCard = ({ post }: PostCardProps) => {
 
 
       {post.video && (
-        <div className="relative mx-4 mb-4 overflow-hidden rounded-xl bg-muted">
+        <div className="relative group mx-4 mb-4 overflow-hidden rounded-xl bg-muted">
           <AspectRatio ratio={4/5}>
             <VideoPlayer
               src={post.video}
               className="w-full h-full"
               controls={true}
               poster={post.image}
+              showSafeZone
             />
           </AspectRatio>
           <div className="absolute top-2 left-2">

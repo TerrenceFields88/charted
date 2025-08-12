@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X, Image } from 'lucide-react';
 import { validateImageFile, validateImageContent, generateSecureFilename, sanitizeErrorMessage } from '@/lib/validation';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { SafeZoneOverlay } from '@/components/SafeZoneOverlay';
 
 interface PhotoUploaderProps {
   onPhotosChange: (urls: string[]) => void;
