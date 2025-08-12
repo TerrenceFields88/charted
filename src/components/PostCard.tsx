@@ -117,7 +117,7 @@ export const PostCard = ({ post }: PostCardProps) => {
     <Card className="mb-4 overflow-hidden border-0 shadow-sm bg-card">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-3">
-        <Link to={`/user/${post.user.id}`} className="flex items-center space-x-3 focus:outline-none focus-visible:ring-2 ring-primary/50 rounded-md" aria-label={`View @${post.user.username} profile`}>
+        <Link to={`/u/${post.user.username}`} className="flex items-center space-x-3 focus:outline-none focus-visible:ring-2 ring-primary/50 rounded-md" aria-label={`View @${post.user.username} profile`}>
           <div className="relative">
             <Avatar className="w-10 h-10">
               <AvatarImage src={post.user.avatar} alt={post.user.displayName} />

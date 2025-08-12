@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { EditProfilePage } from "@/components/EditProfilePage";
 import UserProfile from "./pages/UserProfile";
+import UserProfileByUsername from "./pages/UserProfileByUsername";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -29,6 +30,7 @@ const App = () => (
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="/user/:userId" element={<UserProfile />} />
+            <Route path="/u/:username" element={<UserProfileByUsername />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
