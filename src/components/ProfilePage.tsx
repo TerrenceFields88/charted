@@ -208,40 +208,24 @@ export const ProfilePage = () => {
               </div>
               
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-xl font-bold">{profile.display_name || profile.username}</h2>
-                  <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
-                    Trader
-                  </Badge>
-                  {profile.verified_trader && (
-                    <Badge variant="default" className="bg-bullish text-white">
-                      Verified
+                <div className="min-w-0">
+                  <h2 className="text-lg font-semibold truncate">{profile.display_name || profile.username}</h2>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                    <Badge className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-primary-foreground">
+                      Trader
                     </Badge>
-                  )}
+                    {profile.verified_trader && (
+                      <Badge variant="default" className="text-xs bg-bullish text-primary-foreground">
+                        Verified
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                <p className="text-muted-foreground mb-3">@{profile.username}</p>
+                <p className="text-xs text-muted-foreground mb-2 truncate">@{profile.username}</p>
                 {profile.bio && (
                   <p className="text-sm text-muted-foreground mb-3">{profile.bio}</p>
                 )}
 
-                {/* Connected Brokers Display */}
-                {profile.connected_brokers && Array.isArray(profile.connected_brokers) && profile.connected_brokers.length > 0 && (
-                  <div className="mb-3">
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Connected Accounts</p>
-                    <div className="flex flex-wrap gap-1">
-                      {profile.connected_brokers.slice(0, 3).map((broker: any, index: number) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {broker.broker_name?.replace(/_/g, ' ') || 'Unknown Broker'}
-                        </Badge>
-                      ))}
-                      {profile.connected_brokers.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{profile.connected_brokers.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                )}
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {stats.map((stat) => (
@@ -295,6 +279,23 @@ export const ProfilePage = () => {
                 </span>
               )}
             </div>
+            {profile.connected_brokers && Array.isArray(profile.connected_brokers) && profile.connected_brokers.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Connected Accounts</p>
+                <div className="flex flex-wrap gap-1">
+                  {profile.connected_brokers.slice(0, 4).map((broker: any, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {broker.broker_name?.replace(/_/g, ' ') || 'Unknown Broker'}
+                    </Badge>
+                  ))}
+                  {profile.connected_brokers.length > 4 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{profile.connected_brokers.length - 4} more
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             {(performanceLoading || brokerageLoading) ? (
@@ -412,13 +413,15 @@ export const ProfilePage = () => {
                       <div className="w-2 h-2 rounded-full bg-primary" />
                       <div className="flex-1">
                         {activity.type === 'trade' && (
-                          <div>
-                            <span className="font-medium">{activity.action} {activity.symbol}</span>
-                            <span className="text-muted-foreground"> at ${activity.price}</span>
-                            {activity.profit_loss && (
-                              <span className={`ml-2 ${activity.profit_loss > 0 ? 'text-bullish' : 'text-bearish'}`}>
-                                ({activity.profit_loss > 0 ? '+' : ''}${activity.profit_loss})
-                              </span>
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium truncate">
+                              {activity.action} {activity.symbol}
+                              <span className="text-muted-foreground font-normal"> at ${activity.price}</span>
+                            </div>
+                            {activity.profit_loss !== undefined && activity.profit_loss !== null && (
+                              <div className={`text-xs font-semibold ${activity.profit_loss > 0 ? 'text-bullish' : 'text-bearish'}`}>
+                                {activity.profit_loss > 0 ? '+' : ''}${activity.profit_loss}
+                              </div>
                             )}
                           </div>
                         )}

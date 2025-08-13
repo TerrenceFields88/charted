@@ -35,6 +35,7 @@ interface UserProfile {
   follower_count: number;
   following_count: number;
   created_at: string;
+  verified_trader?: boolean;
 }
 
 interface UserProfileViewProps {
@@ -241,7 +242,7 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <h1 className="text-xl font-bold">@{profile.username}</h1>
+        <h1 className="text-lg font-semibold">@{profile.username}</h1>
       </div>
 
       {/* Profile Header */}
@@ -257,20 +258,21 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
               </Avatar>
             </div>
             
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-xl font-bold">{profile.display_name || profile.username}</h2>
-                <Badge variant="secondary">
-                  Trader
-                </Badge>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-semibold truncate">{profile.display_name || profile.username}</h2>
+              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                <Badge variant="secondary">Trader</Badge>
+                {profile.verified_trader && (
+                  <Badge variant="default" className="bg-bullish text-primary-foreground">Verified</Badge>
+                )}
               </div>
-              <p className="text-muted-foreground mb-2">@{profile.username}</p>
+              <p className="text-xs text-muted-foreground mt-1 truncate">@{profile.username}</p>
               
               {profile.bio && (
-                <p className="text-sm text-muted-foreground mb-3">{profile.bio}</p>
+                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{profile.bio}</p>
               )}
 
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-3">
                 <Calendar className="w-3 h-3" />
                 <span>Joined {formatDate(profile.created_at)}</span>
               </div>
@@ -309,7 +311,7 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
                   <div key={stat.label} className="text-center">
                     <div className={`flex items-center justify-center gap-1 ${stat.color}`}>
                       <stat.icon className="w-4 h-4" />
-                      <span className="font-bold">{stat.value}</span>
+                      <span className="text-sm font-semibold truncate">{stat.value}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">{stat.label}</p>
                   </div>
