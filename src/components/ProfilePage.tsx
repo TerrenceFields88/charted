@@ -10,16 +10,16 @@ import { usePosts } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
 import { PostCard } from '@/components/PostCard';
 import { 
-  Settings, 
-  Edit, 
-  TrendingUp, 
-  Users, 
-  Target,
-  Award,
-  Plus,
-  Heart,
-  RefreshCw
-} from 'lucide-react';
+   Settings, 
+   Edit, 
+   TrendingUp, 
+   Users, 
+   Target,
+   Award,
+   Plus,
+   RefreshCw,
+   CheckCircle
+ } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
 import { BrokerageConnectionDialog } from '@/components/BrokerageConnectionDialog';
@@ -102,18 +102,6 @@ export const ProfilePage = () => {
   }
 
   const stats = [
-    { 
-      label: 'Portfolio Return', 
-      value: performanceData.portfolioReturn, 
-      icon: TrendingUp, 
-      color: performanceData.portfolioReturn.startsWith('+') ? 'text-bullish' : 'text-bearish' 
-    },
-    { 
-      label: 'Portfolio Value', 
-      value: hasConnectedAccounts ? `$${aggregatedData.totalEquity.toLocaleString()}` : 'N/A', 
-      icon: Target, 
-      color: 'text-primary' 
-    },
     { label: 'Win Rate', value: performanceData.winRate, icon: Target, color: 'text-primary' },
     { label: 'Followers', value: profile.follower_count.toLocaleString(), icon: Users, color: 'text-foreground' },
   ];
@@ -210,16 +198,6 @@ export const ProfilePage = () => {
               <div className="flex-1">
                 <div className="min-w-0">
                   <h2 className="text-lg font-semibold truncate">{profile.display_name || profile.username}</h2>
-                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                    <Badge className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-primary-foreground">
-                      Trader
-                    </Badge>
-                    {profile.verified_trader && (
-                      <Badge variant="default" className="text-xs bg-bullish text-primary-foreground">
-                        Verified
-                      </Badge>
-                    )}
-                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-2 truncate">@{profile.username}</p>
                 {profile.bio && (
@@ -279,23 +257,6 @@ export const ProfilePage = () => {
                 </span>
               )}
             </div>
-            {profile.connected_brokers && Array.isArray(profile.connected_brokers) && profile.connected_brokers.length > 0 && (
-              <div className="mt-3">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Connected Accounts</p>
-                <div className="flex flex-wrap gap-1">
-                  {profile.connected_brokers.slice(0, 4).map((broker: any, index: number) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {broker.broker_name?.replace(/_/g, ' ') || 'Unknown Broker'}
-                    </Badge>
-                  ))}
-                  {profile.connected_brokers.length > 4 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{profile.connected_brokers.length - 4} more
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
           </CardHeader>
           <CardContent className="space-y-4">
             {(performanceLoading || brokerageLoading) ? (
@@ -303,18 +264,32 @@ export const ProfilePage = () => {
             ) : (
               <>
                 {hasConnectedAccounts && (
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">${aggregatedData.totalEquity.toLocaleString()}</div>
-                      <div className="text-xs text-muted-foreground">Total Portfolio Value</div>
-                    </div>
-                    <div className="text-center">
-                      <div className={`text-2xl font-bold ${aggregatedData.totalPnL >= 0 ? 'text-bullish' : 'text-bearish'}`}>
-                        {aggregatedData.totalPnL >= 0 ? '+' : ''}${aggregatedData.totalPnL.toFixed(2)}
+                  <>
+                    <div className="p-4 bg-muted/30 rounded-lg">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">${aggregatedData.totalEquity.toLocaleString()}</div>
+                        <div className="text-xs text-muted-foreground">Total Portfolio Value</div>
                       </div>
-                      <div className="text-xs text-muted-foreground">Daily P&L</div>
                     </div>
-                  </div>
+
+                    {profile.connected_brokers && Array.isArray(profile.connected_brokers) && profile.connected_brokers.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Connected Accounts</p>
+                        <div className="flex flex-wrap gap-1">
+                          {profile.connected_brokers.slice(0, 4).map((broker: any, index: number) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {broker.broker_name?.replace(/_/g, ' ') || 'Unknown Broker'}
+                            </Badge>
+                          ))}
+                          {profile.connected_brokers.length > 4 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{profile.connected_brokers.length - 4} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <div className="space-y-2">
@@ -328,18 +303,6 @@ export const ProfilePage = () => {
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Portfolio Return</span>
-                    <span className={`font-medium ${performanceData.portfolioReturn.startsWith('+') ? 'text-bullish' : 'text-bearish'}`}>
-                      {performanceData.portfolioReturn}
-                    </span>
-                  </div>
-                  <Progress 
-                    value={Math.abs(parseFloat(performanceData.portfolioReturn.replace(/[%+]/g, '')))} 
-                    className="h-2" 
-                  />
-                </div>
 
                 <div className="grid grid-cols-3 gap-4 pt-2">
                   <div className="text-center">
@@ -449,6 +412,28 @@ export const ProfilePage = () => {
 
           <TabsContent value="achievements">
             <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-sm text-muted-foreground">Total Portfolio Value</div>
+                      <div className="text-lg font-semibold">
+                        {hasConnectedAccounts ? `$${aggregatedData.totalEquity.toLocaleString()}` : 'N/A'}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-muted-foreground">Portfolio Return</div>
+                      <div className={`text-lg font-semibold ${performanceData.portfolioReturn.startsWith('+') ? 'text-bullish' : 'text-bearish'}`}>
+                        {performanceData.portfolioReturn}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {achievements.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center space-y-4">

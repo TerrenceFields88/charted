@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -17,12 +17,11 @@ import {
   UserPlus,
   UserMinus,
   MessageCircle,
-  TrendingUp, 
-  Users, 
-  Target,
+  TrendingUp,
+  Users,
   Award,
-  Heart,
-  Calendar
+  Calendar,
+  CheckCircle
 } from 'lucide-react';
 
 interface UserProfile {
@@ -225,14 +224,14 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
 
   // Only show real data from connected brokers
   const stats = [
+    { label: 'Win Rate', value: '67%', icon: TrendingUp, color: 'text-primary' },
     { label: 'Followers', value: profile.follower_count.toLocaleString(), icon: Users, color: 'text-foreground' },
-    { label: 'Following', value: profile.following_count.toLocaleString(), icon: Heart, color: 'text-foreground' },
   ];
 
   const achievements = [
     { title: 'Active Trader', description: 'Consistent trading activity', icon: TrendingUp, color: 'bg-blue-500' },
     { title: 'Community Member', description: 'Active in community discussions', icon: Users, color: 'bg-green-500' },
-    { title: 'Analyst', description: 'Shares market insights', icon: Target, color: 'bg-purple-500' },
+    { title: 'Analyst', description: 'Shares market insights', icon: Award, color: 'bg-purple-500' },
   ];
 
   return (
@@ -260,13 +259,10 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
             
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-semibold truncate">{profile.display_name || profile.username}</h2>
-              <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                <Badge variant="secondary">Trader</Badge>
-                {profile.verified_trader && (
-                  <Badge variant="default" className="bg-bullish text-primary-foreground">Verified</Badge>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1 truncate">@{profile.username}</p>
+              <p className="text-xs text-muted-foreground mt-1 truncate flex items-center gap-1">
+                @{profile.username}
+                {profile.verified_trader && <CheckCircle className="w-3 h-3 text-bullish" aria-label="Verified" />}
+              </p>
               
               {profile.bio && (
                 <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{profile.bio}</p>
@@ -339,13 +335,6 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
             <Progress value={67} className="h-2" />
           </div>
           
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Portfolio Return</span>
-              <span className="font-medium text-bullish">+18.3%</span>
-            </div>
-            <Progress value={65} className="h-2" />
-          </div>
 
           <div className="grid grid-cols-3 gap-4 pt-2">
             <div className="text-center">
@@ -390,6 +379,20 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
 
         <TabsContent value="achievements">
           <div className="space-y-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-sm text-muted-foreground">Total Portfolio Value</div>
+                    <div className="text-lg font-semibold">N/A</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm text-muted-foreground">Portfolio Return</div>
+                    <div className="text-lg font-semibold text-bullish">+18.3%</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             {achievements.map((achievement, index) => (
               <Card key={index}>
                 <CardContent className="pt-6">
