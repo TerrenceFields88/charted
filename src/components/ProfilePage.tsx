@@ -18,7 +18,8 @@ import {
    Award,
    Plus,
    RefreshCw,
-   CheckCircle
+   CheckCircle,
+   Link
  } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
@@ -323,8 +324,8 @@ export const ProfilePage = () => {
                   <span className="text-muted-foreground">Connected account</span>
                   <div className="flex items-center gap-2">
                     <span className="text-primary">TD Ameritrade</span>
-                    <Button variant="ghost" size="sm" className="h-6 px-2" onClick={syncAllAccounts}>
-                      Sync
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={syncAllAccounts}>
+                      <Link className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>

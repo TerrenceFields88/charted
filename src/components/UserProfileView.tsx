@@ -21,7 +21,8 @@ import {
   Users,
   Award,
   Calendar,
-  CheckCircle
+  CheckCircle,
+  Link
 } from 'lucide-react';
 
 interface UserProfile {
@@ -355,8 +356,8 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
             <span className="text-muted-foreground">Connected account</span>
             <div className="flex items-center gap-2">
               <span className="text-primary">TD Ameritrade</span>
-              <Button variant="ghost" size="sm" className="h-6 px-2">
-                Sync
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <Link className="w-3 h-3" />
               </Button>
             </div>
           </div>
