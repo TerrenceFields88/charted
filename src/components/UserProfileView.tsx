@@ -247,118 +247,86 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
 
       {/* Profile Header */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-4">
-            <div className="relative">
-              <Avatar className="w-20 h-20">
-                <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
-                <AvatarFallback className="text-2xl">
-                  {(profile.display_name || profile.username)[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </div>
+        <CardContent className="p-4">
+          <div className="flex gap-4">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
+              <AvatarFallback className="text-lg">
+                {(profile.display_name || profile.username)[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold truncate">{profile.display_name || profile.username}</h2>
-              <p className="text-xs text-muted-foreground mt-1 truncate flex items-center gap-1">
-                @{profile.username}
-                {profile.verified_trader && <CheckCircle className="w-3 h-3 text-bullish" aria-label="Verified" />}
-              </p>
+            <div className="flex-1 min-w-0 space-y-2">
+              <div>
+                <h2 className="text-lg font-semibold truncate">{profile.display_name || profile.username}</h2>
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  @{profile.username}
+                  {profile.verified_trader && <CheckCircle className="w-3 h-3 text-bullish" />}
+                </p>
+              </div>
               
               {profile.bio && (
-                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{profile.bio}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">{profile.bio}</p>
               )}
 
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-3">
-                <Calendar className="w-3 h-3" />
-                <span>Joined {formatDate(profile.created_at)}</span>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  Joined {formatDate(profile.created_at)}
+                </span>
+                <span className="text-primary">TD Ameritrade</span>
+                <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
+                  <Link className="w-3 h-3" />
+                </Button>
               </div>
               
-              {/* Action Buttons */}
-              {user?.id !== userId && (
-                <div className="flex gap-2 mb-4">
-                  <Button
-                    onClick={handleFollow}
-                    disabled={followLoading}
-                    variant={isFollowing ? "outline" : "default"}
-                    size="sm"
-                    className="flex-1"
-                  >
-                    {isFollowing ? (
-                      <>
-                        <UserMinus className="w-4 h-4 mr-2" />
-                        {followLoading ? 'Updating...' : 'Unfollow'}
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="w-4 h-4 mr-2" />
-                        {followLoading ? 'Following...' : 'Follow'}
-                      </>
-                    )}
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Message
-                  </Button>
-                </div>
-              )}
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <div className={`flex items-center justify-center gap-1 ${stat.color}`}>
-                      <stat.icon className="w-4 h-4" />
-                      <span className="text-sm font-semibold truncate">{stat.value}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+              {/* Stats and Actions Row */}
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex gap-6 text-sm">
+                  <div className="text-center">
+                    <div className="font-semibold">67%</div>
+                    <div className="text-xs text-muted-foreground">Win Rate</div>
                   </div>
-                ))}
+                  <div className="text-center">
+                    <div className="font-semibold">{profile.follower_count}</div>
+                    <div className="text-xs text-muted-foreground">Followers</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold">89/44</div>
+                    <div className="text-xs text-muted-foreground">W/L</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold">2.1:1</div>
+                    <div className="text-xs text-muted-foreground">R/R</div>
+                  </div>
+                </div>
+                
+                {user?.id !== userId && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleFollow}
+                      disabled={followLoading}
+                      variant={isFollowing ? "outline" : "default"}
+                      size="sm"
+                    >
+                      {isFollowing ? (
+                        <>
+                          <UserMinus className="w-4 h-4 mr-1" />
+                          {followLoading ? 'Updating...' : 'Unfollow'}
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="w-4 h-4 mr-1" />
+                          {followLoading ? 'Following...' : 'Follow'}
+                        </>
+                      )}
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Trading Performance */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Trading Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Win Rate</span>
-              <span className="font-medium">67%</span>
-            </div>
-            <Progress value={67} className="h-2" />
-          </div>
-          
-
-          <div className="grid grid-cols-3 gap-4 pt-2">
-            <div className="text-center">
-              <div className="text-lg font-bold text-bullish">89</div>
-              <div className="text-xs text-muted-foreground">Winning Trades</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-bearish">44</div>
-              <div className="text-xs text-muted-foreground">Losing Trades</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold">2.1:1</div>
-              <div className="text-xs text-muted-foreground">Risk/Reward</div>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between text-sm pt-2 border-t">
-            <span className="text-muted-foreground">Connected account</span>
-            <div className="flex items-center gap-2">
-              <span className="text-primary">TD Ameritrade</span>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                <Link className="w-3 h-3" />
-              </Button>
             </div>
           </div>
         </CardContent>

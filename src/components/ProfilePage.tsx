@@ -19,7 +19,8 @@ import {
    Plus,
    RefreshCw,
    CheckCircle,
-   Link
+   Link,
+   Calendar
  } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
@@ -164,6 +165,13 @@ export const ProfilePage = () => {
 
   const recentActivity = formatRecentActivity();
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
+    });
+  };
+
   return (
     <div className="pb-20">
       {/* Header */}
@@ -185,164 +193,62 @@ export const ProfilePage = () => {
       <div className="px-4 py-4 space-y-6">
         {/* Profile Header */}
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="relative">
-                <Avatar className="w-20 h-20">
-                  <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
-                  <AvatarFallback className="text-2xl">
-                    {(profile.display_name || profile.username)[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+          <CardContent className="p-4">
+            <div className="flex gap-4">
+              <Avatar className="w-16 h-16">
+                <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
+                <AvatarFallback className="text-lg">
+                  {(profile.display_name || profile.username)[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               
-              <div className="flex-1">
-                <div className="min-w-0">
+              <div className="flex-1 min-w-0 space-y-2">
+                <div>
                   <h2 className="text-lg font-semibold truncate">{profile.display_name || profile.username}</h2>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    @{profile.username}
+                    {profile.verified_trader && <CheckCircle className="w-3 h-3 text-bullish" />}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground mb-2 truncate">@{profile.username}</p>
+                
                 {profile.bio && (
-                  <p className="text-sm text-muted-foreground mb-3">{profile.bio}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{profile.bio}</p>
                 )}
 
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    Joined {formatDate(profile.created_at)}
+                  </span>
+                  <span className="text-primary">TD Ameritrade</span>
+                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={syncAllAccounts}>
+                    <Link className="w-3 h-3" />
+                  </Button>
+                </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Stats Row */}
+                <div className="flex gap-6 text-sm pt-2">
                   {stats.map((stat) => (
                     <div key={stat.label} className="text-center">
-                      <div className={`flex items-center justify-center gap-1 ${stat.color}`}>
-                        <stat.icon className="w-4 h-4" />
-                        <span className="font-bold">{stat.value}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{stat.label}</p>
+                      <div className="font-semibold">{stat.value}</div>
+                      <div className="text-xs text-muted-foreground">{stat.label}</div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Trading Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Trading Performance
-                {hasConnectedAccounts && (
-                  <Badge variant="outline" className="text-bullish border-bullish">
-                    Live Data
-                  </Badge>
-                )}
-              </div>
-              <div className="flex gap-2">
-                {hasConnectedAccounts && (
-                  <Button variant="outline" size="sm" onClick={syncAllAccounts}>
-                    <RefreshCw className="w-4 h-4 mr-1" />
-                    Sync
-                  </Button>
-                )}
-                <BrokerageConnectionDialog />
-              </div>
-            </CardTitle>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {hasConnectedAccounts 
-                  ? 'Real-time data from connected accounts'
-                  : 'Connect your brokerage or prop firm account to track real performance'
-                }
-              </p>
-              {lastUpdate && (
-                <span className="text-xs text-muted-foreground">
-                  Last updated: {lastUpdate.toLocaleTimeString()}
-                </span>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {(performanceLoading || brokerageLoading) ? (
-              <div className="text-center text-muted-foreground">Loading performance data...</div>
-            ) : (
-              <>
-                {hasConnectedAccounts && (
-                  <>
-                    <div className="p-4 bg-muted/30 rounded-lg">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">${aggregatedData.totalEquity.toLocaleString()}</div>
-                        <div className="text-xs text-muted-foreground">Total Portfolio Value</div>
-                      </div>
-                    </div>
-
-                    {profile.connected_brokers && Array.isArray(profile.connected_brokers) && profile.connected_brokers.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Connected Accounts</p>
-                        <div className="flex flex-wrap gap-1">
-                          {profile.connected_brokers.slice(0, 4).map((broker: any, index: number) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {broker.broker_name?.replace(/_/g, ' ') || 'Unknown Broker'}
-                            </Badge>
-                          ))}
-                          {profile.connected_brokers.length > 4 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{profile.connected_brokers.length - 4} more
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Win Rate</span>
-                    <span className="font-medium">{performanceData.winRate}</span>
-                  </div>
-                  <Progress 
-                    value={parseInt(performanceData.winRate.replace('%', ''))} 
-                    className="h-2" 
-                  />
-                </div>
-                
-
-                <div className="grid grid-cols-3 gap-4 pt-2">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-bullish">{performanceData.winningTrades}</div>
-                    <div className="text-xs text-muted-foreground">Winning Trades</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-bearish">{performanceData.losingTrades}</div>
-                    <div className="text-xs text-muted-foreground">Losing Trades</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold">{performanceData.riskRewardRatio}</div>
-                    <div className="text-xs text-muted-foreground">Risk/Reward</div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm pt-2 border-t">
-                  <span className="text-muted-foreground">Connected account</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-primary">TD Ameritrade</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={syncAllAccounts}>
-                      <Link className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
 
                 {hasConnectedAccounts && aggregatedData.allPositions.length > 0 && (
-                  <div className="pt-4">
-                    <h4 className="font-medium mb-2">Current Positions</h4>
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="font-medium mb-2 text-sm">Current Positions</h4>
                     <div className="space-y-2">
                       {aggregatedData.allPositions.slice(0, 3).map((position, index) => (
-                        <div key={index} className="flex justify-between items-center p-2 bg-muted/20 rounded">
+                        <div key={index} className="flex justify-between items-center p-2 bg-muted/20 rounded text-sm">
                           <div>
                             <span className="font-medium">{position.symbol}</span>
-                            <span className="text-sm text-muted-foreground ml-2">
-                              {position.quantity} shares @ ${position.current_price.toFixed(2)}
+                            <span className="text-xs text-muted-foreground ml-2">
+                              {position.quantity} @ ${position.current_price.toFixed(2)}
                             </span>
                           </div>
-                          <div className={`text-sm font-medium ${position.unrealized_pnl >= 0 ? 'text-bullish' : 'text-bearish'}`}>
+                          <div className={`text-xs font-medium ${position.unrealized_pnl >= 0 ? 'text-bullish' : 'text-bearish'}`}>
                             {position.unrealized_pnl >= 0 ? '+' : ''}${position.unrealized_pnl.toFixed(2)}
                           </div>
                         </div>
@@ -352,13 +258,13 @@ export const ProfilePage = () => {
                 )}
 
                 {performanceData.totalTrades === 0 && !hasConnectedAccounts && (
-                  <div className="text-center py-4 text-muted-foreground">
-                    <p>No trading data available.</p>
-                    <p className="text-sm">Connect your brokerage or prop firm account to see real performance.</p>
+                  <div className="text-center py-4 text-muted-foreground mt-4 pt-4 border-t">
+                    <p className="text-sm">No trading data available.</p>
+                    <p className="text-xs">Connect your brokerage or prop firm account to see real performance.</p>
                   </div>
                 )}
-              </>
-            )}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
