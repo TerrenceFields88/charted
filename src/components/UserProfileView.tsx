@@ -350,6 +350,16 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
               <div className="text-xs text-muted-foreground">Risk/Reward</div>
             </div>
           </div>
+          
+          <div className="flex items-center justify-between text-sm pt-2 border-t">
+            <span className="text-muted-foreground">Connected account</span>
+            <div className="flex items-center gap-2">
+              <span className="text-primary">TD Ameritrade</span>
+              <Button variant="ghost" size="sm" className="h-6 px-2">
+                Sync
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
