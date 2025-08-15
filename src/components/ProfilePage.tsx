@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -20,18 +21,36 @@ import {
    RefreshCw,
    CheckCircle,
    Link,
-   Calendar
+   Calendar,
+   Camera,
+   MoreHorizontal,
+   Shield,
+   HelpCircle,
+   LogOut
  } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
 import { BrokerageConnectionDialog } from '@/components/BrokerageConnectionDialog';
 import { MessagesPage } from '@/components/MessagesPage';
+import { StoryViewer } from '@/components/StoryViewer';
+import { CreateStoryDialog } from '@/components/CreateStoryDialog';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator,
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { profile, loading } = useProfile();
   const { posts } = usePosts();
   const { user } = useAuth();
+  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
+  const [createStoryOpen, setCreateStoryOpen] = useState(false);
+  const [stories, setStories] = useState([]);
+  
   const { performance, getFormattedPerformance, recentTrades, loading: performanceLoading } = useTradingPerformance();
   const { 
     aggregatedData, 
@@ -165,6 +184,35 @@ export const ProfilePage = () => {
 
   const recentActivity = formatRecentActivity();
 
+  const handleSettingsClick = (action: string) => {
+    switch (action) {
+      case 'edit-profile':
+        navigate('/edit-profile');
+        break;
+      case 'connect-account':
+        // BrokerageConnectionDialog manages its own state
+        break;
+      case 'privacy':
+        // TODO: Open privacy settings
+        break;
+      case 'help':
+        // TODO: Open help
+        break;
+      case 'logout':
+        // TODO: Implement logout
+        break;
+    }
+  };
+
+  const handleProfilePhotoClick = () => {
+    // Check if user has stories
+    if (stories.length > 0) {
+      setStoryViewerOpen(true);
+    } else {
+      setCreateStoryOpen(true);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -183,9 +231,37 @@ export const ProfilePage = () => {
               <Edit className="w-4 h-4 mr-1" />
               Edit
             </Button>
-            <Button variant="ghost" size="sm">
-              <Settings className="w-4 h-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => handleSettingsClick('edit-profile')}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSettingsClick('connect-account')}>
+                  <Link className="w-4 h-4 mr-2" />
+                  Connect Account
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleSettingsClick('privacy')}>
+                  <Shield className="w-4 h-4 mr-2" />
+                  Privacy & Security
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSettingsClick('help')}>
+                  <HelpCircle className="w-4 h-4 mr-2" />
+                  Help & Support
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleSettingsClick('logout')} className="text-destructive focus:text-destructive">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -195,12 +271,35 @@ export const ProfilePage = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex gap-4">
-              <Avatar className="w-16 h-16">
-                <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
-                <AvatarFallback className="text-lg">
-                  {(profile.display_name || profile.username)[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar 
+                  className="w-16 h-16 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
+                  onClick={handleProfilePhotoClick}
+                >
+                  <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
+                  <AvatarFallback className="text-lg">
+                    {(profile.display_name || profile.username)[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Story ring indicator */}
+                {stories.length > 0 && (
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 to-orange-500 p-0.5">
+                    <div className="w-full h-full bg-background rounded-full" />
+                  </div>
+                )}
+                {/* Add story button */}
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="absolute -bottom-1 -right-1 w-6 h-6 p-0 rounded-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCreateStoryOpen(true);
+                  }}
+                >
+                  <Plus className="w-3 h-3" />
+                </Button>
+              </div>
               
               <div className="flex-1 min-w-0 space-y-2">
                 <div>
@@ -268,11 +367,11 @@ export const ProfilePage = () => {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="activity" className="space-y-4">
+        <Tabs defaultValue="posts" className="space-y-4">
           <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="posts">My Posts</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
-            <TabsTrigger value="posts">My Posts</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
 
@@ -407,6 +506,22 @@ export const ProfilePage = () => {
             <MessagesPage />
           </TabsContent>
         </Tabs>
+
+        {/* Story Viewer */}
+        <StoryViewer
+          open={storyViewerOpen}
+          onOpenChange={setStoryViewerOpen}
+          stories={stories}
+        />
+
+        {/* Create Story Dialog */}
+        <CreateStoryDialog
+          open={createStoryOpen}
+          onOpenChange={setCreateStoryOpen}
+        />
+
+        {/* Brokerage Connection Dialog - managed internally */}
+        <BrokerageConnectionDialog />
       </div>
     </div>
   );

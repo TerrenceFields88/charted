@@ -9,13 +9,14 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Heart, MessageCircle, Share, MoreHorizontal, TrendingUp, TrendingDown, Minus, Trash2, Send } from 'lucide-react';
+import { Heart, MessageCircle, Share, MoreHorizontal, TrendingUp, TrendingDown, Minus, Trash2, Send, Repeat } from 'lucide-react';
 import { Post } from '@/types/social';
 import { useAuth } from '@/hooks/useAuth';
 import { usePostActions } from '@/hooks/useSupabaseData';
 import { useRealTimeLikes } from '@/hooks/useRealTimeLikes';
 import { useToast } from '@/hooks/use-toast';
 import { SharePostDialog } from '@/components/SharePostDialog';
+import { RepostDialog } from '@/components/RepostDialog';
 import { TradingViewMiniChart } from '@/components/TradingViewChart';
 import { CommentSection } from '@/components/CommentSection';
 import { VideoPlayer } from '@/components/VideoPlayer';
@@ -37,6 +38,7 @@ export const PostCard = ({ post }: PostCardProps) => {
   const [likeCount, setLikeCount] = useState(post.likes);
   const [isDeleting, setIsDeleting] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [repostDialogOpen, setRepostDialogOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(post.comments);
   const [imageOpen, setImageOpen] = useState(false);
 
@@ -159,6 +161,10 @@ export const PostCard = ({ post }: PostCardProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="z-50 bg-popover text-popover-foreground border border-border">
+            <DropdownMenuItem onClick={() => setRepostDialogOpen(true)}>
+              <Repeat className="w-4 h-4 mr-2" />
+              Repost
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
               <Send className="w-4 h-4 mr-2" />
               Share via DM
@@ -309,6 +315,13 @@ export const PostCard = ({ post }: PostCardProps) => {
         open={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
         postId={post.id}
+      />
+
+      {/* Repost Dialog */}
+      <RepostDialog
+        open={repostDialogOpen}
+        onOpenChange={setRepostDialogOpen}
+        originalPost={post}
       />
     </Card>
   );
