@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Home, TrendingUp, Plus, Bell, User, LogOut, Search, Activity, MessageCircle } from 'lucide-react';
+import { Home, TrendingUp, Plus, Bell, User, LogOut, Search, Activity, MessageCircle, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface NavigationProps {
   activeTab: string;
@@ -11,7 +12,8 @@ interface NavigationProps {
 }
 
 export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   
   const tabs = [
     { id: 'feed', label: 'Feed', icon: Home },
@@ -37,6 +39,10 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     }
   };
 
+  const handleLogin = () => {
+    navigate('/auth');
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border z-50 animate-slide-up">
       <div className="max-w-md mx-auto px-4 py-2">
@@ -46,11 +52,24 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               const isCreate = tab.id === 'create';
+              const requiresAuth = ['create', 'notifications', 'profile'].includes(tab.id);
+              
+              const handleTabClick = () => {
+                if (requiresAuth && !user) {
+                  toast({
+                    title: "Login Required",
+                    description: "Please log in to access this feature.",
+                  });
+                  navigate('/auth');
+                  return;
+                }
+                onTabChange(tab.id);
+              };
               
               return (
                 <button
                   key={tab.id}
-                  onClick={() => onTabChange(tab.id)}
+                  onClick={handleTabClick}
                   className={cn(
                     "flex flex-col items-center py-2 px-3 rounded-lg transition-smooth transform active:scale-95",
                     isCreate 
@@ -70,15 +89,26 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
             })}
           </div>
           
-          {/* Sign Out Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSignOut}
-            className="ml-2 p-2 text-muted-foreground hover:text-foreground transition-smooth"
-          >
-            <LogOut className="w-4 h-4" />
-          </Button>
+          {/* Auth Button - Login/Logout */}
+          {user ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="ml-2 p-2 text-muted-foreground hover:text-foreground transition-smooth"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogin}
+              className="ml-2 p-2 text-muted-foreground hover:text-foreground transition-smooth"
+            >
+              <LogIn className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
     </nav>

@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ActivityFeed } from '@/components/ActivityFeed';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { 
   Bell, 
   TrendingUp, 
@@ -29,6 +31,39 @@ interface Notification {
 }
 
 export const NotificationsPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Show login prompt for guests
+  if (!user) {
+    return (
+      <div className="pb-20">
+        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
+          <h1 className="text-xl font-bold">Notifications</h1>
+        </div>
+        <div className="px-4 py-6">
+          <Card>
+            <CardContent className="pt-6 text-center space-y-4">
+              <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                <Bell className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold mb-2">Stay Updated</h2>
+                <p className="text-muted-foreground mb-4">
+                  Log in to receive notifications about market alerts, followers, and trading updates
+                </p>
+                <Button onClick={() => navigate('/auth')}>
+                  <Users className="w-4 h-4 mr-2" />
+                  Sign Up / Log In
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',

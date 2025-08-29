@@ -77,6 +77,38 @@ export const ProfilePage = () => {
       }
     : getFormattedPerformance();
 
+  // Show create profile UI if no user is logged in
+  if (!user) {
+    return (
+      <div className="pb-20">
+        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
+          <h1 className="text-xl font-bold">Profile</h1>
+        </div>
+        <div className="px-4 py-6">
+          <Card>
+            <CardContent className="pt-6 text-center space-y-4">
+              <Avatar className="w-24 h-24 mx-auto">
+                <AvatarFallback className="text-2xl">
+                  <Users className="w-8 h-8" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-xl font-bold mb-2">Join the Community</h2>
+                <p className="text-muted-foreground mb-4">
+                  Log in to create your trading profile and connect with traders
+                </p>
+                <Button onClick={() => navigate('/auth')}>
+                  <Users className="w-4 h-4 mr-2" />
+                  Sign Up / Log In
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   // Show create profile UI if no profile exists
   if (loading) {
     return (
