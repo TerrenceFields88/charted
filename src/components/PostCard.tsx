@@ -17,7 +17,7 @@ import { useRealTimeLikes } from '@/hooks/useRealTimeLikes';
 import { useToast } from '@/hooks/use-toast';
 import { SharePostDialog } from '@/components/SharePostDialog';
 import { RepostDialog } from '@/components/RepostDialog';
-import { TradingViewMiniChart } from '@/components/TradingViewChart';
+import { TradingViewMiniChart } from '@/components/TradingViewMiniChart';
 import { CommentSection } from '@/components/CommentSection';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { cn } from '@/lib/utils';
