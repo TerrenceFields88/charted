@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { UserSearchPage } from '@/components/UserSearchPage';
+import { ErrorBoundary } from './ErrorBoundary';
+import { ErrorFallback } from './ErrorFallback';
 
 export const FeedPage = () => {
   const { posts, loading, error, refetch } = usePosts();
@@ -53,7 +55,9 @@ export const FeedPage = () => {
       {/* Feed */}
       <div className="px-4 py-4 space-y-6">
         {/* News Widget */}
-        <NewsWidget maxArticles={3} showHeader={true} />
+        <ErrorBoundary fallback={<ErrorFallback minimal />}>
+          <NewsWidget maxArticles={3} showHeader={true} />
+        </ErrorBoundary>
 
         {loading && posts.length === 0 ? (
           <div className="space-y-4">
@@ -81,7 +85,9 @@ export const FeedPage = () => {
         ) : (
           <>
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <ErrorBoundary key={post.id} fallback={<ErrorFallback minimal />}>
+                <PostCard post={post} />
+              </ErrorBoundary>
             ))}
             {loading && (
               <div className="mt-4 p-4 bg-card rounded-lg border">
