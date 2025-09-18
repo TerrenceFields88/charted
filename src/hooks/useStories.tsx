@@ -27,22 +27,10 @@ export const useStories = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch non-expired stories with user profile data
-      const { data, error: fetchError } = await supabase
+      // Fetch non-expired stories
+      const { data: postsData, error: fetchError } = await supabase
         .from('posts')
-        .select(`
-          id,
-          user_id,
-          content,
-          image_url,
-          created_at,
-          expires_at,
-          profiles (
-            username,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('id, user_id, content, image_url, created_at, expires_at')
         .eq('post_type', 'story')
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false });
@@ -51,7 +39,41 @@ export const useStories = () => {
         throw fetchError;
       }
 
-      setStories(data || []);
+      if (!postsData || postsData.length === 0) {
+        setStories([]);
+        return;
+      }
+
+      // Get unique user IDs
+      const userIds = [...new Set(postsData.map(post => post.user_id))];
+
+      // Fetch profiles for these users
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url')
+        .in('user_id', userIds);
+
+      if (profilesError) {
+        throw profilesError;
+      }
+
+      // Create a map of user_id to profile
+      const profilesMap = (profilesData || []).reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {} as Record<string, any>);
+
+      // Combine posts with profiles
+      const storiesWithProfiles = postsData.map(post => ({
+        ...post,
+        profiles: profilesMap[post.user_id] || {
+          username: 'unknown',
+          display_name: null,
+          avatar_url: null
+        }
+      }));
+
+      setStories(storiesWithProfiles);
     } catch (err) {
       console.error('Error fetching stories:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch stories');
@@ -62,21 +84,10 @@ export const useStories = () => {
 
   const fetchUserStories = async (userId: string) => {
     try {
-      const { data, error: fetchError } = await supabase
+      // Fetch non-expired stories for specific user
+      const { data: postsData, error: fetchError } = await supabase
         .from('posts')
-        .select(`
-          id,
-          user_id,
-          content,
-          image_url,
-          created_at,
-          expires_at,
-          profiles (
-            username,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('id, user_id, content, image_url, created_at, expires_at')
         .eq('post_type', 'story')
         .eq('user_id', userId)
         .gt('expires_at', new Date().toISOString())
@@ -86,7 +97,33 @@ export const useStories = () => {
         throw fetchError;
       }
 
-      return data || [];
+      if (!postsData || postsData.length === 0) {
+        return [];
+      }
+
+      // Fetch profile for this user
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url')
+        .eq('user_id', userId)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        return [];
+      }
+
+      // Combine posts with profile
+      const storiesWithProfile = postsData.map(post => ({
+        ...post,
+        profiles: profileData || {
+          username: 'unknown',
+          display_name: null,
+          avatar_url: null
+        }
+      }));
+
+      return storiesWithProfile;
     } catch (err) {
       console.error('Error fetching user stories:', err);
       return [];

@@ -391,6 +391,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_posts_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "posts_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
