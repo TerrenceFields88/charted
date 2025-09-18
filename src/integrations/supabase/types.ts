@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -344,9 +344,11 @@ export type Database = {
           community_id: string | null
           content: string
           created_at: string | null
+          expires_at: string | null
           id: string
           image_url: string | null
           like_count: number | null
+          post_type: string | null
           prediction_confidence: number | null
           prediction_outcome: string | null
           prediction_text: string | null
@@ -359,9 +361,11 @@ export type Database = {
           community_id?: string | null
           content: string
           created_at?: string | null
+          expires_at?: string | null
           id?: string
           image_url?: string | null
           like_count?: number | null
+          post_type?: string | null
           prediction_confidence?: number | null
           prediction_outcome?: string | null
           prediction_text?: string | null
@@ -374,9 +378,11 @@ export type Database = {
           community_id?: string | null
           content?: string
           created_at?: string | null
+          expires_at?: string | null
           id?: string
           image_url?: string | null
           like_count?: number | null
+          post_type?: string | null
           prediction_confidence?: number | null
           prediction_outcome?: string | null
           prediction_text?: string | null
@@ -616,11 +622,11 @@ export type Database = {
       }
       log_security_event: {
         Args: {
-          p_user_id: string
           p_action: string
-          p_table_name?: string
-          p_record_id?: string
           p_details?: Json
+          p_record_id?: string
+          p_table_name?: string
+          p_user_id: string
         }
         Returns: undefined
       }
