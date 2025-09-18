@@ -366,34 +366,6 @@ export const ProfilePage = () => {
                     </div>
                   ))}
                 </div>
-
-                {hasConnectedAccounts && aggregatedData.allPositions.length > 0 && (
-                  <div className="mt-4 pt-4 border-t">
-                    <h4 className="font-medium mb-2 text-sm">Current Positions</h4>
-                    <div className="space-y-2">
-                      {aggregatedData.allPositions.slice(0, 3).map((position, index) => (
-                        <div key={index} className="flex justify-between items-center p-2 bg-muted/20 rounded text-sm">
-                          <div>
-                            <span className="font-medium">{position.symbol}</span>
-                            <span className="text-xs text-muted-foreground ml-2">
-                              {position.quantity} @ ${position.current_price.toFixed(2)}
-                            </span>
-                          </div>
-                          <div className={`text-xs font-medium ${position.unrealized_pnl >= 0 ? 'text-bullish' : 'text-bearish'}`}>
-                            {position.unrealized_pnl >= 0 ? '+' : ''}${position.unrealized_pnl.toFixed(2)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {performanceData.totalTrades === 0 && !hasConnectedAccounts && (
-                  <div className="text-center py-4 text-muted-foreground mt-4 pt-4 border-t">
-                    <p className="text-sm">No trading data available.</p>
-                    <p className="text-xs">Connect your brokerage or prop firm account to see real performance.</p>
-                  </div>
-                )}
               </div>
             </div>
           </CardContent>
@@ -401,11 +373,58 @@ export const ProfilePage = () => {
 
         <Tabs defaultValue="posts" className="space-y-4">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="posts">My Posts</TabsTrigger>
+            <TabsTrigger value="posts">Posts</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="posts">
+            {userPosts.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center text-muted-foreground">
+                    <p>No posts yet.</p>
+                    <p className="text-sm">Share your first trading insight or market analysis.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-3 gap-1">
+                {userPosts.map((post) => (
+                  <div 
+                    key={post.id} 
+                    className="aspect-square bg-muted rounded-sm overflow-hidden group cursor-pointer relative"
+                  >
+                    {post.image ? (
+                      <img 
+                        src={post.image} 
+                        alt="Post content"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/20 p-2">
+                        <p className="text-xs text-center line-clamp-4 text-muted-foreground group-hover:text-foreground transition-colors">
+                          {post.content}
+                        </p>
+                      </div>
+                    )}
+                    {/* Hover overlay with stats */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                      <div className="text-white text-xs space-y-1 text-center">
+                        <div className="flex items-center gap-1 justify-center">
+                          <span>❤️ {post.likes || 0}</span>
+                        </div>
+                        <div className="flex items-center gap-1 justify-center">
+                          <span>💬 {post.comments || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
           <TabsContent value="activity">
             <Card>
@@ -431,25 +450,19 @@ export const ProfilePage = () => {
                             </div>
                             {activity.profit_loss !== undefined && activity.profit_loss !== null && (
                               <div className={`text-xs font-semibold ${activity.profit_loss > 0 ? 'text-bullish' : 'text-bearish'}`}>
-                                {activity.profit_loss > 0 ? '+' : ''}${activity.profit_loss}
+                                {activity.profit_loss > 0 ? '+' : ''}${activity.profit_loss.toFixed(2)}
                               </div>
                             )}
+                            <div className="text-xs text-muted-foreground">{activity.timestamp}</div>
                           </div>
                         )}
                         {activity.type === 'post' && (
-                          <div>
-                            <span>Posted: </span>
-                            <span className="font-medium">{activity.content}</span>
-                            <span className="text-muted-foreground"> • {activity.likes} likes</span>
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium">New post</div>
+                            <div className="text-xs text-muted-foreground truncate">{activity.content}</div>
+                            <div className="text-xs text-muted-foreground">{activity.timestamp} • {activity.likes} likes</div>
                           </div>
                         )}
-                        {activity.type === 'follow' && (
-                          <div>
-                            <span>Started following </span>
-                            <span className="font-medium">@{activity.user}</span>
-                          </div>
-                        )}
-                        <div className="text-xs text-muted-foreground">{activity.timestamp}</div>
                       </div>
                     </div>
                   ))
@@ -461,76 +474,38 @@ export const ProfilePage = () => {
           <TabsContent value="achievements">
             <div className="space-y-4">
               <Card>
-                <CardHeader>
-                  <CardTitle>Performance Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
                       <div className="text-sm text-muted-foreground">Total Portfolio Value</div>
                       <div className="text-lg font-semibold">
-                        {hasConnectedAccounts ? `$${aggregatedData.totalEquity.toLocaleString()}` : 'N/A'}
+                        {hasConnectedAccounts && aggregatedData.totalEquity > 0 
+                          ? `$${aggregatedData.totalEquity.toLocaleString()}` 
+                          : 'N/A'}
                       </div>
                     </div>
                     <div className="text-center">
                       <div className="text-sm text-muted-foreground">Portfolio Return</div>
-                      <div className={`text-lg font-semibold ${performanceData.portfolioReturn.startsWith('+') ? 'text-bullish' : 'text-bearish'}`}>
-                        {performanceData.portfolioReturn}
-                      </div>
+                      <div className="text-lg font-semibold text-bullish">{performanceData.portfolioReturn}</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-
-              {achievements.length === 0 ? (
-                <Card>
-                  <CardContent className="pt-6 text-center space-y-4">
-                    <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
-                      <Award className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-2">No Achievements Yet</h3>
-                      <p className="text-muted-foreground text-sm">
-                        Connect your trading account and start trading to earn achievements based on real performance.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                achievements.map((achievement, index) => (
-                  <Card key={index}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full ${achievement.color} flex items-center justify-center`}>
-                          <achievement.icon className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{achievement.title}</h3>
-                          <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="posts">
-            <div className="space-y-4">
-              {userPosts.length === 0 ? (
-                <Card>
+              {achievements.map((achievement, index) => (
+                <Card key={index}>
                   <CardContent className="pt-6">
-                    <div className="text-center text-muted-foreground">
-                      No posts yet. Share your first trading insight!
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-full ${achievement.color} flex items-center justify-center`}>
+                        <achievement.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{achievement.title}</h3>
+                        <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-              ) : (
-                userPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))
-              )}
+              ))}
             </div>
           </TabsContent>
 
@@ -544,6 +519,7 @@ export const ProfilePage = () => {
           open={storyViewerOpen}
           onOpenChange={setStoryViewerOpen}
           stories={stories}
+          initialStoryIndex={0}
         />
 
         {/* Create Story Dialog */}

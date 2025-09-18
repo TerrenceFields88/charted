@@ -339,21 +339,49 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
         </TabsList>
 
         <TabsContent value="posts">
-          <div className="space-y-4">
-            {userPosts.length === 0 ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center text-muted-foreground">
-                    No posts yet from this user.
+          {userPosts.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center text-muted-foreground">
+                  No posts yet from this user.
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-3 gap-1">
+              {userPosts.map((post) => (
+                <div 
+                  key={post.id} 
+                  className="aspect-square bg-muted rounded-sm overflow-hidden group cursor-pointer relative"
+                >
+                  {post.image ? (
+                    <img 
+                      src={post.image} 
+                      alt="Post content"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/20 p-2">
+                      <p className="text-xs text-center line-clamp-4 text-muted-foreground group-hover:text-foreground transition-colors">
+                        {post.content}
+                      </p>
+                    </div>
+                  )}
+                  {/* Hover overlay with stats */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                    <div className="text-white text-xs space-y-1 text-center">
+                      <div className="flex items-center gap-1 justify-center">
+                        <span>❤️ {post.likes || 0}</span>
+                      </div>
+                      <div className="flex items-center gap-1 justify-center">
+                        <span>💬 {post.comments || 0}</span>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              userPosts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="achievements">
