@@ -192,28 +192,13 @@ class BrokerageAPIService {
   // Broker-specific connection methods
   getBrokerConnectionInfo(brokerName: string): { apiEndpoint: string; authMethod: string; requirements: string[] } {
     const brokerConfigs: { [key: string]: any } = {
-      alpaca: {
-        apiEndpoint: 'https://paper-api.alpaca.markets',
-        authMethod: 'api_key',
-        requirements: ['api_key', 'secret_key']
-      },
-      interactive_brokers: {
-        apiEndpoint: 'https://localhost:5000/v1/portal',
-        authMethod: 'session',
-        requirements: ['username', 'password']
-      },
-      td_ameritrade: {
-        apiEndpoint: 'https://api.tdameritrade.com/v1',
-        authMethod: 'oauth',
-        requirements: ['username', 'password', 'client_id']
-      },
-      ftmo: {
-        apiEndpoint: 'https://ftmo.com/api/v1',
+      tradovate: {
+        apiEndpoint: 'https://api.tradovate.com/v1',
         authMethod: 'credentials',
         requirements: ['username', 'password']
       },
-      my_forex_funds: {
-        apiEndpoint: 'https://myforexfunds.com/api',
+      topstep: {
+        apiEndpoint: 'https://topsteptrader.com/api/v1',
         authMethod: 'credentials',
         requirements: ['username', 'password']
       },

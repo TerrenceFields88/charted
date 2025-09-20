@@ -15,24 +15,8 @@ const SUPPORTED_BROKERS = [
   { value: 'tradingview', label: 'TradingView', demo: false, type: 'platform' },
   { value: 'tradovate', label: 'Tradovate', demo: false, type: 'platform' },
   
-  // Traditional Brokerages
-  { value: 'alpaca', label: 'Alpaca Trading', demo: true, type: 'brokerage' },
-  { value: 'interactive_brokers', label: 'Interactive Brokers', demo: false, type: 'brokerage' },
-  { value: 'td_ameritrade', label: 'TD Ameritrade', demo: false, type: 'brokerage' },
-  { value: 'tradestation', label: 'TradeStation', demo: false, type: 'brokerage' },
-  { value: 'etrade', label: 'E*TRADE', demo: false, type: 'brokerage' },
-  { value: 'robinhood', label: 'Robinhood', demo: false, type: 'brokerage' },
-  
   // Prop Firms
-  { value: 'ftmo', label: 'FTMO', demo: false, type: 'prop_firm' },
-  { value: 'my_forex_funds', label: 'MyForexFunds', demo: false, type: 'prop_firm' },
-  { value: 'the5ers', label: 'The5%ers', demo: false, type: 'prop_firm' },
-  { value: 'funded_trader', label: 'Funded Trader', demo: false, type: 'prop_firm' },
-  { value: 'apex_trader', label: 'Apex Trader Funding', demo: false, type: 'prop_firm' },
-  { value: 'topstep', label: 'TopstepTrader', demo: false, type: 'prop_firm' },
-  { value: 'earn2trade', label: 'Earn2Trade', demo: false, type: 'prop_firm' },
-  { value: 'elite_trader_funding', label: 'Elite Trader Funding', demo: false, type: 'prop_firm' },
-  { value: 'take_profit_trader', label: 'Take Profit Trader', demo: false, type: 'prop_firm' },
+  { value: 'topstep', label: 'TopStepTrader', demo: false, type: 'prop_firm' },
 ];
 
 export const BrokerageConnectionDialog = () => {
@@ -243,7 +227,7 @@ export const BrokerageConnectionDialog = () => {
             </div>
 
             {/* API Key fields for supported brokers */}
-            {(formData.broker_name === 'alpaca' || formData.broker_name === 'interactive_brokers' || formData.broker_name === 'tradovate' || formData.broker_name === 'tradestation') && (
+            {(formData.broker_name === 'tradovate' || formData.broker_name === 'tradingview') && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="api_key">API Key (Optional)</Label>
