@@ -333,9 +333,8 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
       </Card>
 
       <Tabs defaultValue="posts" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
         </TabsList>
 
         <TabsContent value="posts">
@@ -382,40 +381,6 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
               ))}
             </div>
           )}
-        </TabsContent>
-
-        <TabsContent value="achievements">
-          <div className="space-y-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-sm text-muted-foreground">Total Portfolio Value</div>
-                    <div className="text-lg font-semibold">N/A</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm text-muted-foreground">Portfolio Return</div>
-                    <div className="text-lg font-semibold text-bullish">+18.3%</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            {achievements.map((achievement, index) => (
-              <Card key={index}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full ${achievement.color} flex items-center justify-center`}>
-                      <achievement.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{achievement.title}</h3>
-                      <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </TabsContent>
       </Tabs>
     </div>

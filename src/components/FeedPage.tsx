@@ -24,8 +24,8 @@ export const FeedPage = () => {
       {/* Header */}
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">Trading Feed</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">Feed</h1>
             <Button
               variant="ghost"
               size="sm"
@@ -52,11 +52,11 @@ export const FeedPage = () => {
         )}
       </div>
 
-      {/* Feed */}
-      <div className="px-4 py-4 space-y-6">
-        {/* News Widget */}
+      {/* Feed Content */}
+      <div className="px-4 space-y-4">
+        {/* Simplified News Section */}
         <ErrorBoundary fallback={<ErrorFallback minimal />}>
-          <NewsWidget maxArticles={3} showHeader={true} />
+          <NewsWidget maxArticles={2} showHeader={false} />
         </ErrorBoundary>
 
         {loading && posts.length === 0 ? (

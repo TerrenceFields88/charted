@@ -14,12 +14,8 @@ const Index = () => {
     switch (activeTab) {
       case 'feed':
         return <FeedPage />;
-      case 'markets':
-        return <MarketsPage />;
       case 'create':
         return <CreatePage />;
-      case 'notifications':
-        return <NotificationsPage />;
       case 'profile':
         return <ProfilePage />;
       default:
@@ -29,13 +25,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Market Ticker */}
-      <MarketTicker />
-      
       <div className="max-w-md mx-auto relative">
-        <div className="px-4 py-6 pb-20">
-          {renderContent()}
-        </div>
+        {renderContent()}
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
     </div>

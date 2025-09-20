@@ -16,10 +16,8 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const navigate = useNavigate();
   
   const tabs = [
-    { id: 'feed', label: 'Feed', icon: Home },
-    { id: 'markets', label: 'Markets', icon: TrendingUp },
-    { id: 'create', label: 'Create', icon: Plus },
-    { id: 'notifications', label: 'Alerts', icon: Bell },
+    { id: 'feed', label: 'Home', icon: Home },
+    { id: 'create', label: 'Post', icon: Plus },
     { id: 'profile', label: 'Profile', icon: User },
   ];
 
@@ -52,7 +50,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               const isCreate = tab.id === 'create';
-              const requiresAuth = ['create', 'notifications', 'profile'].includes(tab.id);
+              const requiresAuth = ['create', 'profile'].includes(tab.id);
               
               const handleTabClick = () => {
                 if (requiresAuth && !user) {

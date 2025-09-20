@@ -1,37 +1,23 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
 import { usePosts } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { PostCard } from '@/components/PostCard';
 import { 
    Settings, 
    Edit, 
-   TrendingUp, 
-   Users, 
-   Target,
-   Award,
+   Users,
    Plus,
-   RefreshCw,
    CheckCircle,
-   Link,
-   Calendar,
-   Camera,
    MoreHorizontal,
-   Shield,
-   HelpCircle,
    LogOut
  } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
-import { BrokerageConnectionDialog } from '@/components/BrokerageConnectionDialog';
-import { MessagesPage } from '@/components/MessagesPage';
 import { StoryViewer } from '@/components/StoryViewer';
 import { CreateStoryDialog } from '@/components/CreateStoryDialog';
 import { 
@@ -51,13 +37,10 @@ export const ProfilePage = () => {
   const [createStoryOpen, setCreateStoryOpen] = useState(false);
   const [stories, setStories] = useState([]);
   
-  const { performance, getFormattedPerformance, recentTrades, loading: performanceLoading } = useTradingPerformance();
+  const { performance, getFormattedPerformance } = useTradingPerformance();
   const { 
     aggregatedData, 
-    loading: brokerageLoading, 
-    lastUpdate, 
     hasConnectedAccounts,
-    syncAllAccounts 
   } = useRealTimeBrokerageData();
   
   // Filter posts by current user
@@ -70,10 +53,6 @@ export const ProfilePage = () => {
           ? `+${(aggregatedData.totalPnL / aggregatedData.totalEquity * 100).toFixed(2)}%`
           : `${(aggregatedData.totalPnL / aggregatedData.totalEquity * 100).toFixed(2)}%`,
         winRate: `${aggregatedData.performanceMetrics.win_rate.toFixed(0)}%`,
-        winningTrades: aggregatedData.recentTrades.filter(t => (t.pnl || 0) > 0).length,
-        losingTrades: aggregatedData.recentTrades.filter(t => (t.pnl || 0) < 0).length,
-        riskRewardRatio: `${aggregatedData.performanceMetrics.profit_factor.toFixed(1)}:1`,
-        totalTrades: aggregatedData.recentTrades.length,
       }
     : getFormattedPerformance();
 
@@ -109,7 +88,7 @@ export const ProfilePage = () => {
     );
   }
 
-  // Show create profile UI if no profile exists
+  // Show loading state
   if (loading) {
     return (
       <div className="pb-20">
@@ -123,6 +102,7 @@ export const ProfilePage = () => {
     );
   }
 
+  // Show create profile UI if no profile exists
   if (!profile) {
     return (
       <div className="pb-20">
@@ -154,81 +134,10 @@ export const ProfilePage = () => {
     );
   }
 
-  const stats = [
-    { label: 'Win Rate', value: performanceData.winRate, icon: Target, color: 'text-primary' },
-    { label: 'Followers', value: profile.follower_count.toLocaleString(), icon: Users, color: 'text-foreground' },
-  ];
-
-  // Only show real achievements when they have actual trading data
-  const achievements = performance && performance.total_trades > 0 ? [
-    ...(performance.total_trades >= 50 ? [{ 
-      title: 'Active Trader', 
-      description: `Completed ${performance.total_trades} trades`, 
-      icon: Award, 
-      color: 'bg-blue-500' 
-    }] : []),
-    ...(performance.win_rate_percentage >= 70 ? [{ 
-      title: 'High Win Rate', 
-      description: `${performance.win_rate_percentage.toFixed(0)}% win rate achieved`, 
-      icon: TrendingUp, 
-      color: 'bg-green-500' 
-    }] : []),
-    ...(performance.portfolio_return_percentage >= 20 ? [{ 
-      title: 'Profitable Trader', 
-      description: `${performance.portfolio_return_percentage.toFixed(1)}% portfolio return`, 
-      icon: Award, 
-      color: 'bg-yellow-500' 
-    }] : []),
-  ] : [];
-
-  // Format recent trades for activity display - use real-time data if available
-  const formatRecentActivity = () => {
-    const activities = [];
-    
-    // Add recent trades from real-time data if available, otherwise use database trades
-    const tradesToShow = hasConnectedAccounts && aggregatedData.recentTrades.length > 0 
-      ? aggregatedData.recentTrades.slice(0, 5)
-      : recentTrades.slice(0, 3);
-
-    tradesToShow.forEach(trade => {
-      activities.push({
-        type: 'trade',
-        symbol: trade.symbol,
-        action: hasConnectedAccounts ? trade.side : (trade.trade_type === 'buy' ? 'Buy' : 'Sell'),
-        price: trade.price,
-        profit_loss: trade.pnl || trade.profit_loss,
-        timestamp: new Date(hasConnectedAccounts ? trade.timestamp : trade.executed_at).toLocaleDateString()
-      });
-    });
-
-    // Add recent posts
-    userPosts.slice(0, 2).forEach(post => {
-      activities.push({
-        type: 'post',
-        content: post.content.substring(0, 50) + (post.content.length > 50 ? '...' : ''),
-        likes: post.likes || 0,
-        timestamp: new Date(post.timestamp).toLocaleDateString()
-      });
-    });
-
-    return activities.sort(() => Math.random() - 0.5); // Mix activities
-  };
-
-  const recentActivity = formatRecentActivity();
-
   const handleSettingsClick = (action: string) => {
     switch (action) {
       case 'edit-profile':
         navigate('/edit-profile');
-        break;
-      case 'connect-account':
-        // BrokerageConnectionDialog manages its own state
-        break;
-      case 'privacy':
-        // TODO: Open privacy settings
-        break;
-      case 'help':
-        // TODO: Open help
         break;
       case 'logout':
         // TODO: Implement logout
@@ -243,13 +152,6 @@ export const ProfilePage = () => {
     } else {
       setCreateStoryOpen(true);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long'
-    });
   };
 
   return (
@@ -273,19 +175,6 @@ export const ProfilePage = () => {
                 <DropdownMenuItem onClick={() => handleSettingsClick('edit-profile')}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSettingsClick('connect-account')}>
-                  <Link className="w-4 h-4 mr-2" />
-                  Connect Account
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleSettingsClick('privacy')}>
-                  <Shield className="w-4 h-4 mr-2" />
-                  Privacy & Security
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSettingsClick('help')}>
-                  <HelpCircle className="w-4 h-4 mr-2" />
-                  Help & Support
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleSettingsClick('logout')} className="text-destructive focus:text-destructive">
@@ -345,26 +234,17 @@ export const ProfilePage = () => {
                 {profile.bio && (
                   <p className="text-sm text-muted-foreground line-clamp-2">{profile.bio}</p>
                 )}
-
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    Joined {formatDate(profile.created_at)}
-                  </span>
-                  <span className="text-primary">TD Ameritrade</span>
-                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={syncAllAccounts}>
-                    <Link className="w-3 h-3" />
-                  </Button>
-                </div>
                 
-                {/* Stats Row */}
+                {/* Simple Stats Row */}
                 <div className="flex gap-6 text-sm pt-2">
-                  {stats.map((stat) => (
-                    <div key={stat.label} className="text-center">
-                      <div className="font-semibold">{stat.value}</div>
-                      <div className="text-xs text-muted-foreground">{stat.label}</div>
-                    </div>
-                  ))}
+                  <div className="text-center">
+                    <div className="font-semibold">{performanceData.winRate}</div>
+                    <div className="text-xs text-muted-foreground">Win Rate</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold">{profile.follower_count}</div>
+                    <div className="text-xs text-muted-foreground">Followers</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -372,11 +252,9 @@ export const ProfilePage = () => {
         </Card>
 
         <Tabs defaultValue="posts" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="posts">Posts</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
-            <TabsTrigger value="achievements">Achievements</TabsTrigger>
-            <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts">
@@ -428,109 +306,30 @@ export const ProfilePage = () => {
 
           <TabsContent value="activity">
             <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {recentActivity.length === 0 ? (
-                  <div className="text-center py-4 text-muted-foreground">
-                    <p>No recent activity.</p>
-                    <p className="text-sm">Start trading and posting to see your activity here.</p>
-                  </div>
-                ) : (
-                  recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                      <div className="flex-1">
-                        {activity.type === 'trade' && (
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium truncate">
-                              {activity.action} {activity.symbol}
-                              <span className="text-muted-foreground font-normal"> at ${activity.price}</span>
-                            </div>
-                            {activity.profit_loss !== undefined && activity.profit_loss !== null && (
-                              <div className={`text-xs font-semibold ${activity.profit_loss > 0 ? 'text-bullish' : 'text-bearish'}`}>
-                                {activity.profit_loss > 0 ? '+' : ''}${activity.profit_loss.toFixed(2)}
-                              </div>
-                            )}
-                            <div className="text-xs text-muted-foreground">{activity.timestamp}</div>
-                          </div>
-                        )}
-                        {activity.type === 'post' && (
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium">New post</div>
-                            <div className="text-xs text-muted-foreground truncate">{activity.content}</div>
-                            <div className="text-xs text-muted-foreground">{activity.timestamp} • {activity.likes} likes</div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
+              <CardContent className="pt-6">
+                <div className="text-center text-muted-foreground">
+                  <p>Activity coming soon.</p>
+                  <p className="text-sm">Your recent trades and posts will appear here.</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="achievements">
-            <div className="space-y-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <div className="text-sm text-muted-foreground">Total Portfolio Value</div>
-                      <div className="text-lg font-semibold">
-                        {hasConnectedAccounts && aggregatedData.totalEquity > 0 
-                          ? `$${aggregatedData.totalEquity.toLocaleString()}` 
-                          : 'N/A'}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm text-muted-foreground">Portfolio Return</div>
-                      <div className="text-lg font-semibold text-bullish">{performanceData.portfolioReturn}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              {achievements.map((achievement, index) => (
-                <Card key={index}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full ${achievement.color} flex items-center justify-center`}>
-                        <achievement.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{achievement.title}</h3>
-                        <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="messages">
-            <MessagesPage />
-          </TabsContent>
         </Tabs>
-
-        {/* Story Viewer */}
-        <StoryViewer
-          open={storyViewerOpen}
-          onOpenChange={setStoryViewerOpen}
-          stories={stories}
-          initialStoryIndex={0}
-        />
-
-        {/* Create Story Dialog */}
-        <CreateStoryDialog
-          open={createStoryOpen}
-          onOpenChange={setCreateStoryOpen}
-        />
-
-        {/* Brokerage Connection Dialog - managed internally */}
-        <BrokerageConnectionDialog />
       </div>
+
+      {/* Story Viewer */}
+      <StoryViewer
+        open={storyViewerOpen}
+        onOpenChange={setStoryViewerOpen}
+        stories={[]}
+        initialStoryIndex={0}
+      />
+
+      {/* Create Story Dialog */}
+      <CreateStoryDialog
+        open={createStoryOpen}
+        onOpenChange={setCreateStoryOpen}
+      />
     </div>
   );
 };
