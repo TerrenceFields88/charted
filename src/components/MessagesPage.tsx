@@ -109,7 +109,7 @@ export const MessagesPage = () => {
     enrichConversations();
   }, [conversations, user]);
 
-  // Fetch messages for selected conversation
+  // Fetch messages for selected conversation and set up real-time subscription
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedConversation) {
@@ -140,7 +140,30 @@ export const MessagesPage = () => {
     };
 
     fetchMessages();
-  }, [selectedConversation]);
+
+    // Set up real-time subscription for new messages
+    if (selectedConversation) {
+      const channel = supabase
+        .channel(`messages-${selectedConversation}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `conversation_id=eq.${selectedConversation}`
+          },
+          (payload) => {
+            setMessages(current => [...current, payload.new as Message]);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [selectedConversation, toast]);
 
   // Fetch users for new conversations
   useEffect(() => {

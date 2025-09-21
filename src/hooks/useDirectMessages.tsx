@@ -148,6 +148,40 @@ export const useDirectMessages = () => {
 
   useEffect(() => {
     fetchConversations();
+
+    // Set up real-time subscription for conversation updates
+    if (user) {
+      const channel = supabase
+        .channel(`conversations-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'conversations',
+            filter: `participant_1=eq.${user.id},participant_2=eq.${user.id}`
+          },
+          () => {
+            fetchConversations();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages'
+          },
+          () => {
+            fetchConversations();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [user]);
 
   return {
