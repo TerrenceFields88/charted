@@ -14,6 +14,8 @@ const Index = () => {
     switch (activeTab) {
       case 'feed':
         return <FeedPage />;
+      case 'markets':
+        return <MarketsPage />;
       case 'create':
         return <CreatePage />;
       case 'profile':
