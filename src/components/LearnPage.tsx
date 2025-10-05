@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, TrendingUp, Target, Shield, PlayCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CourseDetailPage } from '@/components/CourseDetailPage';
 
 export const LearnPage = () => {
+  const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
   const courses = [
     {
       id: 1,
@@ -67,6 +70,17 @@ export const LearnPage = () => {
     },
   ];
 
+  if (selectedCourse !== null) {
+    const course = courses.find(c => c.id === selectedCourse);
+    return (
+      <CourseDetailPage
+        courseId={selectedCourse}
+        courseTitle={course?.title || ''}
+        onBack={() => setSelectedCourse(null)}
+      />
+    );
+  }
+
   return (
     <div className="pb-20">
       {/* Header */}
@@ -86,7 +100,11 @@ export const LearnPage = () => {
             {courses.map((course) => {
               const Icon = course.icon;
               return (
-                <Card key={course.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card 
+                  key={course.id} 
+                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => setSelectedCourse(course.id)}
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex gap-3">
@@ -109,7 +127,14 @@ export const LearnPage = () => {
                         <span>•</span>
                         <span className="text-primary font-medium">{course.level}</span>
                       </div>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCourse(course.id);
+                        }}
+                      >
                         <PlayCircle className="w-4 h-4 mr-1" />
                         Start
                       </Button>
