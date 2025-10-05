@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, TrendingUp, Plus, Bell, User, LogOut, Search, Activity, MessageCircle, LogIn } from 'lucide-react';
+import { Home, TrendingUp, Plus, Bell, User, LogOut, Search, Activity, MessageCircle, LogIn, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'feed', label: 'Home', icon: Home },
     { id: 'markets', label: 'Markets', icon: TrendingUp },
     { id: 'create', label: 'Post', icon: Plus },
-    { id: 'messages', label: 'Messages', icon: MessageCircle },
+    { id: 'learn', label: 'Learn', icon: BookOpen },
     { id: 'profile', label: 'Profile', icon: User },
   ];
 

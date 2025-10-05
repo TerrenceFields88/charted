@@ -20,6 +20,7 @@ import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
 import { StoryViewer } from '@/components/StoryViewer';
 import { CreateStoryDialog } from '@/components/CreateStoryDialog';
+import { PortfolioSection } from '@/components/PortfolioSection';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -252,8 +253,9 @@ export const ProfilePage = () => {
         </Card>
 
         <Tabs defaultValue="posts" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="posts">Posts</TabsTrigger>
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
@@ -302,6 +304,10 @@ export const ProfilePage = () => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="portfolio">
+            <PortfolioSection />
           </TabsContent>
 
           <TabsContent value="activity">
