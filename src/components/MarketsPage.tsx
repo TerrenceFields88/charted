@@ -9,6 +9,7 @@ import { useBloombergNews } from '@/hooks/useBloombergNews';
 import { NewsCard } from '@/components/NewsCard';
 import { BloombergTVPlayer } from '@/components/BloombergTVPlayer';
 import { InvestingAnalysisPage } from '@/components/InvestingAnalysisPage';
+import { AIMarketAnalysis } from '@/components/AIMarketAnalysis';
 import { 
   TrendingUp,
   TrendingDown,
@@ -18,12 +19,14 @@ import {
   WifiOff,
   Newspaper,
   Search,
-  BarChart3
+  BarChart3,
+  Brain
 } from 'lucide-react';
 
 export const MarketsPage = () => {
   const { marketData, isLoading, error, lastUpdated, refetch } = useRealTimeMarketData();
   const { articles, isLoading: newsLoading, error: newsError, lastUpdated: newsLastUpdated, refetch: newsRefetch, hasApiKey } = useBloombergNews();
+  const [selectedSymbol, setSelectedSymbol] = useState('SPY');
 
   const formatPrice = (price: number, type: string) => {
     if (type === 'forex') return price.toFixed(4);
@@ -252,10 +255,14 @@ export const MarketsPage = () => {
 
       <div className="px-4 py-6">
         <Tabs defaultValue="markets" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="markets" className="flex items-center gap-1">
               <Activity className="w-4 h-4" />
               Markets
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="flex items-center gap-1">
+              <Brain className="w-4 h-4" />
+              AI Predictions
             </TabsTrigger>
             <TabsTrigger value="news" className="flex items-center gap-1">
               <Newspaper className="w-4 h-4" />
@@ -269,6 +276,39 @@ export const MarketsPage = () => {
           
           <TabsContent value="markets" className="mt-6">
             <MarketDataSection />
+          </TabsContent>
+          
+          <TabsContent value="ai" className="mt-6">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Select Asset to Analyze</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <select
+                    value={selectedSymbol}
+                    onChange={(e) => setSelectedSymbol(e.target.value)}
+                    className="w-full p-3 rounded-lg bg-card border border-border text-foreground"
+                  >
+                    {marketData.map((data) => (
+                      <option key={data.symbol} value={data.symbol}>
+                        {data.symbol} - ${formatPrice(data.price, data.type)} ({data.changePercent >= 0 ? '+' : ''}{data.changePercent.toFixed(2)}%)
+                      </option>
+                    ))}
+                  </select>
+                </CardContent>
+              </Card>
+
+              {marketData.find(m => m.symbol === selectedSymbol) && (
+                <AIMarketAnalysis
+                  symbol={selectedSymbol}
+                  price={marketData.find(m => m.symbol === selectedSymbol)!.price}
+                  change={marketData.find(m => m.symbol === selectedSymbol)!.change}
+                  changePercent={marketData.find(m => m.symbol === selectedSymbol)!.changePercent}
+                  marketData={marketData}
+                />
+              )}
+            </div>
           </TabsContent>
           
           <TabsContent value="news" className="mt-6">

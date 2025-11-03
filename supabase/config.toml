@@ -1,1 +1,4 @@
 project_id = "tyasymsyqlsjilhwezvy"
+
+[functions.ai-market-analysis]
+verify_jwt = false
