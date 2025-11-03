@@ -20,7 +20,7 @@ serve(async (req) => {
 
     console.log(`Analyzing ${symbol} for ${timeframe} timeframe`);
 
-    const systemPrompt = `You are an expert financial analyst with deep knowledge of technical analysis, market trends, and trading strategies. Analyze the provided market data and give actionable trading recommendations.
+    const systemPrompt = `You are an expert commodities futures trading analyst specializing in energy, metals, and agricultural commodities. You have deep knowledge of supply/demand fundamentals, seasonal patterns, geopolitical impacts, and technical analysis specific to futures markets.
 
 Your response MUST be in valid JSON format with this exact structure:
 {
@@ -28,25 +28,29 @@ Your response MUST be in valid JSON format with this exact structure:
   "confidence": number (0-100),
   "targetPrice": number,
   "stopLoss": number,
-  "reasoning": "brief explanation",
+  "reasoning": "brief explanation focused on commodities fundamentals",
   "keyFactors": ["factor1", "factor2", "factor3"],
   "timeframe": "same as input",
   "riskLevel": "LOW" | "MEDIUM" | "HIGH"
 }`;
 
-    const userPrompt = `Analyze this market data for ${symbol}:
+    const userPrompt = `Analyze this commodities future for ${symbol}:
 - Current Price: $${price}
 - Change: ${change >= 0 ? '+' : ''}${change} (${changePercent >= 0 ? '+' : ''}${changePercent}%)
 - Timeframe: ${timeframe}
-- Additional Market Context: ${JSON.stringify(marketData || {})}
+- Broader Commodities Market: ${JSON.stringify(marketData || {})}
 
-Provide a trading recommendation considering:
-1. Price momentum and trend direction
-2. Support/resistance levels
-3. Risk/reward ratio
-4. Timeframe appropriateness
-5. Current market conditions
+Consider these commodities-specific factors:
+1. Supply and demand fundamentals
+2. Seasonal patterns and weather impacts (for agricultural commodities)
+3. Geopolitical events affecting production or trade
+4. Currency movements (USD strength/weakness)
+5. Storage costs and contango/backwardation
+6. Industrial demand trends
+7. Producer hedging activity
+8. Technical price levels and momentum
 
+Provide a detailed trading recommendation based on both fundamental and technical analysis.
 Return ONLY valid JSON with your analysis.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

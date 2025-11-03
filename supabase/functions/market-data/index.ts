@@ -41,27 +41,12 @@ async function fetchFromYahooFinance(symbols: string[]): Promise<MarketQuote[]> 
           const change = currentPrice - previousClose
           const changePercent = previousClose > 0 ? (change / previousClose) * 100 : 0
           
-          let displaySymbol = symbol
-          let type: 'stock' | 'forex' | 'crypto' | 'futures' = 'stock'
-          
-          // Determine type and clean symbol
-          if (symbol.includes('USD=X')) {
-            type = 'forex'
-            displaySymbol = symbol.replace('USD=X', '/USD')
-          } else if (symbol.includes('-USD')) {
-            type = 'crypto'
-            displaySymbol = symbol.replace('-USD', '')
-          } else if (symbol.includes('=F')) {
-            type = 'futures'
-            displaySymbol = symbol.replace('=F', '')
-          }
-          
           marketData.push({
-            symbol: displaySymbol,
-            price: Number(currentPrice.toFixed(type === 'forex' ? 4 : 2)),
-            change: Number(change.toFixed(type === 'forex' ? 4 : 2)),
+            symbol: symbol,
+            price: Number(currentPrice.toFixed(2)),
+            change: Number(change.toFixed(2)),
             changePercent: Number(changePercent.toFixed(2)),
-            type
+            type: 'futures'
           })
         }
       }
@@ -73,61 +58,17 @@ async function fetchFromYahooFinance(symbols: string[]): Promise<MarketQuote[]> 
   return marketData
 }
 
-async function fetchFromFinnhub(): Promise<MarketQuote[]> {
-  console.log('Attempting Finnhub API (backup)...')
-  
-  const marketData: MarketQuote[] = []
-  const symbols = [
-    { symbol: 'SPY', type: 'stock' as const },
-    { symbol: 'AAPL', type: 'stock' as const },
-    { symbol: 'BINANCE:BTCUSDT', type: 'crypto' as const, display: 'BTC' },
-    { symbol: 'BINANCE:ETHUSDT', type: 'crypto' as const, display: 'ETH' }
-  ]
-  
-  for (const { symbol, type, display } of symbols) {
-    try {
-      // Using free Finnhub API (rate limited but reliable)
-      const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=demo`, {
-        headers: { 'Accept': 'application/json' }
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        
-        if (data.c && data.pc) { // current price and previous close
-          const currentPrice = data.c
-          const previousClose = data.pc
-          const change = currentPrice - previousClose
-          const changePercent = (change / previousClose) * 100
-          
-          marketData.push({
-            symbol: display || symbol,
-            price: Number(currentPrice.toFixed(type === 'forex' ? 4 : 2)),
-            change: Number(change.toFixed(type === 'forex' ? 4 : 2)),
-            changePercent: Number(changePercent.toFixed(2)),
-            type
-          })
-        }
-      }
-    } catch (error) {
-      console.log(`Failed to fetch ${symbol} from Finnhub:`, error.message)
-    }
-  }
-  
-  return marketData
-}
-
 function getReliableFallbackData(): MarketQuote[] {
-  // Updated realistic market data with some randomization
+  // Commodities futures realistic data with some randomization
   const baseData = [
-    { symbol: 'SPY', price: 612.85, change: 8.47, changePercent: 1.40, type: 'stock' as const },
-    { symbol: 'EUR/USD', price: 1.0298, change: -0.0067, changePercent: -0.65, type: 'forex' as const },
-    { symbol: 'BTC', price: 115750, change: 4850.25, changePercent: 4.37, type: 'crypto' as const },
-    { symbol: 'GC', price: 2745.60, change: 32.80, changePercent: 1.21, type: 'futures' as const },
-    { symbol: 'AAPL', price: 248.90, change: 5.23, changePercent: 2.15, type: 'stock' as const },
-    { symbol: 'GBP/USD', price: 1.2089, change: -0.0145, changePercent: -1.18, type: 'forex' as const },
-    { symbol: 'ETH', price: 4567.30, change: 178.85, changePercent: 4.08, type: 'crypto' as const },
-    { symbol: 'CL', price: 89.75, change: -1.67, changePercent: -1.83, type: 'futures' as const }
+    { symbol: 'GC=F', price: 2687.20, change: 18.40, changePercent: 0.69, type: 'futures' as const },
+    { symbol: 'SI=F', price: 31.45, change: 1.23, changePercent: 4.07, type: 'futures' as const },
+    { symbol: 'CL=F', price: 92.30, change: 1.45, changePercent: 1.59, type: 'futures' as const },
+    { symbol: 'NG=F', price: 3.85, change: -0.12, changePercent: -3.02, type: 'futures' as const },
+    { symbol: 'HG=F', price: 4.245, change: 0.067, changePercent: 1.60, type: 'futures' as const },
+    { symbol: 'ZC=F', price: 542.75, change: 12.50, changePercent: 2.36, type: 'futures' as const },
+    { symbol: 'ZS=F', price: 1567.25, change: 22.75, changePercent: 1.47, type: 'futures' as const },
+    { symbol: 'ZW=F', price: 625.50, change: -8.25, changePercent: -1.30, type: 'futures' as const }
   ]
   
   // Add small random variations to make it feel more live
@@ -139,8 +80,8 @@ function getReliableFallbackData(): MarketQuote[] {
     
     return {
       ...item,
-      price: Number(newPrice.toFixed(item.type === 'forex' ? 4 : 2)),
-      change: Number(newChange.toFixed(item.type === 'forex' ? 4 : 2)),
+      price: Number(newPrice.toFixed(2)),
+      change: Number(newChange.toFixed(2)),
       changePercent: Number(newChangePercent.toFixed(2))
     }
   })
@@ -155,21 +96,21 @@ serve(async (req) => {
   try {
     console.log('Fetching real-time market data with multiple sources...')
     
-    // Primary Yahoo Finance symbols
+    // Commodities Futures symbols only
     const yahooSymbols = [
-      'SPY',      // S&P 500 ETF
-      'EURUSD=X', // EUR/USD
-      'BTC-USD',  // Bitcoin
       'GC=F',     // Gold Futures
-      'AAPL',     // Apple
-      'GBPUSD=X', // GBP/USD
-      'ETH-USD',  // Ethereum
-      'CL=F'      // Crude Oil Futures
+      'SI=F',     // Silver Futures
+      'CL=F',     // Crude Oil WTI Futures
+      'NG=F',     // Natural Gas Futures
+      'HG=F',     // Copper Futures
+      'ZC=F',     // Corn Futures
+      'ZS=F',     // Soybean Futures
+      'ZW=F'      // Wheat Futures
     ]
     
     let marketData: MarketQuote[] = []
     
-    // Try Yahoo Finance first
+    // Try Yahoo Finance for commodities futures
     try {
       marketData = await fetchFromYahooFinance(yahooSymbols)
       console.log(`Yahoo Finance returned ${marketData.length} quotes`)
@@ -177,28 +118,9 @@ serve(async (req) => {
       console.log('Yahoo Finance failed:', error.message)
     }
     
-    // If Yahoo Finance didn't return enough data, try Finnhub as backup
-    if (marketData.length < 4) {
-      console.log('Yahoo Finance insufficient, trying Finnhub backup...')
-      try {
-        const finnhubData = await fetchFromFinnhub()
-        console.log(`Finnhub returned ${finnhubData.length} quotes`)
-        
-        // Merge data, prioritizing Yahoo Finance
-        const existingSymbols = new Set(marketData.map(item => item.symbol))
-        for (const item of finnhubData) {
-          if (!existingSymbols.has(item.symbol)) {
-            marketData.push(item)
-          }
-        }
-      } catch (error) {
-        console.log('Finnhub backup failed:', error.message)
-      }
-    }
-    
     // If still no data, use reliable fallback with variations
     if (marketData.length === 0) {
-      console.log('All APIs failed, using enhanced fallback data')
+      console.log('API failed, using enhanced fallback commodities data')
       marketData = getReliableFallbackData()
     }
     

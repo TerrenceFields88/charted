@@ -28,42 +28,61 @@ export const MarketsPage = () => {
   const { articles, isLoading: newsLoading, error: newsError, lastUpdated: newsLastUpdated, refetch: newsRefetch, hasApiKey } = useBloombergNews();
   const [selectedSymbol, setSelectedSymbol] = useState('SPY');
 
-  const formatPrice = (price: number, type: string) => {
-    if (type === 'forex') return price.toFixed(4);
-    if (type === 'crypto' && price > 1000) return price.toLocaleString();
+  const formatPrice = (price: number) => {
+    if (price > 1000) return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return price.toFixed(2);
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'crypto': return '₿';
-      case 'forex': return '💱';
-      case 'futures': return '📈';
-      default: return '📊';
-    }
+  const getCommodityIcon = (symbol: string) => {
+    if (symbol.includes('GC')) return '🥇'; // Gold
+    if (symbol.includes('SI')) return '⚪'; // Silver
+    if (symbol.includes('CL')) return '🛢️'; // Crude Oil
+    if (symbol.includes('NG')) return '🔥'; // Natural Gas
+    if (symbol.includes('HG')) return '🔶'; // Copper
+    if (symbol.includes('ZC')) return '🌽'; // Corn
+    if (symbol.includes('ZS')) return '🫘'; // Soybean
+    if (symbol.includes('ZW')) return '🌾'; // Wheat
+    return '📈';
+  };
+
+  const getCommodityName = (symbol: string) => {
+    const names: { [key: string]: string } = {
+      'GC=F': 'Gold',
+      'SI=F': 'Silver',
+      'CL=F': 'Crude Oil WTI',
+      'NG=F': 'Natural Gas',
+      'HG=F': 'Copper',
+      'ZC=F': 'Corn',
+      'ZS=F': 'Soybean',
+      'ZW=F': 'Wheat'
+    };
+    return names[symbol] || symbol;
   };
 
   const MarketDataSection = () => (
     <div className="space-y-6">
-      {/* Real-time Market Data Grid */}
+      {/* Real-time Commodities Futures Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {marketData.map((item) => (
           <Card key={item.symbol} className="relative">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <span className="text-lg">{getTypeIcon(item.type)}</span>
-                  {item.symbol}
+                  <span className="text-2xl">{getCommodityIcon(item.symbol)}</span>
+                  <div>
+                    <div>{getCommodityName(item.symbol)}</div>
+                    <div className="text-xs text-muted-foreground font-normal">{item.symbol}</div>
+                  </div>
                 </CardTitle>
                 <Badge variant="outline" className="text-xs">
-                  {item.type.toUpperCase()}
+                  FUTURES
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="text-2xl font-bold">
-                  ${formatPrice(item.price, item.type)}
+                  ${formatPrice(item.price)}
                 </div>
                 <div className={`flex items-center gap-2 text-sm ${
                   item.change >= 0 ? 'text-bullish' : 'text-bearish'
@@ -74,10 +93,10 @@ export const MarketsPage = () => {
                     <TrendingDown className="w-4 h-4" />
                   )}
                   <span className="font-medium">
-                    {item.change >= 0 ? '+' : ''}{item.change}
+                    {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}
                   </span>
                   <span className="font-medium">
-                    ({item.changePercent >= 0 ? '+' : ''}{item.changePercent}%)
+                    ({item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%)
                   </span>
                 </div>
               </div>
@@ -93,9 +112,9 @@ export const MarketsPage = () => {
             <div className="w-12 h-12 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
               <Activity className="w-6 h-6 text-primary" />
             </div>
-            <h3 className="font-semibold">Real-Time Market Data</h3>
+            <h3 className="font-semibold">Real-Time Commodities Futures Data</h3>
             <p className="text-sm text-muted-foreground">
-              Live financial data from Yahoo Finance API. Updates every 30 seconds during market hours.
+              Live commodities futures data from Yahoo Finance. Updates every 30 seconds during market hours.
             </p>
             {error && (
               <p className="text-sm text-destructive">
@@ -113,12 +132,11 @@ export const MarketsPage = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
 
     const categories = [
-      { value: 'all', label: 'All News' },
-      { value: 'markets', label: 'Markets' },
-      { value: 'technology', label: 'Technology' },
+      { value: 'all', label: 'All Commodities' },
       { value: 'energy', label: 'Energy' },
-      { value: 'currency', label: 'Currency' },
-      { value: 'policy', label: 'Policy' }
+      { value: 'metals', label: 'Metals' },
+      { value: 'agriculture', label: 'Agriculture' },
+      { value: 'markets', label: 'Market Analysis' }
     ];
 
     const filteredArticles = articles.filter(article => {
@@ -137,7 +155,7 @@ export const MarketsPage = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="Search financial news..."
+            placeholder="Search commodities news..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -169,7 +187,7 @@ export const MarketsPage = () => {
                 </div>
                 <h3 className="font-semibold mb-2">Setup Required</h3>
                 <p className="text-muted-foreground text-sm mb-4">
-                  Configure your Firecrawl API key to automatically fetch live Bloomberg news
+                  Configure your Firecrawl API key to automatically fetch live commodities news
                 </p>
               </CardContent>
             </Card>
@@ -180,10 +198,10 @@ export const MarketsPage = () => {
                   <Newspaper className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-semibold mb-2">
-                  {newsLoading ? 'Loading News...' : 'No Articles Found'}
+                  {newsLoading ? 'Loading Commodities News...' : 'No Articles Found'}
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  {newsLoading ? 'Fetching the latest Bloomberg news' : 
+                  {newsLoading ? 'Fetching the latest commodities news' : 
                    searchQuery ? `No articles match "${searchQuery}"` : 
                    newsError ? 'Failed to fetch news. Try refreshing.' :
                    'No articles available for this category'}
@@ -202,7 +220,7 @@ export const MarketsPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="w-5 h-5" />
-              Bloomberg TV Live
+              Commodities Market TV
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -220,7 +238,7 @@ export const MarketsPage = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
-            Markets & News
+            Commodities Futures
             <Badge variant={error ? "destructive" : "secondary"} className="ml-2">
               {error ? (
                 <>
@@ -258,11 +276,11 @@ export const MarketsPage = () => {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="markets" className="flex items-center gap-1">
               <Activity className="w-4 h-4" />
-              Markets
+              Futures
             </TabsTrigger>
             <TabsTrigger value="ai" className="flex items-center gap-1">
               <Brain className="w-4 h-4" />
-              AI Predictions
+              AI Analysis
             </TabsTrigger>
             <TabsTrigger value="news" className="flex items-center gap-1">
               <Newspaper className="w-4 h-4" />
@@ -270,7 +288,7 @@ export const MarketsPage = () => {
             </TabsTrigger>
             <TabsTrigger value="analysis" className="flex items-center gap-1">
               <BarChart3 className="w-4 h-4" />
-              Analysis
+              Charts
             </TabsTrigger>
           </TabsList>
           
@@ -282,7 +300,7 @@ export const MarketsPage = () => {
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Select Asset to Analyze</CardTitle>
+                  <CardTitle>Select Commodity to Analyze</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <select
@@ -292,7 +310,7 @@ export const MarketsPage = () => {
                   >
                     {marketData.map((data) => (
                       <option key={data.symbol} value={data.symbol}>
-                        {data.symbol} - ${formatPrice(data.price, data.type)} ({data.changePercent >= 0 ? '+' : ''}{data.changePercent.toFixed(2)}%)
+                        {getCommodityIcon(data.symbol)} {getCommodityName(data.symbol)} - ${formatPrice(data.price)} ({data.changePercent >= 0 ? '+' : ''}{data.changePercent.toFixed(2)}%)
                       </option>
                     ))}
                   </select>
