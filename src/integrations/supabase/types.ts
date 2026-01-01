@@ -19,7 +19,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           record_id: string | null
@@ -31,7 +31,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -43,7 +43,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -460,7 +460,7 @@ export type Database = {
           created_at: string
           details: Json | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           record_id: string | null
           table_name: string | null
           user_agent: string | null
@@ -471,7 +471,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           record_id?: string | null
           table_name?: string | null
           user_agent?: string | null
@@ -482,7 +482,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           record_id?: string | null
           table_name?: string | null
           user_agent?: string | null
@@ -611,22 +611,13 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
-      decrement_post_likes: {
-        Args: { post_id: string }
-        Returns: undefined
-      }
+      decrement_post_likes: { Args: { post_id: string }; Returns: undefined }
       get_or_create_conversation: {
         Args: { user_1: string; user_2: string }
         Returns: string
       }
-      increment_post_comments: {
-        Args: { post_id: string }
-        Returns: undefined
-      }
-      increment_post_likes: {
-        Args: { post_id: string }
-        Returns: undefined
-      }
+      increment_post_comments: { Args: { post_id: string }; Returns: undefined }
+      increment_post_likes: { Args: { post_id: string }; Returns: undefined }
       log_security_event: {
         Args: {
           p_action: string
@@ -637,10 +628,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      sanitize_content: {
-        Args: { content: string }
-        Returns: string
-      }
+      sanitize_content: { Args: { content: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
