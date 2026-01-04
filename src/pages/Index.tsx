@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { MarketTicker } from '@/components/MarketTicker';
 import { FeedPage } from '@/components/FeedPage';
 import { MarketsPage } from '@/components/MarketsPage';
 import { CreatePage } from '@/components/CreatePage';
 import { ProfilePage } from '@/components/ProfilePage';
-import { NotificationsPage } from '@/components/NotificationsPage';
 import { MessagesPage } from '@/components/MessagesPage';
 import { AIAnalystPage } from '@/components/AIAnalystPage';
+import { TradeJournalPage } from '@/components/TradeJournalPage';
+
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
 
@@ -23,6 +23,8 @@ const Index = () => {
         return <CreatePage />;
       case 'analyst':
         return <AIAnalystPage />;
+      case 'journal':
+        return <TradeJournalPage />;
       case 'profile':
         return <ProfilePage />;
       default:

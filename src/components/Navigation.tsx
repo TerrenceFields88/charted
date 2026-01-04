@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, TrendingUp, Plus, Bell, User, LogOut, Search, Activity, MessageCircle, LogIn, Brain } from 'lucide-react';
+import { Home, TrendingUp, Plus, User, LogOut, LogIn, Brain, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -18,8 +18,8 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const tabs = [
     { id: 'feed', label: 'Home', icon: Home },
     { id: 'markets', label: 'Markets', icon: TrendingUp },
-    { id: 'create', label: 'Post', icon: Plus },
     { id: 'analyst', label: 'AI Analyst', icon: Brain },
+    { id: 'journal', label: 'Journal', icon: BookOpen },
     { id: 'profile', label: 'Profile', icon: User },
   ];
 
@@ -52,7 +52,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               const isCreate = tab.id === 'create';
-              const requiresAuth = ['create', 'profile'].includes(tab.id);
+              const requiresAuth = ['create', 'profile', 'journal'].includes(tab.id);
               
               const handleTabClick = () => {
                 if (requiresAuth && !user) {

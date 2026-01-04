@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,8 @@ import {
   Crosshair,
   Upload,
   RefreshCw,
-  X
+  X,
+  BookmarkPlus
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +28,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useRealTimeMarketData } from '@/hooks/useRealTimeMarketData';
 import { TradingViewChart } from './TradingViewChart';
+import { useAISignals } from '@/hooks/useAISignals';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TradeSignal {
   symbol: string;
@@ -90,15 +93,17 @@ export const AIAnalystPage = () => {
   const [isIndicatorsOpen, setIsIndicatorsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentSignal, setCurrentSignal] = useState<TradeSignal | null>(null);
-  const [recentSignals, setRecentSignals] = useState<TradeSignal[]>([]);
   const [selectedCommodity, setSelectedCommodity] = useState(commoditySymbols[0]);
   const [chartAnalysis, setChartAnalysis] = useState<ChartAnalysis | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzingChart, setIsAnalyzingChart] = useState(false);
+  const [isSavingSignal, setIsSavingSignal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
   const { marketData, isLoading: isMarketLoading, refetch: refetchMarket } = useRealTimeMarketData();
+  const { signals, stats, saveSignal } = useAISignals();
+  const { user } = useAuth();
 
   // Get real-time price for selected commodity
   const getMarketPrice = (symbol: string) => {
@@ -108,12 +113,19 @@ export const AIAnalystPage = () => {
 
   const currentPrice = getMarketPrice(selectedCommodity.symbol);
 
-  const performanceStats = {
-    overallWinRate: 67,
-    totalTrades: recentSignals.length || 3,
-    commoditiesAccuracy: 75,
-    commoditiesTrades: recentSignals.length || 4,
-    activeSignals: recentSignals.filter(s => s.status === 'pending').length,
+  // Use real stats from the journal
+  const performanceStats = stats ? {
+    overallWinRate: stats.winRate,
+    totalTrades: stats.totalSignals,
+    commoditiesAccuracy: stats.winRate,
+    commoditiesTrades: stats.wonSignals + stats.lostSignals,
+    activeSignals: stats.pendingSignals,
+  } : {
+    overallWinRate: 0,
+    totalTrades: 0,
+    commoditiesAccuracy: 0,
+    commoditiesTrades: 0,
+    activeSignals: 0,
   };
 
   const indicators = [
@@ -167,7 +179,6 @@ export const AIAnalystPage = () => {
           riskLevel: data.analysis.riskLevel,
         };
         setCurrentSignal(newSignal);
-        setRecentSignals(prev => [newSignal, ...prev].slice(0, 10));
         
         // Update selected commodity for chart
         const commodity = commoditySymbols.find(c => c.symbol === symbol.toUpperCase());
@@ -603,6 +614,34 @@ export const AIAnalystPage = () => {
                     <h4 className="font-semibold text-sm mb-2">Analysis</h4>
                     <p className="text-sm text-muted-foreground">{chartAnalysis.reasoning}</p>
                   </div>
+
+                  {/* Save to Journal Button */}
+                  {user && (
+                    <Button 
+                      onClick={async () => {
+                        setIsSavingSignal(true);
+                        await saveSignal({
+                          symbol: chartAnalysis.symbol,
+                          direction: chartAnalysis.recommendation === 'BUY' ? 'LONG' : 'SHORT',
+                          entry_price: chartAnalysis.entryPrice,
+                          target_price: chartAnalysis.targetPrice,
+                          stop_loss: chartAnalysis.stopLoss,
+                          confidence: chartAnalysis.confidence,
+                          risk_level: chartAnalysis.riskLevel,
+                          timeframe: selectedTimeframe,
+                          reasoning: chartAnalysis.reasoning,
+                          key_factors: chartAnalysis.keyPatterns,
+                          signal_source: 'chart_upload',
+                        });
+                        setIsSavingSignal(false);
+                      }}
+                      disabled={isSavingSignal}
+                      className="w-full"
+                    >
+                      <BookmarkPlus className="w-4 h-4 mr-2" />
+                      {isSavingSignal ? 'Saving...' : 'Save to Trade Journal'}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -704,6 +743,34 @@ export const AIAnalystPage = () => {
                   ))}
                 </ul>
               </div>
+
+              {/* Save to Journal Button */}
+              {user && (
+                <Button 
+                  onClick={async () => {
+                    setIsSavingSignal(true);
+                    await saveSignal({
+                      symbol: currentSignal.symbol,
+                      direction: currentSignal.direction,
+                      entry_price: currentSignal.entry,
+                      target_price: currentSignal.target,
+                      stop_loss: currentSignal.stopLoss,
+                      confidence: currentSignal.confidence,
+                      risk_level: currentSignal.riskLevel,
+                      timeframe: selectedTimeframe,
+                      reasoning: currentSignal.reasoning,
+                      key_factors: currentSignal.keyFactors,
+                      signal_source: 'live',
+                    });
+                    setIsSavingSignal(false);
+                  }}
+                  disabled={isSavingSignal}
+                  className="w-full"
+                >
+                  <BookmarkPlus className="w-4 h-4 mr-2" />
+                  {isSavingSignal ? 'Saving...' : 'Save to Trade Journal'}
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}
@@ -758,15 +825,16 @@ export const AIAnalystPage = () => {
           </div>
         </div>
 
-        {/* Recent Signals */}
-        {recentSignals.length > 0 && (
+        {/* Recent Signals from Journal */}
+        {signals.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold">Recent Signals</h2>
+              <Badge variant="outline" className="text-xs">{signals.length} total</Badge>
             </div>
             <div className="space-y-3">
-              {recentSignals.slice(0, 5).map((signal, idx) => (
-                <Card key={idx} className="bg-muted/30">
+              {signals.slice(0, 5).map((signal) => (
+                <Card key={signal.id} className="bg-muted/30">
                   <CardContent className="py-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -776,15 +844,18 @@ export const AIAnalystPage = () => {
                             <Badge className={`text-xs ${getDirectionColor(signal.direction)}`}>
                               {signal.direction}
                             </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {signal.status}
+                            </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(signal.timestamp).toLocaleDateString()} • {new Date(signal.timestamp).toLocaleTimeString()}
+                            {new Date(signal.created_at).toLocaleDateString()} • {new Date(signal.created_at).toLocaleTimeString()}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm">Entry <span className="font-semibold">${formatPrice(signal.entry)}</span></p>
-                        <p className="text-xs text-muted-foreground">Target ${formatPrice(signal.target)}</p>
+                        <p className="text-sm">Entry <span className="font-semibold">${formatPrice(signal.entry_price)}</span></p>
+                        <p className="text-xs text-muted-foreground">Target ${formatPrice(signal.target_price)}</p>
                       </div>
                     </div>
                   </CardContent>
