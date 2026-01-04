@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_signals: {
+        Row: {
+          actual_exit_price: number | null
+          closed_at: string | null
+          confidence: number
+          created_at: string
+          direction: string
+          entry_price: number
+          id: string
+          key_factors: Json | null
+          notes: string | null
+          profit_loss_percent: number | null
+          reasoning: string | null
+          risk_level: string
+          signal_source: string | null
+          status: string
+          stop_loss: number
+          symbol: string
+          target_price: number
+          timeframe: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_exit_price?: number | null
+          closed_at?: string | null
+          confidence: number
+          created_at?: string
+          direction: string
+          entry_price: number
+          id?: string
+          key_factors?: Json | null
+          notes?: string | null
+          profit_loss_percent?: number | null
+          reasoning?: string | null
+          risk_level: string
+          signal_source?: string | null
+          status?: string
+          stop_loss: number
+          symbol: string
+          target_price: number
+          timeframe: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_exit_price?: number | null
+          closed_at?: string | null
+          confidence?: number
+          created_at?: string
+          direction?: string
+          entry_price?: number
+          id?: string
+          key_factors?: Json | null
+          notes?: string | null
+          profit_loss_percent?: number | null
+          reasoning?: string | null
+          risk_level?: string
+          signal_source?: string | null
+          status?: string
+          stop_loss?: number
+          symbol?: string
+          target_price?: number
+          timeframe?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
