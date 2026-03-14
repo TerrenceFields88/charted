@@ -13,22 +13,14 @@ const Index = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'feed':
-        return <FeedPage />;
-      case 'markets':
-        return <MarketsPage />;
-      case 'messages':
-        return <MessagesPage />;
-      case 'create':
-        return <CreatePage />;
-      case 'analyst':
-        return <AIAnalystPage />;
-      case 'journal':
-        return <TradeJournalPage />;
-      case 'profile':
-        return <ProfilePage />;
-      default:
-        return <FeedPage />;
+      case 'feed': return <FeedPage />;
+      case 'markets': return <MarketsPage />;
+      case 'messages': return <MessagesPage />;
+      case 'create': return <CreatePage />;
+      case 'analyst': return <AIAnalystPage />;
+      case 'journal': return <TradeJournalPage />;
+      case 'profile': return <ProfilePage />;
+      default: return <FeedPage />;
     }
   };
 

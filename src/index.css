@@ -41,6 +41,10 @@ All colors MUST be HSL.
     --bullish: 142 76% 36%;
     --bearish: 0 72% 51%;
     --neutral: 47 96% 60%;
+    --success: 142 76% 36%;
+    --success-foreground: 355 5% 4%;
+    --warning: 47 96% 53%;
+    --warning-foreground: 26 83% 14%;
     
     --gradient-bullish: linear-gradient(135deg, hsl(142 76% 36% / 0.1), hsl(142 76% 36% / 0.05));
     --gradient-bearish: linear-gradient(135deg, hsl(0 72% 51% / 0.1), hsl(0 72% 51% / 0.05));

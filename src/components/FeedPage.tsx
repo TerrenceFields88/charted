@@ -25,7 +25,7 @@ export const FeedPage = () => {
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Feed</h1>
+            <h1 className="text-xl font-bold">Home</h1>
             <Button
               variant="ghost"
               size="sm"

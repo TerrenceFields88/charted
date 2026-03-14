@@ -135,13 +135,15 @@ export const ProfilePage = () => {
     );
   }
 
-  const handleSettingsClick = (action: string) => {
+  const { signOut } = useAuth();
+
+  const handleSettingsClick = async (action: string) => {
     switch (action) {
       case 'edit-profile':
         navigate('/edit-profile');
         break;
       case 'logout':
-        // TODO: Implement logout
+        await signOut();
         break;
     }
   };
