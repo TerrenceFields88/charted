@@ -421,6 +421,14 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Story Viewer */}
+      <StoryViewer
+        open={storyViewerOpen}
+        onOpenChange={setStoryViewerOpen}
+        stories={formattedStories}
+        initialStoryIndex={0}
+      />
     </div>
   );
 };
