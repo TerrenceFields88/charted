@@ -378,6 +378,8 @@ export const AIAnalystPage = () => {
       </div>
 
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} progress={progress} />
+
+      <div className="px-4 pt-3 space-y-4">
         {/* Market Bar — scrollable chips */}
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
           {commoditySymbols.map((c) => {
