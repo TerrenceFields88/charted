@@ -17,6 +17,8 @@ import { useRealTimeMarketData } from '@/hooks/useRealTimeMarketData';
 import { TradingViewChart } from './TradingViewChart';
 import { useAISignals } from '@/hooks/useAISignals';
 import { useAuth } from '@/hooks/useAuth';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from './PullToRefreshIndicator';
 
 interface TradeSignal {
   symbol: string;
