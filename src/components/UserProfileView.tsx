@@ -50,10 +50,33 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
   const { posts } = usePosts();
   const { getUpdatedProfile, hasUpdate } = useRealTimeProfiles();
   const { getFollowStatus, hasUpdate: hasFollowUpdate } = useRealTimeFollows(user?.id);
+  const { fetchUserStories } = useStories();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [userStories, setUserStories] = useState<any[]>([]);
+  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
+
+  // Fetch stories for this user
+  useEffect(() => {
+    fetchUserStories(userId).then(setUserStories);
+  }, [userId]);
+
+  const hasStories = userStories.length > 0;
+
+  const formattedStories = userStories.map(story => ({
+    id: story.id,
+    user_id: story.user_id,
+    username: story.profiles.username,
+    display_name: story.profiles.display_name,
+    avatar_url: story.profiles.avatar_url,
+    content: story.content,
+    media_url: story.image_url,
+    media_type: story.image_url?.includes('.mp4') || story.image_url?.includes('.mov') ? 'video' as const : 'image' as const,
+    created_at: story.created_at,
+    expires_at: story.expires_at,
+  }));
 
   // Filter posts by the viewed user
   const userPosts = posts.filter(post => post.user.id === userId);
