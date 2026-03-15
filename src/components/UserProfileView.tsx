@@ -274,12 +274,25 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
       <Card>
         <CardContent className="p-4">
           <div className="flex gap-4">
-            <Avatar className="w-16 h-16">
-              <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
-              <AvatarFallback className="text-lg">
-                {(profile.display_name || profile.username)[0].toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            {/* Instagram-style story ring */}
+            <div
+              className={cn(
+                "rounded-full p-[3px] flex-shrink-0 transition-transform hover:scale-105",
+                hasStories
+                  ? "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 cursor-pointer"
+                  : "bg-muted"
+              )}
+              onClick={() => hasStories && setStoryViewerOpen(true)}
+            >
+              <div className="rounded-full p-[2px] bg-background">
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
+                  <AvatarFallback className="text-lg">
+                    {(profile.display_name || profile.username)[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
             
             <div className="flex-1 min-w-0 space-y-2">
               <div>
