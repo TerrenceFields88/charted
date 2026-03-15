@@ -10,8 +10,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePosts } from '@/hooks/useSupabaseData';
 import { useRealTimeProfiles, useRealTimeFollows } from '@/hooks/useRealTimeUpdates';
+import { useStories } from '@/hooks/useStories';
+import { StoryViewer } from '@/components/StoryViewer';
 import { toast } from '@/hooks/use-toast';
 import { sanitizeErrorMessage } from '@/lib/validation';
+import { cn } from '@/lib/utils';
 import { 
   ArrowLeft,
   UserPlus,
@@ -24,7 +27,6 @@ import {
   CheckCircle,
   Link
 } from 'lucide-react';
-
 interface UserProfile {
   id: string;
   user_id: string;

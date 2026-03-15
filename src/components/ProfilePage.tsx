@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
 import { usePosts } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
+import { useStories } from '@/hooks/useStories';
 import { Settings, Edit, Users, Plus, CheckCircle, LogOut } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
@@ -15,20 +16,48 @@ import { CreateStoryDialog } from '@/components/CreateStoryDialog';
 import { PortfolioSection } from '@/components/PortfolioSection';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { profile, loading } = useProfile();
   const { posts } = usePosts();
   const { user, signOut } = useAuth();
+  const { fetchUserStories } = useStories();
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
   const [createStoryOpen, setCreateStoryOpen] = useState(false);
-  const [stories] = useState([]);
+  const [userStories, setUserStories] = useState<any[]>([]);
+  const [storiesLoaded, setStoriesLoaded] = useState(false);
 
   const { getFormattedPerformance } = useTradingPerformance();
   const { aggregatedData, hasConnectedAccounts } = useRealTimeBrokerageData();
 
   const userPosts = posts.filter(post => post.user.id === user?.id);
+
+  // Fetch user's own stories
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserStories(user.id).then((stories) => {
+        setUserStories(stories);
+        setStoriesLoaded(true);
+      });
+    }
+  }, [user?.id]);
+
+  const hasStories = userStories.length > 0;
+
+  const formattedStories = userStories.map(story => ({
+    id: story.id,
+    user_id: story.user_id,
+    username: story.profiles.username,
+    display_name: story.profiles.display_name,
+    avatar_url: story.profiles.avatar_url,
+    content: story.content,
+    media_url: story.image_url,
+    media_type: story.image_url?.includes('.mp4') || story.image_url?.includes('.mov') ? 'video' as const : 'image' as const,
+    created_at: story.created_at,
+    expires_at: story.expires_at,
+  }));
 
   const performanceData = hasConnectedAccounts && aggregatedData.performanceMetrics
     ? {
@@ -58,7 +87,7 @@ export const ProfilePage = () => {
         </div>
         <div className="px-4 py-6 space-y-4">
           <div className="flex gap-4">
-            <Skeleton className="w-16 h-16 rounded-full" />
+            <Skeleton className="w-20 h-20 rounded-full" />
             <div className="space-y-2 flex-1">
               <Skeleton className="h-5 w-32" />
               <Skeleton className="h-4 w-24" />
@@ -113,23 +142,34 @@ export const ProfilePage = () => {
       </div>
 
       <div className="px-4 py-4 space-y-4">
-        {/* Profile card */}
+        {/* Profile card with Story Ring */}
         <div className="flex gap-4">
-          <div className="relative">
-            <Avatar
-              className="w-16 h-16 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
-              onClick={() => stories.length > 0 ? setStoryViewerOpen(true) : setCreateStoryOpen(true)}
+          <div className="relative flex-shrink-0">
+            {/* Instagram-style gradient ring */}
+            <div
+              className={cn(
+                "rounded-full p-[3px] cursor-pointer transition-transform hover:scale-105",
+                hasStories
+                  ? "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600"
+                  : "bg-muted"
+              )}
+              onClick={() => hasStories ? setStoryViewerOpen(true) : setCreateStoryOpen(true)}
             >
-              <AvatarImage src={profile.avatar_url || undefined} />
-              <AvatarFallback className="text-lg">
-                {(profile.display_name || profile.username)[0].toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+              <div className="rounded-full p-[2px] bg-background">
+                <Avatar className="w-[72px] h-[72px]">
+                  <AvatarImage src={profile.avatar_url || undefined} />
+                  <AvatarFallback className="text-xl">
+                    {(profile.display_name || profile.username)[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
+            {/* Add story button */}
             <button
-              className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+              className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-sm"
               onClick={() => setCreateStoryOpen(true)}
             >
-              <Plus className="w-3 h-3 text-primary-foreground" />
+              <Plus className="w-3.5 h-3.5 text-primary-foreground" />
             </button>
           </div>
 
@@ -207,8 +247,14 @@ export const ProfilePage = () => {
         </Tabs>
       </div>
 
-      <StoryViewer open={storyViewerOpen} onOpenChange={setStoryViewerOpen} stories={[]} initialStoryIndex={0} />
-      <CreateStoryDialog open={createStoryOpen} onOpenChange={setCreateStoryOpen} />
+      <StoryViewer open={storyViewerOpen} onOpenChange={setStoryViewerOpen} stories={formattedStories} initialStoryIndex={0} />
+      <CreateStoryDialog open={createStoryOpen} onOpenChange={(open) => {
+        setCreateStoryOpen(open);
+        // Refresh stories when dialog closes
+        if (!open && user?.id) {
+          fetchUserStories(user.id).then(setUserStories);
+        }
+      }} />
     </div>
   );
 };
