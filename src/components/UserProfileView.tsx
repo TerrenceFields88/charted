@@ -10,8 +10,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePosts } from '@/hooks/useSupabaseData';
 import { useRealTimeProfiles, useRealTimeFollows } from '@/hooks/useRealTimeUpdates';
+import { useStories } from '@/hooks/useStories';
+import { StoryViewer } from '@/components/StoryViewer';
 import { toast } from '@/hooks/use-toast';
 import { sanitizeErrorMessage } from '@/lib/validation';
+import { cn } from '@/lib/utils';
 import { 
   ArrowLeft,
   UserPlus,
@@ -24,7 +27,6 @@ import {
   CheckCircle,
   Link
 } from 'lucide-react';
-
 interface UserProfile {
   id: string;
   user_id: string;
@@ -48,10 +50,33 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
   const { posts } = usePosts();
   const { getUpdatedProfile, hasUpdate } = useRealTimeProfiles();
   const { getFollowStatus, hasUpdate: hasFollowUpdate } = useRealTimeFollows(user?.id);
+  const { fetchUserStories } = useStories();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [userStories, setUserStories] = useState<any[]>([]);
+  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
+
+  // Fetch stories for this user
+  useEffect(() => {
+    fetchUserStories(userId).then(setUserStories);
+  }, [userId]);
+
+  const hasStories = userStories.length > 0;
+
+  const formattedStories = userStories.map(story => ({
+    id: story.id,
+    user_id: story.user_id,
+    username: story.profiles.username,
+    display_name: story.profiles.display_name,
+    avatar_url: story.profiles.avatar_url,
+    content: story.content,
+    media_url: story.image_url,
+    media_type: story.image_url?.includes('.mp4') || story.image_url?.includes('.mov') ? 'video' as const : 'image' as const,
+    created_at: story.created_at,
+    expires_at: story.expires_at,
+  }));
 
   // Filter posts by the viewed user
   const userPosts = posts.filter(post => post.user.id === userId);
@@ -249,12 +274,25 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
       <Card>
         <CardContent className="p-4">
           <div className="flex gap-4">
-            <Avatar className="w-16 h-16">
-              <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
-              <AvatarFallback className="text-lg">
-                {(profile.display_name || profile.username)[0].toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            {/* Instagram-style story ring */}
+            <div
+              className={cn(
+                "rounded-full p-[3px] flex-shrink-0 transition-transform hover:scale-105",
+                hasStories
+                  ? "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 cursor-pointer"
+                  : "bg-muted"
+              )}
+              onClick={() => hasStories && setStoryViewerOpen(true)}
+            >
+              <div className="rounded-full p-[2px] bg-background">
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
+                  <AvatarFallback className="text-lg">
+                    {(profile.display_name || profile.username)[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
             
             <div className="flex-1 min-w-0 space-y-2">
               <div>
@@ -383,6 +421,14 @@ export const UserProfileView = ({ userId, onBack }: UserProfileViewProps) => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Story Viewer */}
+      <StoryViewer
+        open={storyViewerOpen}
+        onOpenChange={setStoryViewerOpen}
+        stories={formattedStories}
+        initialStoryIndex={0}
+      />
     </div>
   );
 };
