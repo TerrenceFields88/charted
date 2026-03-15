@@ -13,8 +13,8 @@ export const CreatePage = () => {
   if (!user) {
     return (
       <div className="pb-20">
-        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
-          <h1 className="text-xl font-bold">Create Post</h1>
+        <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
+          <h1 className="text-lg font-bold tracking-tight">Create Post</h1>
         </div>
         <div className="px-4 py-6">
           <Card>
@@ -42,8 +42,8 @@ export const CreatePage = () => {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
-        <h1 className="text-xl font-bold">Create Post</h1>
+      <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
+        <h1 className="text-lg font-bold tracking-tight">Create Post</h1>
       </div>
 
       <div className="px-4 py-6">

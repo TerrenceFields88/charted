@@ -17,6 +17,8 @@ import { useRealTimeMarketData } from '@/hooks/useRealTimeMarketData';
 import { TradingViewChart } from './TradingViewChart';
 import { useAISignals } from '@/hooks/useAISignals';
 import { useAuth } from '@/hooks/useAuth';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from './PullToRefreshIndicator';
 
 interface TradeSignal {
   symbol: string;
@@ -255,6 +257,10 @@ export const AIAnalystPage = () => {
   const { signals, stats, saveSignal } = useAISignals();
   const { user } = useAuth();
 
+  const { containerRef, pullDistance, isRefreshing, progress } = usePullToRefresh({
+    onRefresh: async () => { await refetchMarket(); },
+  });
+
   const getMarketPrice = (symbol: string) => {
     const data = marketData.find(m => m.symbol === symbol);
     return data ? { price: data.price, change: data.change, changePercent: data.changePercent } : null;
@@ -357,13 +363,13 @@ export const AIAnalystPage = () => {
   const performanceStats = stats || { winRate: 0, totalSignals: 0, wonSignals: 0, lostSignals: 0, pendingSignals: 0 };
 
   return (
-    <div className="pb-20">
+    <div ref={containerRef} className="pb-20 min-h-screen overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
+      <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
-            <h1 className="text-lg font-bold">AI Analyst</h1>
+            <h1 className="text-lg font-bold tracking-tight">AI Analyst</h1>
           </div>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={refetchMarket} disabled={isMarketLoading}>
             <RefreshCw className={`w-4 h-4 ${isMarketLoading ? 'animate-spin' : ''}`} />
@@ -371,7 +377,9 @@ export const AIAnalystPage = () => {
         </div>
       </div>
 
-      <div className="px-4 py-3 space-y-4">
+      <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} progress={progress} />
+
+      <div className="px-4 pt-3 space-y-4">
         {/* Market Bar — scrollable chips */}
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
           {commoditySymbols.map((c) => {
