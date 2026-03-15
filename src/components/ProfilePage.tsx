@@ -7,182 +7,104 @@ import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
 import { usePosts } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { 
-   Settings, 
-   Edit, 
-   Users,
-   Plus,
-   CheckCircle,
-   MoreHorizontal,
-   LogOut
- } from 'lucide-react';
+import { Settings, Edit, Users, Plus, CheckCircle, LogOut } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
 import { StoryViewer } from '@/components/StoryViewer';
 import { CreateStoryDialog } from '@/components/CreateStoryDialog';
 import { PortfolioSection } from '@/components/PortfolioSection';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator,
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { profile, loading } = useProfile();
   const { posts } = usePosts();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
   const [createStoryOpen, setCreateStoryOpen] = useState(false);
-  const [stories, setStories] = useState([]);
-  
-  const { performance, getFormattedPerformance } = useTradingPerformance();
-  const { 
-    aggregatedData, 
-    hasConnectedAccounts,
-  } = useRealTimeBrokerageData();
-  
-  // Filter posts by current user
+  const [stories] = useState([]);
+
+  const { getFormattedPerformance } = useTradingPerformance();
+  const { aggregatedData, hasConnectedAccounts } = useRealTimeBrokerageData();
+
   const userPosts = posts.filter(post => post.user.id === user?.id);
 
-  // Get real trading performance data - use real-time data if available
-  const performanceData = hasConnectedAccounts && aggregatedData.performanceMetrics 
+  const performanceData = hasConnectedAccounts && aggregatedData.performanceMetrics
     ? {
-        portfolioReturn: aggregatedData.totalPnL >= 0 
+        portfolioReturn: aggregatedData.totalPnL >= 0
           ? `+${(aggregatedData.totalPnL / aggregatedData.totalEquity * 100).toFixed(2)}%`
           : `${(aggregatedData.totalPnL / aggregatedData.totalEquity * 100).toFixed(2)}%`,
         winRate: `${aggregatedData.performanceMetrics.win_rate.toFixed(0)}%`,
       }
     : getFormattedPerformance();
 
-  // Show create profile UI if no user is logged in
   if (!user) {
     return (
-      <div className="pb-20">
-        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
-          <h1 className="text-xl font-bold">Profile</h1>
-        </div>
-        <div className="px-4 py-6">
-          <Card>
-            <CardContent className="pt-6 text-center space-y-4">
-              <Avatar className="w-24 h-24 mx-auto">
-                <AvatarFallback className="text-2xl">
-                  <Users className="w-8 h-8" />
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-xl font-bold mb-2">Join the Community</h2>
-                <p className="text-muted-foreground mb-4">
-                  Log in to create your trading profile and connect with traders
-                </p>
-                <Button onClick={() => navigate('/auth')}>
-                  <Users className="w-4 h-4 mr-2" />
-                  Sign Up / Log In
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="pb-20 flex flex-col items-center justify-center min-h-[60vh] px-4">
+        <Users className="w-10 h-10 text-muted-foreground mb-3" />
+        <h2 className="text-lg font-bold mb-1">Join the Community</h2>
+        <p className="text-sm text-muted-foreground text-center mb-4">Log in to create your trading profile</p>
+        <Button onClick={() => navigate('/auth')} size="sm">Sign Up / Log In</Button>
       </div>
     );
   }
 
-  // Show loading state
   if (loading) {
     return (
       <div className="pb-20">
-        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
-          <h1 className="text-xl font-bold">Profile</h1>
+        <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
+          <h1 className="text-lg font-bold">Profile</h1>
         </div>
-        <div className="px-4 py-6 text-center">
-          <p>Loading profile...</p>
+        <div className="px-4 py-6 space-y-4">
+          <div className="flex gap-4">
+            <Skeleton className="w-16 h-16 rounded-full" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Show create profile UI if no profile exists
   if (!profile) {
     return (
-      <div className="pb-20">
-        <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
-          <h1 className="text-xl font-bold">Profile</h1>
-        </div>
-        <div className="px-4 py-6">
-          <Card>
-            <CardContent className="pt-6 text-center space-y-4">
-              <Avatar className="w-24 h-24 mx-auto">
-                <AvatarFallback className="text-2xl">
-                  <Plus className="w-8 h-8" />
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-xl font-bold mb-2">Create Your Profile</h2>
-                <p className="text-muted-foreground mb-4">
-                  Set up your trading profile to start connecting with the community
-                </p>
-                <Button onClick={() => navigate('/edit-profile')}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Profile
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="pb-20 flex flex-col items-center justify-center min-h-[60vh] px-4">
+        <Plus className="w-10 h-10 text-muted-foreground mb-3" />
+        <h2 className="text-lg font-bold mb-1">Create Your Profile</h2>
+        <p className="text-sm text-muted-foreground text-center mb-4">Set up your trading profile to get started</p>
+        <Button onClick={() => navigate('/edit-profile')} size="sm">
+          <Plus className="w-4 h-4 mr-1" /> Create Profile
+        </Button>
       </div>
     );
   }
-
-  const { signOut } = useAuth();
-
-  const handleSettingsClick = async (action: string) => {
-    switch (action) {
-      case 'edit-profile':
-        navigate('/edit-profile');
-        break;
-      case 'logout':
-        await signOut();
-        break;
-    }
-  };
-
-  const handleProfilePhotoClick = () => {
-    // Check if user has stories
-    if (stories.length > 0) {
-      setStoryViewerOpen(true);
-    } else {
-      setCreateStoryOpen(true);
-    }
-  };
 
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
+      <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Profile</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate('/edit-profile')}>
-              <Edit className="w-4 h-4 mr-1" />
-              Edit
+          <h1 className="text-lg font-bold tracking-tight">Profile</h1>
+          <div className="flex gap-1.5">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/edit-profile')}>
+              <Edit className="w-4 h-4" />
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
                   <Settings className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => handleSettingsClick('edit-profile')}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem onClick={() => navigate('/edit-profile')}>
+                  <Edit className="w-4 h-4 mr-2" /> Edit Profile
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleSettingsClick('logout')} className="text-destructive focus:text-destructive">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+                <DropdownMenuItem onClick={() => signOut()} className="text-destructive focus:text-destructive">
+                  <LogOut className="w-4 h-4 mr-2" /> Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -190,116 +112,81 @@ export const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="px-4 py-4 space-y-6">
-        {/* Profile Header */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex gap-4">
-              <div className="relative">
-                <Avatar 
-                  className="w-16 h-16 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
-                  onClick={handleProfilePhotoClick}
-                >
-                  <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || profile.username} />
-                  <AvatarFallback className="text-lg">
-                    {(profile.display_name || profile.username)[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                {/* Story ring indicator */}
-                {stories.length > 0 && (
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 to-orange-500 p-0.5">
-                    <div className="w-full h-full bg-background rounded-full" />
-                  </div>
-                )}
-                {/* Add story button */}
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="absolute -bottom-1 -right-1 w-6 h-6 p-0 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCreateStoryOpen(true);
-                  }}
-                >
-                  <Plus className="w-3 h-3" />
-                </Button>
+      <div className="px-4 py-4 space-y-4">
+        {/* Profile card */}
+        <div className="flex gap-4">
+          <div className="relative">
+            <Avatar
+              className="w-16 h-16 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
+              onClick={() => stories.length > 0 ? setStoryViewerOpen(true) : setCreateStoryOpen(true)}
+            >
+              <AvatarImage src={profile.avatar_url || undefined} />
+              <AvatarFallback className="text-lg">
+                {(profile.display_name || profile.username)[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+              onClick={() => setCreateStoryOpen(true)}
+            >
+              <Plus className="w-3 h-3 text-primary-foreground" />
+            </button>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base font-semibold truncate">{profile.display_name || profile.username}</h2>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              @{profile.username}
+              {profile.verified_trader && <CheckCircle className="w-3 h-3 text-success" />}
+            </p>
+            {profile.bio && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{profile.bio}</p>}
+
+            <div className="flex gap-5 mt-2">
+              <div>
+                <p className="text-sm font-semibold">{performanceData.winRate}</p>
+                <p className="text-[10px] text-muted-foreground">Win Rate</p>
               </div>
-              
-              <div className="flex-1 min-w-0 space-y-2">
-                <div>
-                  <h2 className="text-lg font-semibold truncate">{profile.display_name || profile.username}</h2>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    @{profile.username}
-                    {profile.verified_trader && <CheckCircle className="w-3 h-3 text-bullish" />}
-                  </p>
-                </div>
-                
-                {profile.bio && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">{profile.bio}</p>
-                )}
-                
-                {/* Simple Stats Row */}
-                <div className="flex gap-6 text-sm pt-2">
-                  <div className="text-center">
-                    <div className="font-semibold">{performanceData.winRate}</div>
-                    <div className="text-xs text-muted-foreground">Win Rate</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-semibold">{profile.follower_count}</div>
-                    <div className="text-xs text-muted-foreground">Followers</div>
-                  </div>
-                </div>
+              <div>
+                <p className="text-sm font-semibold">{profile.follower_count}</p>
+                <p className="text-[10px] text-muted-foreground">Followers</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold">{userPosts.length}</p>
+                <p className="text-[10px] text-muted-foreground">Posts</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Tabs defaultValue="posts" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="posts">Posts</TabsTrigger>
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
+        {/* Tabs */}
+        <Tabs defaultValue="posts">
+          <TabsList className="grid w-full grid-cols-3 h-9">
+            <TabsTrigger value="posts" className="text-xs">Posts</TabsTrigger>
+            <TabsTrigger value="portfolio" className="text-xs">Portfolio</TabsTrigger>
+            <TabsTrigger value="activity" className="text-xs">Activity</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="posts">
+          <TabsContent value="posts" className="mt-3">
             {userPosts.length === 0 ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center text-muted-foreground">
-                    <p>No posts yet.</p>
-                    <p className="text-sm">Share your first trading insight or market analysis.</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="text-center py-10 text-sm text-muted-foreground">
+                <p>No posts yet</p>
+                <p className="text-xs mt-1">Share your first trading insight!</p>
+              </div>
             ) : (
-              <div className="grid grid-cols-3 gap-1">
+              <div className="grid grid-cols-3 gap-0.5 rounded-lg overflow-hidden">
                 {userPosts.map((post) => (
-                  <div 
-                    key={post.id} 
-                    className="aspect-square bg-muted rounded-sm overflow-hidden group cursor-pointer relative"
-                  >
+                  <div key={post.id} className="aspect-square bg-muted overflow-hidden group cursor-pointer relative">
                     {post.image ? (
-                      <img 
-                        src={post.image} 
-                        alt="Post content"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
+                      <img src={post.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/20 p-2">
-                        <p className="text-xs text-center line-clamp-4 text-muted-foreground group-hover:text-foreground transition-colors">
-                          {post.content}
-                        </p>
+                      <div className="w-full h-full flex items-center justify-center bg-muted p-2">
+                        <p className="text-[10px] text-center line-clamp-4 text-muted-foreground">{post.content}</p>
                       </div>
                     )}
-                    {/* Hover overlay with stats */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                      <div className="text-white text-xs space-y-1 text-center">
-                        <div className="flex items-center gap-1 justify-center">
-                          <span>❤️ {post.likes || 0}</span>
-                        </div>
-                        <div className="flex items-center gap-1 justify-center">
-                          <span>💬 {post.comments || 0}</span>
-                        </div>
+                    <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="text-foreground text-[10px] space-y-0.5 text-center">
+                        <p>❤️ {post.likes || 0}</p>
+                        <p>💬 {post.comments || 0}</p>
                       </div>
                     </div>
                   </div>
@@ -308,36 +195,20 @@ export const ProfilePage = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="portfolio">
+          <TabsContent value="portfolio" className="mt-3">
             <PortfolioSection />
           </TabsContent>
 
-          <TabsContent value="activity">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center text-muted-foreground">
-                  <p>Activity coming soon.</p>
-                  <p className="text-sm">Your recent trades and posts will appear here.</p>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="activity" className="mt-3">
+            <div className="text-center py-10 text-sm text-muted-foreground">
+              <p>Activity coming soon</p>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Story Viewer */}
-      <StoryViewer
-        open={storyViewerOpen}
-        onOpenChange={setStoryViewerOpen}
-        stories={[]}
-        initialStoryIndex={0}
-      />
-
-      {/* Create Story Dialog */}
-      <CreateStoryDialog
-        open={createStoryOpen}
-        onOpenChange={setCreateStoryOpen}
-      />
+      <StoryViewer open={storyViewerOpen} onOpenChange={setStoryViewerOpen} stories={[]} initialStoryIndex={0} />
+      <CreateStoryDialog open={createStoryOpen} onOpenChange={setCreateStoryOpen} />
     </div>
   );
 };

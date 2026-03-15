@@ -1,106 +1,83 @@
-
 import { useState } from 'react';
 import { PostCard } from './PostCard';
 import { NewsWidget } from '@/components/NewsWidget';
 import { usePosts } from '@/hooks/useSupabaseData';
-import { RefreshCw, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
 import { UserSearchPage } from '@/components/UserSearchPage';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ErrorFallback } from './ErrorFallback';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from './PullToRefreshIndicator';
 
 export const FeedPage = () => {
   const { posts, loading, error, refetch } = usePosts();
   const [showSearch, setShowSearch] = useState(false);
 
-  const handleRefresh = () => {
-    refetch();
-  };
+  const { containerRef, pullDistance, isRefreshing, progress } = usePullToRefresh({
+    onRefresh: async () => { await refetch(); },
+  });
 
   return (
-    <div className="pb-20 animate-fade-in">
+    <div ref={containerRef} className="pb-20 min-h-screen overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
+      <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold">Home</h1>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowSearch(!showSearch)}
-              className="h-8 w-8 p-0 transition-smooth hover:scale-110"
-            >
-              <Search className="w-4 h-4" />
-            </Button>
-          </div>
+          <h1 className="text-lg font-bold tracking-tight">Home</h1>
           <Button
             variant="ghost"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={loading}
-            className="h-8 w-8 p-0 transition-smooth hover:scale-110"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setShowSearch(!showSearch)}
           >
-            <RefreshCw className={`w-4 h-4 transition-smooth ${loading ? 'animate-spin' : ''}`} />
+            <Search className="w-4 h-4" />
           </Button>
         </div>
         {showSearch && (
-          <div className="mt-3 animate-scale-in">
+          <div className="mt-2 animate-scale-in">
             <UserSearchPage />
           </div>
         )}
       </div>
 
-      {/* Feed Content */}
-      <div className="px-4 space-y-4">
-        {/* Simplified News Section */}
+      <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} progress={progress} />
+
+      {/* Feed */}
+      <div className="px-4 pt-3 space-y-3">
         <ErrorBoundary fallback={<ErrorFallback minimal />}>
           <NewsWidget maxArticles={2} showHeader={false} />
         </ErrorBoundary>
 
         {loading && posts.length === 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="p-4 bg-card rounded-lg border space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
+              <div key={i} className="p-4 bg-card rounded-xl space-y-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-9 w-9 rounded-full" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-3.5 w-24" />
                     <Skeleton className="h-3 w-16" />
                   </div>
                 </div>
-                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-16 w-full rounded-lg" />
               </div>
             ))}
           </div>
         ) : error ? (
-          <div className="text-center text-muted-foreground py-8">
-            Error loading posts: {error}
+          <div className="text-center text-muted-foreground py-12 text-sm">
+            Something went wrong. Pull down to retry.
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center text-muted-foreground py-8">
-            No posts yet. Create the first one!
+          <div className="text-center text-muted-foreground py-12 text-sm">
+            No posts yet. Be the first to share!
           </div>
         ) : (
-          <>
-            {posts.map((post) => (
-              <ErrorBoundary key={post.id} fallback={<ErrorFallback minimal />}>
-                <PostCard post={post} />
-              </ErrorBoundary>
-            ))}
-            {loading && (
-              <div className="mt-4 p-4 bg-card rounded-lg border">
-                <div className="flex items-center space-x-3">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-16" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
+          posts.map((post) => (
+            <ErrorBoundary key={post.id} fallback={<ErrorFallback minimal />}>
+              <PostCard post={post} />
+            </ErrorBoundary>
+          ))
         )}
       </div>
     </div>
