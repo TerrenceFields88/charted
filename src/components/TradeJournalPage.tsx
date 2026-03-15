@@ -70,7 +70,7 @@ export const TradeJournalPage = () => {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40 px-4 py-3">
+      <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-primary" />
           <h1 className="text-lg font-bold">Trade Journal</h1>
