@@ -257,6 +257,10 @@ export const AIAnalystPage = () => {
   const { signals, stats, saveSignal } = useAISignals();
   const { user } = useAuth();
 
+  const { containerRef, pullDistance, isRefreshing, progress } = usePullToRefresh({
+    onRefresh: async () => { await refetchMarket(); },
+  });
+
   const getMarketPrice = (symbol: string) => {
     const data = marketData.find(m => m.symbol === symbol);
     return data ? { price: data.price, change: data.change, changePercent: data.changePercent } : null;
