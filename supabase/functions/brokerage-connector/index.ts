@@ -324,6 +324,25 @@ serve(async (req) => {
       return account;
     };
 
+    // Helper: decrypt credentials using pgcrypto
+    const decryptionKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const decryptCredential = async (encrypted: string | null): Promise<string> => {
+      if (!encrypted) return '';
+      try {
+        const { data, error } = await supabaseClient.rpc('decrypt_credential', {
+          p_encrypted: encrypted,
+          p_key: decryptionKey
+        });
+        if (error) {
+          console.error('Decryption error:', error);
+          return encrypted; // Fallback for legacy unencrypted data
+        }
+        return data || '';
+      } catch {
+        return encrypted; // Fallback for legacy unencrypted data
+      }
+    };
+
     let result: any = {};
 
     switch (action) {
