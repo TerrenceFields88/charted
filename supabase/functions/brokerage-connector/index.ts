@@ -422,11 +422,13 @@ serve(async (req) => {
         const account = await getOwnedAccount(account_id);
 
         const connector = getConnector(account.broker_name);
+        const decryptedPassword = await decryptCredential(account.password_encrypted);
+        const decryptedApiKey = await decryptCredential(account.api_key_encrypted);
         const accountData = await connector.getAccountData({
           broker_name: account.broker_name,
           username: account.username,
-          password: account.password_encrypted,
-          api_key: account.api_key_encrypted
+          password: decryptedPassword,
+          api_key: decryptedApiKey
         });
 
         // Update sync timestamp
