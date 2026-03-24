@@ -367,9 +367,7 @@ serve(async (req) => {
           .maybeSingle();
 
         if (existingAccount) {
-          // Update existing account with re-encrypted credentials
-          const { error: updateError } = await supabaseClient.rpc('exec_sql', {});
-          // Use raw SQL for pgcrypto encryption
+          // Update existing account
           const { error: dbError } = await supabaseClient
             .from('brokerage_accounts')
             .update({
