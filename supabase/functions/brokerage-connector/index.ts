@@ -462,11 +462,11 @@ serve(async (req) => {
       case 'trades': {
         const account = await getOwnedAccount(account_id);
 
-        const connector = getConnector(account.broker_name);
-        const trades = await connector.getTrades({
+        const connector3 = getConnector(account.broker_name);
+        const trades = await connector3.getTrades({
           broker_name: account.broker_name,
           username: account.username,
-          password: account.password_encrypted
+          password: await decryptCredential(account.password_encrypted)
         }, limit || 50);
 
         result = { success: true, trades };
