@@ -718,6 +718,10 @@ export type Database = {
         Returns: string
       }
       decrement_post_likes: { Args: { post_id: string }; Returns: undefined }
+      decrypt_credential: {
+        Args: { p_encrypted: string; p_key: string }
+        Returns: string
+      }
       get_or_create_conversation: {
         Args: { user_1: string; user_2: string }
         Returns: string
