@@ -448,11 +448,11 @@ serve(async (req) => {
       case 'positions': {
         const account = await getOwnedAccount(account_id);
 
-        const connector = getConnector(account.broker_name);
-        const positions = await connector.getPositions({
+        const connector2 = getConnector(account.broker_name);
+        const positions = await connector2.getPositions({
           broker_name: account.broker_name,
           username: account.username,
-          password: account.password_encrypted
+          password: await decryptCredential(account.password_encrypted)
         });
 
         result = { success: true, positions };
