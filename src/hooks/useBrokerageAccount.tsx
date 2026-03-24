@@ -59,7 +59,7 @@ export const useBrokerageAccount = () => {
     if (!user) return null;
 
     try {
-      // First, test the connection using the brokerage connector
+      // Connect and create account server-side (credentials encrypted in edge function)
       const { data: connectionResult, error: connectionError } = await supabase.functions.invoke('brokerage-connector', {
         body: {
           action: 'connect',
@@ -77,27 +77,9 @@ export const useBrokerageAccount = () => {
         throw new Error(connectionResult?.error || 'Failed to connect to brokerage account');
       }
 
-      // If connection is successful, store the account
-      const { data, error: createError } = await supabase
-        .from('brokerage_accounts')
-        .insert({
-          user_id: user.id,
-          broker_name: accountData.broker_name,
-          username: accountData.username,
-          account_id: accountData.username, // Use username as account_id for now
-          password_encrypted: accountData.password, // In real app, this should be encrypted
-          api_key_encrypted: accountData.api_key, // In real app, this should be encrypted
-          last_sync_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (createError) {
-        throw createError;
-      }
-
-      setAccounts(prev => [...prev, data]);
-      return data;
+      // Refresh accounts from DB (account was created server-side)
+      await fetchAccounts();
+      return connectionResult;
     } catch (err) {
       console.error('Error creating brokerage account:', err);
       setError(err instanceof Error ? err.message : 'Failed to add account');

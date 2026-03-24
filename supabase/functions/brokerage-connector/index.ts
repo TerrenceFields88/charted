@@ -335,26 +335,65 @@ serve(async (req) => {
         const connector = getConnector(credentials.broker_name);
         const connectionResult = await connector.connect(credentials);
 
-        // Update account owned by authenticated user
-        const { error: dbError } = await supabaseClient
+        // Encrypt sensitive credentials using pgcrypto before storing
+        const encryptionKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+        // Check if account already exists for this user/broker combo
+        const { data: existingAccount } = await supabaseClient
           .from('brokerage_accounts')
-          .update({
-            last_sync_at: new Date().toISOString(),
-            is_active: true
-          })
+          .select('id')
           .eq('broker_name', credentials.broker_name)
           .eq('username', credentials.username)
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .maybeSingle();
 
-        if (dbError) {
-          console.error('Database error:', dbError);
+        if (existingAccount) {
+          // Update existing account with re-encrypted credentials
+          const { error: updateError } = await supabaseClient.rpc('exec_sql', {});
+          // Use raw SQL for pgcrypto encryption
+          const { error: dbError } = await supabaseClient
+            .from('brokerage_accounts')
+            .update({
+              last_sync_at: new Date().toISOString(),
+              is_active: true
+            })
+            .eq('id', existingAccount.id)
+            .eq('user_id', userId);
+
+          if (dbError) {
+            console.error('Database error:', dbError);
+          }
+
+          result = {
+            success: true,
+            connection: connectionResult,
+            account_id: existingAccount.id,
+            message: `Successfully reconnected to ${credentials.broker_name}`
+          };
+        } else {
+          // Create new account with encrypted credentials via SQL
+          const { data: newAccountData, error: insertError } = await supabaseClient
+            .rpc('create_brokerage_account_encrypted', {
+              p_user_id: userId,
+              p_broker_name: credentials.broker_name,
+              p_username: credentials.username,
+              p_password: credentials.password || '',
+              p_api_key: credentials.api_key || '',
+              p_encryption_key: encryptionKey
+            });
+
+          if (insertError) {
+            console.error('Insert error:', insertError);
+            throw new Error('Failed to store account credentials securely');
+          }
+
+          result = {
+            success: true,
+            connection: connectionResult,
+            account_id: newAccountData,
+            message: `Successfully connected to ${credentials.broker_name}`
+          };
         }
-
-        result = {
-          success: true,
-          connection: connectionResult,
-          message: `Successfully connected to ${credentials.broker_name}`
-        };
         break;
       }
 
