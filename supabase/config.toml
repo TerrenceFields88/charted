@@ -2,3 +2,6 @@ project_id = "tyasymsyqlsjilhwezvy"
 
 [functions.ai-market-analysis]
 verify_jwt = false
+
+[functions.ai-chart-analysis]
+verify_jwt = false
