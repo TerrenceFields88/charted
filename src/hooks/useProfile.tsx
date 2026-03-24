@@ -11,8 +11,6 @@ interface Profile {
   avatar_url: string | null;
   follower_count: number;
   following_count: number;
-  connected_brokers: any;
-  total_accounts: number;
   verified_trader: boolean;
   created_at: string;
   updated_at: string;

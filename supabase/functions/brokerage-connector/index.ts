@@ -274,14 +274,55 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Authenticate the caller via JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+    // Validate JWT using anon client
+    const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: authenticatedUser }, error: authError } = await anonClient.auth.getUser();
+
+    if (authError || !authenticatedUser) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const userId = authenticatedUser.id;
+
+    // Service client for DB operations
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const { action, credentials, account_id, symbols, limit } = await req.json();
 
-    console.log(`Processing brokerage action: ${action}`);
+    console.log(`Processing brokerage action: ${action} for user: ${userId}`);
+
+    // Helper: fetch account with ownership check
+    const getOwnedAccount = async (accountId: string) => {
+      const { data: account, error: fetchError } = await supabaseClient
+        .from('brokerage_accounts')
+        .select('*')
+        .eq('id', accountId)
+        .eq('user_id', userId)
+        .single();
+
+      if (fetchError || !account) {
+        throw new Error('Account not found or access denied');
+      }
+      return account;
+    };
 
     let result: any = {};
 
@@ -294,7 +335,7 @@ serve(async (req) => {
         const connector = getConnector(credentials.broker_name);
         const connectionResult = await connector.connect(credentials);
 
-        // Store the connection result (encrypted credentials would be stored in real implementation)
+        // Update account owned by authenticated user
         const { error: dbError } = await supabaseClient
           .from('brokerage_accounts')
           .update({
@@ -302,7 +343,8 @@ serve(async (req) => {
             is_active: true
           })
           .eq('broker_name', credentials.broker_name)
-          .eq('username', credentials.username);
+          .eq('username', credentials.username)
+          .eq('user_id', userId);
 
         if (dbError) {
           console.error('Database error:', dbError);
@@ -321,30 +363,22 @@ serve(async (req) => {
           throw new Error('Account ID is required for sync');
         }
 
-        // Get account credentials from database
-        const { data: account, error: fetchError } = await supabaseClient
-          .from('brokerage_accounts')
-          .select('*')
-          .eq('id', account_id)
-          .single();
-
-        if (fetchError || !account) {
-          throw new Error('Account not found');
-        }
+        const account = await getOwnedAccount(account_id);
 
         const connector = getConnector(account.broker_name);
         const accountData = await connector.getAccountData({
           broker_name: account.broker_name,
           username: account.username,
-          password: account.password_encrypted, // In real app, this would be decrypted
-          api_key: account.api_key_encrypted // In real app, this would be decrypted
+          password: account.password_encrypted,
+          api_key: account.api_key_encrypted
         });
 
         // Update sync timestamp
         await supabaseClient
           .from('brokerage_accounts')
           .update({ last_sync_at: new Date().toISOString() })
-          .eq('id', account_id);
+          .eq('id', account_id)
+          .eq('user_id', userId);
 
         result = {
           success: true,
@@ -354,15 +388,7 @@ serve(async (req) => {
       }
 
       case 'positions': {
-        const { data: account } = await supabaseClient
-          .from('brokerage_accounts')
-          .select('*')
-          .eq('id', account_id)
-          .single();
-
-        if (!account) {
-          throw new Error('Account not found');
-        }
+        const account = await getOwnedAccount(account_id);
 
         const connector = getConnector(account.broker_name);
         const positions = await connector.getPositions({
@@ -376,15 +402,7 @@ serve(async (req) => {
       }
 
       case 'trades': {
-        const { data: account } = await supabaseClient
-          .from('brokerage_accounts')
-          .select('*')
-          .eq('id', account_id)
-          .single();
-
-        if (!account) {
-          throw new Error('Account not found');
-        }
+        const account = await getOwnedAccount(account_id);
 
         const connector = getConnector(account.broker_name);
         const trades = await connector.getTrades({
@@ -402,8 +420,7 @@ serve(async (req) => {
           throw new Error('Symbols array is required for quotes');
         }
 
-        // For quotes, we can use any available connector or a market data service
-        const connector = new MockConnector(); // In real app, use a market data connector
+        const connector = new MockConnector();
         const quotes = await connector.getQuotes({} as any, symbols);
 
         result = { success: true, quotes };
