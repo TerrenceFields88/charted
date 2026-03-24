@@ -324,6 +324,25 @@ serve(async (req) => {
       return account;
     };
 
+    // Helper: decrypt credentials using pgcrypto
+    const decryptionKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const decryptCredential = async (encrypted: string | null): Promise<string> => {
+      if (!encrypted) return '';
+      try {
+        const { data, error } = await supabaseClient.rpc('decrypt_credential', {
+          p_encrypted: encrypted,
+          p_key: decryptionKey
+        });
+        if (error) {
+          console.error('Decryption error:', error);
+          return encrypted; // Fallback for legacy unencrypted data
+        }
+        return data || '';
+      } catch {
+        return encrypted; // Fallback for legacy unencrypted data
+      }
+    };
+
     let result: any = {};
 
     switch (action) {
@@ -348,9 +367,7 @@ serve(async (req) => {
           .maybeSingle();
 
         if (existingAccount) {
-          // Update existing account with re-encrypted credentials
-          const { error: updateError } = await supabaseClient.rpc('exec_sql', {});
-          // Use raw SQL for pgcrypto encryption
+          // Update existing account
           const { error: dbError } = await supabaseClient
             .from('brokerage_accounts')
             .update({
@@ -405,11 +422,13 @@ serve(async (req) => {
         const account = await getOwnedAccount(account_id);
 
         const connector = getConnector(account.broker_name);
+        const decryptedPassword = await decryptCredential(account.password_encrypted);
+        const decryptedApiKey = await decryptCredential(account.api_key_encrypted);
         const accountData = await connector.getAccountData({
           broker_name: account.broker_name,
           username: account.username,
-          password: account.password_encrypted,
-          api_key: account.api_key_encrypted
+          password: decryptedPassword,
+          api_key: decryptedApiKey
         });
 
         // Update sync timestamp
@@ -429,11 +448,11 @@ serve(async (req) => {
       case 'positions': {
         const account = await getOwnedAccount(account_id);
 
-        const connector = getConnector(account.broker_name);
-        const positions = await connector.getPositions({
+        const connector2 = getConnector(account.broker_name);
+        const positions = await connector2.getPositions({
           broker_name: account.broker_name,
           username: account.username,
-          password: account.password_encrypted
+          password: await decryptCredential(account.password_encrypted)
         });
 
         result = { success: true, positions };
@@ -443,11 +462,11 @@ serve(async (req) => {
       case 'trades': {
         const account = await getOwnedAccount(account_id);
 
-        const connector = getConnector(account.broker_name);
-        const trades = await connector.getTrades({
+        const connector3 = getConnector(account.broker_name);
+        const trades = await connector3.getTrades({
           broker_name: account.broker_name,
           username: account.username,
-          password: account.password_encrypted
+          password: await decryptCredential(account.password_encrypted)
         }, limit || 50);
 
         result = { success: true, trades };

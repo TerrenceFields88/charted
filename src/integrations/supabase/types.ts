@@ -706,6 +706,17 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      create_brokerage_account_encrypted: {
+        Args: {
+          p_api_key: string
+          p_broker_name: string
+          p_encryption_key: string
+          p_password: string
+          p_user_id: string
+          p_username: string
+        }
+        Returns: string
+      }
       decrement_post_likes: { Args: { post_id: string }; Returns: undefined }
       get_or_create_conversation: {
         Args: { user_1: string; user_2: string }
