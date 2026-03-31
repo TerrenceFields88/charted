@@ -16,7 +16,10 @@ import UserProfile from "./pages/UserProfile";
 import UserProfileByUsername from "./pages/UserProfileByUsername";
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  useNativeFeatures();
+
+  return (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
