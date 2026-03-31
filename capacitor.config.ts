@@ -2,18 +2,39 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.0257cb44f3674f7081c02d1669f7d11a',
-  appName: 'charted',
+  appName: 'Charted',
   webDir: 'dist',
+  server: {
+    url: 'https://charted.site',
+    cleartext: true
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: "#1a1a1a",
-      showSpinner: false
+      launchAutoHide: true,
+      backgroundColor: '#0a0a0b',
+      showSpinner: false,
+      androidScaleType: 'CENTER_CROP',
+      splashFullScreen: true,
+      splashImmersive: true
+    },
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#0a0a0b'
+    },
+    Keyboard: {
+      resize: 'body',
+      resizeOnFullScreen: true
     }
   },
-  // Use the uploaded Charted logo for app icon
-  appIcon: {
-    source: '/lovable-uploads/16a10ce7-11b4-4088-be90-8fb8158da9d3.png'
+  ios: {
+    contentInset: 'automatic',
+    preferredContentMode: 'mobile',
+    scheme: 'Charted'
+  },
+  android: {
+    backgroundColor: '#0a0a0b',
+    allowMixedContent: true
   }
 };
 
