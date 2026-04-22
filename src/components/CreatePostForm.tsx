@@ -5,7 +5,7 @@ import { usePostActions } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PhotoUploader } from '@/components/PhotoUploader';
+import { MediaUploader, type UploadedMedia } from '@/components/MediaUploader';
 import { TradingViewMiniChart } from '@/components/TradingViewChart';
 import { useToast } from '@/hooks/use-toast';
 import { Send, TrendingUp, Camera } from 'lucide-react';
@@ -23,7 +23,7 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
   const { toast } = useToast();
   const { createPost } = usePostActions();
   const [content, setContent] = useState('');
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [media, setMedia] = useState<UploadedMedia[]>([]);
   const [predictionText, setPredictionText] = useState('');
   const [predictionConfidence, setPredictionConfidence] = useState(50);
   const [loading, setLoading] = useState(false);
@@ -112,18 +112,22 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
     try {
       setLoading(true);
 
+      const firstImage = media.find((m) => m.type === 'image')?.url;
+      const firstVideo = media.find((m) => m.type === 'video')?.url;
+
       await createPost(
         sanitizeContent(content.trim()),
         predictionText.trim() ? sanitizeContent(predictionText.trim()) : undefined,
         predictionText ? predictionConfidence : undefined,
         undefined, // community_id
-        photos.length > 0 ? photos[0] : undefined, // Use first photo as main image
-        showChart ? chartSymbol : undefined // Add chart symbol if chart is shown
+        firstImage,
+        showChart ? chartSymbol : undefined,
+        firstVideo,
       );
 
       // Reset form
       setContent('');
-      setPhotos([]);
+      setMedia([]);
       setPredictionText('');
       setPredictionConfidence(50);
       setShowChart(false);
@@ -177,16 +181,17 @@ export const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
             </p>
           </div>
 
-          {/* Photo Uploader */}
+          {/* Media Uploader */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Camera className="w-4 h-4" />
-              <span className="text-sm font-medium">Add Photos</span>
+              <span className="text-sm font-medium">Add Photos & Videos</span>
             </div>
-            <PhotoUploader
-              onPhotosChange={setPhotos}
+            <MediaUploader
+              onMediaChange={setMedia}
               maxFiles={4}
-              existingPhotos={photos}
+              existingMedia={media}
+              allowVideo
             />
           </div>
 

@@ -60,12 +60,13 @@ const transformSupabasePost = (supabasePost: any): SocialPost => {
     user,
     content: supabasePost.content,
     image: supabasePost.image_url,
+    video: supabasePost.video_url,
     timestamp: new Date(supabasePost.created_at),
     likes: supabasePost.like_count || 0,
     comments: supabasePost.comment_count || 0,
     shares: 0,
     isLiked: false,
-    type: 'text',
+    type: supabasePost.video_url ? 'video' : (supabasePost.image_url ? 'image' : 'text'),
     tags: [],
     sentiment: 'neutral'
   };
@@ -318,7 +319,15 @@ export const useCommunities = () => {
 export const usePostActions = () => {
   const { user } = useAuth();
 
-  const createPost = async (content: string, predictionText?: string, confidence?: number, communityId?: string, imageUrl?: string, chartSymbol?: string) => {
+  const createPost = async (
+    content: string,
+    predictionText?: string,
+    confidence?: number,
+    communityId?: string,
+    imageUrl?: string,
+    chartSymbol?: string,
+    videoUrl?: string,
+  ) => {
     if (!user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
@@ -329,6 +338,7 @@ export const usePostActions = () => {
         prediction_confidence: confidence,
         community_id: communityId,
         image_url: imageUrl,
+        video_url: videoUrl,
         chart_symbol: chartSymbol,
         user_id: user.id,
       })

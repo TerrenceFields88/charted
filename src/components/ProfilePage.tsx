@@ -3,17 +3,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
 import { usePosts } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
 import { useStories } from '@/hooks/useStories';
-import { Settings, Edit, Users, Plus, CheckCircle, LogOut } from 'lucide-react';
+import { Settings, Edit, Users, Plus, CheckCircle, LogOut, Play } from 'lucide-react';
 import { useTradingPerformance } from '@/hooks/useTradingPerformance';
 import { useRealTimeBrokerageData } from '@/hooks/useRealTimeBrokerageData';
 import { StoryViewer } from '@/components/StoryViewer';
 import { CreateStoryDialog } from '@/components/CreateStoryDialog';
 import { PortfolioSection } from '@/components/PortfolioSection';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -28,6 +30,7 @@ export const ProfilePage = () => {
   const [createStoryOpen, setCreateStoryOpen] = useState(false);
   const [userStories, setUserStories] = useState<any[]>([]);
   const [storiesLoaded, setStoriesLoaded] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
 
   const { getFormattedPerformance } = useTradingPerformance();
   const { aggregatedData, hasConnectedAccounts } = useRealTimeBrokerageData();
@@ -215,12 +218,36 @@ export const ProfilePage = () => {
             ) : (
               <div className="grid grid-cols-3 gap-0.5 rounded-lg overflow-hidden">
                 {userPosts.map((post) => (
-                  <div key={post.id} className="aspect-square bg-muted overflow-hidden group cursor-pointer relative">
-                    {post.image ? (
-                      <img src={post.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  <button
+                    key={post.id}
+                    type="button"
+                    onClick={() => setSelectedPost(post)}
+                    className="aspect-square bg-muted overflow-hidden group cursor-pointer relative active:scale-95 transition-transform"
+                  >
+                    {post.video ? (
+                      <>
+                        <video
+                          src={post.video}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <Play className="w-6 h-6 text-white drop-shadow-lg fill-white" />
+                        </div>
+                      </>
+                    ) : post.image ? (
+                      <img
+                        src={post.image}
+                        alt=""
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted p-2">
-                        <p className="text-[10px] text-center line-clamp-4 text-muted-foreground">{post.content}</p>
+                        <p className="text-[10px] text-center line-clamp-4 text-muted-foreground">
+                          {post.content}
+                        </p>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -229,7 +256,7 @@ export const ProfilePage = () => {
                         <p>💬 {post.comments || 0}</p>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -255,6 +282,40 @@ export const ProfilePage = () => {
           fetchUserStories(user.id).then(setUserStories);
         }
       }} />
+
+      {/* Post lightbox */}
+      <Dialog open={!!selectedPost} onOpenChange={(o) => !o && setSelectedPost(null)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl p-0 bg-card overflow-hidden">
+          {selectedPost?.video ? (
+            <VideoPlayer
+              src={selectedPost.video}
+              poster={selectedPost.image}
+              className="w-full max-h-[80vh] aspect-[4/5] bg-black"
+              controls
+              showSafeZone={false}
+            />
+          ) : selectedPost?.image ? (
+            <img
+              src={selectedPost.image}
+              alt=""
+              className="w-full h-auto object-contain max-h-[80vh]"
+            />
+          ) : (
+            <div className="p-6">
+              <p className="text-sm whitespace-pre-wrap">{selectedPost?.content}</p>
+            </div>
+          )}
+          {selectedPost?.content && (selectedPost.image || selectedPost.video) && (
+            <div className="p-4 border-t border-border/50">
+              <p className="text-sm whitespace-pre-wrap">{selectedPost.content}</p>
+              <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
+                <span>❤️ {selectedPost.likes || 0}</span>
+                <span>💬 {selectedPost.comments || 0}</span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
