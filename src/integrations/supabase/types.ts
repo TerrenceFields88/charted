@@ -423,6 +423,7 @@ export type Database = {
           prediction_text: string | null
           updated_at: string | null
           user_id: string
+          video_url: string | null
         }
         Insert: {
           chart_symbol?: string | null
@@ -440,6 +441,7 @@ export type Database = {
           prediction_text?: string | null
           updated_at?: string | null
           user_id: string
+          video_url?: string | null
         }
         Update: {
           chart_symbol?: string | null
@@ -457,6 +459,7 @@ export type Database = {
           prediction_text?: string | null
           updated_at?: string | null
           user_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {
