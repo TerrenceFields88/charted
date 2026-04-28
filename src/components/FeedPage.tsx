@@ -22,13 +22,26 @@ export const FeedPage = () => {
   return (
     <div ref={containerRef} className="pb-20 min-h-screen overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
+      <div className="sticky top-0 glass border-b hairline z-40 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold tracking-tight">Home</h1>
+          <div className="flex items-center gap-2.5">
+            <div className="relative w-8 h-8 rounded-xl bg-gradient-ember shadow-ember flex items-center justify-center">
+              <span className="font-display font-bold text-primary-foreground text-sm">C</span>
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent ember-pulse" />
+            </div>
+            <div className="leading-none">
+              <h1 className="font-display text-lg font-bold tracking-tight">
+                Charted
+              </h1>
+              <span className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground font-mono-num">
+                Live · Commodities
+              </span>
+            </div>
+          </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-9 w-9 rounded-full hover:bg-primary/10"
             onClick={() => setShowSearch(!showSearch)}
           >
             <Search className="w-4 h-4" />
