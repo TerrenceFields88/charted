@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Home } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -117,7 +117,16 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate('/')}
+        className="absolute top-4 left-4 gap-1.5 text-muted-foreground hover:text-foreground"
+      >
+        <Home className="w-4 h-4" />
+        Home
+      </Button>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary mb-2">Charted</h1>
