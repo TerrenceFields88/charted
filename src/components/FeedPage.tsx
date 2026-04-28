@@ -33,9 +33,6 @@ export const FeedPage = () => {
               <h1 className="font-display text-lg font-bold tracking-tight">
                 Charted
               </h1>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground font-mono-num">
-                Live · Commodities
-              </span>
             </div>
           </div>
           <Button
