@@ -109,8 +109,9 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -10%, hsl(35 92% 56% / 0.08), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 100% 100%, hsl(152 70% 42% / 0.05), transparent 60%);
+      radial-gradient(ellipse 80% 55% at 50% -10%, hsl(174 55% 58% / 0.14), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, hsl(190 80% 55% / 0.10), transparent 60%),
+      radial-gradient(ellipse 50% 35% at 0% 80%, hsl(255 70% 65% / 0.08), transparent 60%);
     background-attachment: fixed;
     font-size: 1rem;
     line-height: 1.5;
@@ -215,6 +216,7 @@
 .bg-gradient-molten { background-image: var(--gradient-molten); }
 .bg-gradient-emerald { background-image: var(--gradient-emerald); }
 .bg-gradient-surface { background-image: var(--gradient-surface); }
+.bg-gradient-aurora { background-image: var(--gradient-aurora); }
 .shadow-ember { box-shadow: var(--shadow-ember); }
 .shadow-glow { box-shadow: var(--shadow-glow); }
 
