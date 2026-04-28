@@ -79,24 +79,25 @@ export const PostCard = ({ post }: PostCardProps) => {
       <div className="flex items-center justify-between p-3 pb-2">
         <Link to={`/u/${post.user.username}`} className="flex items-center gap-2.5">
           <div className="relative">
-            <Avatar className="w-9 h-9">
+            <div className="absolute -inset-0.5 rounded-full bg-gradient-ember opacity-60 blur-[2px]" />
+            <Avatar className="relative w-9 h-9 ring-2 ring-background">
               <AvatarImage src={post.user.avatar} alt={post.user.displayName} />
-              <AvatarFallback className="text-xs">{post.user.displayName[0]}</AvatarFallback>
+              <AvatarFallback className="text-xs bg-secondary">{post.user.displayName[0]}</AvatarFallback>
             </Avatar>
             {post.user.isVerified && (
-              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-primary rounded-full flex items-center justify-center">
+              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-gradient-ember rounded-full flex items-center justify-center ring-2 ring-card">
                 <div className="w-1.5 h-1.5 bg-primary-foreground rounded-full" />
               </div>
             )}
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold">{post.user.displayName}</span>
-              <span className="text-[10px] text-muted-foreground">{formatTimeAgo(post.timestamp)}</span>
+              <span className="text-sm font-display font-semibold">{post.user.displayName}</span>
+              <span className="text-[10px] text-muted-foreground font-mono-num">· {formatTimeAgo(post.timestamp)}</span>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
               {post.symbol && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5 h-4">
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5 h-4 font-mono-num border-primary/30 bg-primary/5 text-primary">
                   {getSentimentIcon()}
                   ${post.symbol}
                 </Badge>
