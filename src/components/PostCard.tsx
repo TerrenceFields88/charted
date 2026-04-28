@@ -74,7 +74,7 @@ export const PostCard = ({ post }: PostCardProps) => {
   };
 
   return (
-    <Card className="overflow-hidden border-0 bg-card/50 rounded-xl animate-fade-in">
+    <Card className="overflow-hidden border hairline bg-gradient-surface rounded-2xl animate-fade-in shadow-[0_1px_0_hsl(var(--primary)/0.04)_inset]">
       {/* Header */}
       <div className="flex items-center justify-between p-3 pb-2">
         <Link to={`/u/${post.user.username}`} className="flex items-center gap-2.5">
