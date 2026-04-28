@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,43 +6,54 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Charted — "Molten Markets" palette: deep oil-black, ember amber, emerald, copper */
+    --background: 30 12% 5%;
+    --foreground: 40 30% 96%;
 
-    --card: 240 10% 5.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 30 14% 8%;
+    --card-foreground: 40 30% 96%;
 
-    --popover: 240 10% 5.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 30 14% 8%;
+    --popover-foreground: 40 30% 96%;
 
-    --primary: 142 76% 36%;
-    --primary-foreground: 355 5% 4%;
+    /* Signature ember/gold — commodity heat */
+    --primary: 35 92% 56%;
+    --primary-foreground: 30 30% 8%;
+    --primary-glow: 28 100% 62%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 30 8% 13%;
+    --secondary-foreground: 40 30% 96%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 30 6% 12%;
+    --muted-foreground: 35 12% 62%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 152 70% 42%;
+    --accent-foreground: 30 30% 8%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 4 80% 56%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 142 76% 36%;
+    --border: 30 8% 14%;
+    --input: 30 8% 14%;
+    --ring: 35 92% 56%;
 
-    --bullish: 142 76% 36%;
-    --bearish: 0 72% 51%;
-    --neutral: 47 96% 60%;
-    --success: 142 76% 36%;
-    --success-foreground: 355 5% 4%;
-    --warning: 47 96% 53%;
-    --warning-foreground: 26 83% 14%;
+    --bullish: 152 70% 42%;
+    --bearish: 4 80% 56%;
+    --neutral: 35 92% 56%;
+    --success: 152 70% 42%;
+    --success-foreground: 30 30% 8%;
+    --warning: 35 92% 56%;
+    --warning-foreground: 30 30% 8%;
 
-    --radius: 0.75rem;
+    /* Signature gradients & shadows */
+    --gradient-ember: linear-gradient(135deg, hsl(35 92% 56%), hsl(14 92% 54%));
+    --gradient-molten: linear-gradient(135deg, hsl(35 92% 56%) 0%, hsl(14 92% 54%) 50%, hsl(340 72% 48%) 100%);
+    --gradient-emerald: linear-gradient(135deg, hsl(152 70% 42%), hsl(170 70% 38%));
+    --gradient-surface: linear-gradient(180deg, hsl(30 14% 9%), hsl(30 14% 6%));
+    --shadow-ember: 0 10px 40px -10px hsl(35 92% 56% / 0.45);
+    --shadow-glow: 0 0 60px hsl(35 92% 56% / 0.25);
+
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -92,7 +103,11 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, hsl(35 92% 56% / 0.08), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, hsl(152 70% 42% / 0.05), transparent 60%);
+    background-attachment: fixed;
     font-size: 1rem;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -170,7 +185,63 @@
 
 /* Glass morphism utility */
 .glass {
-  background: hsl(var(--card) / 0.8);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: hsl(var(--card) / 0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-color: hsl(var(--border) / 0.6);
 }
+
+/* Charted signature utilities */
+.font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -0.02em; }
+.font-mono-num { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+.text-gradient-ember {
+  background: var(--gradient-ember);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-gradient-molten {
+  background: var(--gradient-molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.bg-gradient-ember { background-image: var(--gradient-ember); }
+.bg-gradient-molten { background-image: var(--gradient-molten); }
+.bg-gradient-emerald { background-image: var(--gradient-emerald); }
+.bg-gradient-surface { background-image: var(--gradient-surface); }
+.shadow-ember { box-shadow: var(--shadow-ember); }
+.shadow-glow { box-shadow: var(--shadow-glow); }
+
+/* Subtle grid pattern */
+.bg-grid {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Animated ember pulse for live indicators */
+@keyframes ember-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.6); }
+  50% { box-shadow: 0 0 0 6px hsl(var(--primary) / 0); }
+}
+.ember-pulse { animation: ember-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* Shimmer for skeletons & price chips */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted) / 0.6) 40%,
+    hsl(var(--primary) / 0.15) 50%,
+    hsl(var(--muted) / 0.6) 60%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Hairline divider */
+.hairline { border-color: hsl(var(--border) / 0.5); }
