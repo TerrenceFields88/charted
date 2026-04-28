@@ -44,15 +44,17 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className="flex flex-col items-center -mt-5 transition-transform active:scale-95"
+                  className="flex flex-col items-center -mt-6 transition-transform active:scale-90"
+                  aria-label="Create post"
                 >
-                  <div className={cn(
-                    "w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-all",
-                    isActive
-                      ? "bg-primary shadow-primary/40 scale-105"
-                      : "bg-primary shadow-primary/25"
-                  )}>
-                    <PlusCircle className="w-5 h-5 text-primary-foreground" />
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-gradient-molten blur-md opacity-70" />
+                    <div className={cn(
+                      "relative w-12 h-12 rounded-full flex items-center justify-center shadow-ember transition-all bg-gradient-ember",
+                      isActive && "scale-110"
+                    )}>
+                      <PlusCircle className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
+                    </div>
                   </div>
                 </button>
               );
@@ -63,12 +65,15 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
                 className={cn(
-                  "flex flex-col items-center py-1.5 px-3 rounded-xl transition-all active:scale-95",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "relative flex flex-col items-center py-1.5 px-3 rounded-xl transition-all active:scale-90",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon className={cn("w-5 h-5 mb-0.5 transition-transform", isActive && "scale-110")} />
-                <span className="text-[10px] font-medium">{tab.label}</span>
+                {isActive && (
+                  <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-gradient-ember" />
+                )}
+                <Icon className={cn("w-5 h-5 mb-0.5 transition-transform", isActive && "scale-110")} strokeWidth={isActive ? 2.5 : 2} />
+                <span className={cn("text-[10px] font-medium tracking-wide", isActive && "font-semibold")}>{tab.label}</span>
               </button>
             );
           })}
