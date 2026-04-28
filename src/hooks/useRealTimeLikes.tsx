@@ -89,7 +89,7 @@ export const useRealTimeLikes = () => {
 
     try {
       if (isLiked) {
-        // Unlike
+        // Unlike — trigger maintains like_count
         const { error } = await supabase
           .from('likes')
           .delete()
@@ -97,12 +97,8 @@ export const useRealTimeLikes = () => {
           .eq('user_id', user.id);
 
         if (error) throw error;
-
-        // Decrement like count
-        const { error: rpcError } = await supabase.rpc('decrement_post_likes', { post_id: postId });
-        if (rpcError) throw rpcError;
       } else {
-        // Like
+        // Like — trigger maintains like_count
         const { error } = await supabase
           .from('likes')
           .insert({
@@ -111,10 +107,6 @@ export const useRealTimeLikes = () => {
           });
 
         if (error) throw error;
-
-        // Increment like count
-        const { error: rpcError } = await supabase.rpc('increment_post_likes', { post_id: postId });
-        if (rpcError) throw rpcError;
       }
     } catch (error) {
       console.error('Error toggling like:', error);

@@ -59,9 +59,7 @@ export const CommentSection = ({ postId, commentCount, onCommentCountChange }: C
 
       if (error) throw error;
 
-      // Increment comment count
-      const { error: rpcError } = await supabase.rpc('increment_post_comments', { post_id: postId });
-      if (rpcError) throw rpcError;
+      // Comment count is maintained by database trigger
 
       // Reset form
       if (parentId) {
