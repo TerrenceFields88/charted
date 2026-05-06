@@ -10,11 +10,12 @@ import { NewsCard } from '@/components/NewsCard';
 import { BloombergTVPlayer } from '@/components/BloombergTVPlayer';
 import { InvestingAnalysisPage } from '@/components/InvestingAnalysisPage';
 import { AIMarketAnalysis } from '@/components/AIMarketAnalysis';
+import { TerminalDashboard } from '@/components/TerminalDashboard';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from './PullToRefreshIndicator';
 import {
   TrendingUp, TrendingDown, Activity, Wifi, WifiOff,
-  Newspaper, Search, BarChart3, Brain
+  Newspaper, Search, BarChart3, Brain, Zap
 } from 'lucide-react';
 
 const getCommodityIcon = (symbol: string) => {
@@ -74,13 +75,18 @@ export const MarketsPage = () => {
       <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} progress={progress} />
 
       <div className="px-4 pt-3 pb-4">
-        <Tabs defaultValue="markets" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 h-9">
-            <TabsTrigger value="markets" className="text-xs gap-1"><Activity className="w-3.5 h-3.5" />Futures</TabsTrigger>
+        <Tabs defaultValue="terminal" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 h-9">
+            <TabsTrigger value="terminal" className="text-xs gap-1"><Zap className="w-3.5 h-3.5" />Terminal</TabsTrigger>
+            <TabsTrigger value="markets" className="text-xs gap-1"><Activity className="w-3.5 h-3.5" />Quotes</TabsTrigger>
             <TabsTrigger value="ai" className="text-xs gap-1"><Brain className="w-3.5 h-3.5" />AI</TabsTrigger>
             <TabsTrigger value="news" className="text-xs gap-1"><Newspaper className="w-3.5 h-3.5" />News</TabsTrigger>
             <TabsTrigger value="analysis" className="text-xs gap-1"><BarChart3 className="w-3.5 h-3.5" />Charts</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="terminal" className="mt-3">
+            <TerminalDashboard />
+          </TabsContent>
 
           <TabsContent value="markets" className="mt-3 space-y-3">
             {/* Commodity cards */}
