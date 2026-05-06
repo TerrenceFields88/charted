@@ -15,6 +15,7 @@ import { RepostDialog } from '@/components/RepostDialog';
 import { TradingViewMiniChart } from '@/components/TradingViewMiniChart';
 import { CommentSection } from '@/components/CommentSection';
 import { VideoPlayer } from '@/components/VideoPlayer';
+import { InlineMarketCard, detectCommodities } from '@/components/InlineMarketCard';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { SafeZoneOverlay } from '@/components/SafeZoneOverlay';
@@ -39,6 +40,7 @@ export const PostCard = ({ post }: PostCardProps) => {
 
   const isLiked = isPostLiked(post.id);
   const isOwner = user && user.id === post.user.id;
+  const detectedSymbols = detectCommodities(`${post.content} ${post.symbol || ''}`);
 
   const handleLike = async () => {
     await toggleLike(post.id);
@@ -138,6 +140,9 @@ export const PostCard = ({ post }: PostCardProps) => {
           </div>
         )}
       </div>
+
+      {/* Inline live market data for detected commodities */}
+      <InlineMarketCard symbols={detectedSymbols} />
 
       {/* Media */}
       {post.image && (
