@@ -8,6 +8,7 @@ import { ProfilePage } from '@/components/ProfilePage';
 import { MessagesPage } from '@/components/MessagesPage';
 import { AIAnalystPage } from '@/components/AIAnalystPage';
 import { TradeJournalPage } from '@/components/TradeJournalPage';
+import { LearnPage } from '@/components/LearnPage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
@@ -20,6 +21,7 @@ const Index = () => {
       case 'create': return <CreatePage />;
       case 'analyst': return <AIAnalystPage />;
       case 'journal': return <TradeJournalPage />;
+      case 'learn': return <LearnPage />;
       case 'profile': return <ProfilePage />;
       default: return <FeedPage />;
     }
