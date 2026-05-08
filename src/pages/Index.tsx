@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { CommodityTicker } from '@/components/CommodityTicker';
 import { FeedPage } from '@/components/FeedPage';
@@ -9,6 +9,7 @@ import { MessagesPage } from '@/components/MessagesPage';
 import { AIAnalystPage } from '@/components/AIAnalystPage';
 import { TradeJournalPage } from '@/components/TradeJournalPage';
 import { LearnPage } from '@/components/LearnPage';
+import { WatchlistPage } from '@/components/WatchlistPage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
