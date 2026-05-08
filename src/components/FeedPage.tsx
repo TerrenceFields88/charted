@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { PostCard } from './PostCard';
 import { NewsWidget } from '@/components/NewsWidget';
 import { usePosts } from '@/hooks/useSupabaseData';
-import { Search } from 'lucide-react';
+import { Search, Star } from 'lucide-react';
+import { SymbolSearch } from '@/components/SymbolSearch';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserSearchPage } from '@/components/UserSearchPage';
@@ -14,6 +15,7 @@ import { PullToRefreshIndicator } from './PullToRefreshIndicator';
 export const FeedPage = () => {
   const { posts, loading, error, refetch } = usePosts();
   const [showSearch, setShowSearch] = useState(false);
+  const [symbolSearchOpen, setSymbolSearchOpen] = useState(false);
 
   const { containerRef, pullDistance, isRefreshing, progress } = usePullToRefresh({
     onRefresh: async () => { await refetch(); },
@@ -35,14 +37,35 @@ export const FeedPage = () => {
               </h1>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-full hover:bg-primary/10"
-            onClick={() => setShowSearch(!showSearch)}
-          >
-            <Search className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full hover:bg-primary/10"
+              onClick={() => setSymbolSearchOpen(true)}
+              aria-label="Search commodities"
+            >
+              <Search className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full hover:bg-primary/10"
+              onClick={() => window.dispatchEvent(new CustomEvent('charted:nav', { detail: 'watchlist' }))}
+              aria-label="Watchlist"
+            >
+              <Star className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full hover:bg-primary/10"
+              onClick={() => setShowSearch(!showSearch)}
+              aria-label="Find traders"
+            >
+              <span className="text-xs font-semibold">@</span>
+            </Button>
+          </div>
         </div>
         {showSearch && (
           <div className="mt-2 animate-scale-in">
@@ -90,6 +113,15 @@ export const FeedPage = () => {
           ))
         )}
       </div>
+
+      <SymbolSearch
+        open={symbolSearchOpen}
+        onOpenChange={setSymbolSearchOpen}
+        onSelect={() => {
+          setSymbolSearchOpen(false);
+          window.dispatchEvent(new CustomEvent('charted:nav', { detail: 'markets' }));
+        }}
+      />
     </div>
   );
 };
