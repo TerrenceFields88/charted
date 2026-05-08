@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { initNotifications } from '@/lib/notifications';
 
 /**
  * Hook to initialize native mobile features and gestures.
@@ -6,6 +7,9 @@ import { useEffect } from 'react';
  */
 export const useNativeFeatures = () => {
   useEffect(() => {
+    // Initialize push / local notifications (native + web)
+    initNotifications().catch(() => {});
+
     // Fix viewport height for mobile browsers (100vh issue)
     const setVH = () => {
       const vh = window.innerHeight * 0.01;
