@@ -26,6 +26,8 @@ export interface Post {
   tags: string[];
   symbol?: string; // Associated trading symbol
   sentiment?: 'bullish' | 'bearish' | 'neutral';
+  predictionText?: string;
+  predictionConfidence?: number; // 1-100
 }
 
 export interface Comment {

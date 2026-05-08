@@ -68,7 +68,9 @@ const transformSupabasePost = (supabasePost: any): SocialPost => {
     isLiked: false,
     type: supabasePost.video_url ? 'video' : (supabasePost.image_url ? 'image' : 'text'),
     tags: [],
-    sentiment: 'neutral'
+    sentiment: 'neutral',
+    predictionText: supabasePost.prediction_text || undefined,
+    predictionConfidence: typeof supabasePost.prediction_confidence === 'number' ? supabasePost.prediction_confidence : undefined,
   };
 };
 

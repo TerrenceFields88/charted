@@ -16,6 +16,7 @@ import { TradingViewMiniChart } from '@/components/TradingViewMiniChart';
 import { CommentSection } from '@/components/CommentSection';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { InlineMarketCard, detectCommodities } from '@/components/InlineMarketCard';
+import { PostPredictionBadge } from '@/components/PostPredictionBadge';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { SafeZoneOverlay } from '@/components/SafeZoneOverlay';
@@ -140,6 +141,13 @@ export const PostCard = ({ post }: PostCardProps) => {
           </div>
         )}
       </div>
+
+      {/* Prediction with confidence */}
+      <PostPredictionBadge
+        text={post.predictionText}
+        confidence={post.predictionConfidence}
+        sentiment={post.sentiment}
+      />
 
       {/* Inline live market data for detected commodities */}
       <InlineMarketCard symbols={detectedSymbols} />

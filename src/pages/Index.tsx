@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { CommodityTicker } from '@/components/CommodityTicker';
 import { FeedPage } from '@/components/FeedPage';
@@ -9,9 +9,19 @@ import { MessagesPage } from '@/components/MessagesPage';
 import { AIAnalystPage } from '@/components/AIAnalystPage';
 import { TradeJournalPage } from '@/components/TradeJournalPage';
 import { LearnPage } from '@/components/LearnPage';
+import { WatchlistPage } from '@/components/WatchlistPage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const tab = (e as CustomEvent<string>).detail;
+      if (typeof tab === 'string') setActiveTab(tab);
+    };
+    window.addEventListener('charted:nav', handler);
+    return () => window.removeEventListener('charted:nav', handler);
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -22,6 +32,7 @@ const Index = () => {
       case 'analyst': return <AIAnalystPage />;
       case 'journal': return <TradeJournalPage />;
       case 'learn': return <LearnPage />;
+      case 'watchlist': return <WatchlistPage />;
       case 'profile': return <ProfilePage />;
       default: return <FeedPage />;
     }
