@@ -30,7 +30,20 @@ type View = { kind: 'home' } | { kind: 'lesson'; id: string } | { kind: 'checkli
 
 export const LearnPage = () => {
   const [view, setView] = useState<View>({ kind: 'home' });
+  const [hasAccess, setHasAccess] = useState<boolean>(() => {
+    try { return localStorage.getItem(ACCESS_KEY) === 'true'; } catch { return false; }
+  });
   const { progress, markComplete, setQuiz, reset } = useLearnProgress();
+
+  if (!hasAccess) {
+    return (
+      <AccessGate onConfirm={() => {
+        try { localStorage.setItem(ACCESS_KEY, 'true'); } catch {}
+        setHasAccess(true);
+      }} />
+    );
+  }
+
 
   const completedCount = Object.values(progress.completed).filter(Boolean).length;
   const total = allLessons.length;
