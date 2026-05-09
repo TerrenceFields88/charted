@@ -290,6 +290,51 @@ export type Database = {
         }
         Relationships: []
       }
+      learn_access: {
+        Row: {
+          created_at: string
+          email: string | null
+          granted_at: string
+          id: string
+          metadata: Json | null
+          revoked_at: string | null
+          source: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          whop_membership_id: string | null
+          whop_plan_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          granted_at?: string
+          id?: string
+          metadata?: Json | null
+          revoked_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          whop_membership_id?: string | null
+          whop_plan_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          granted_at?: string
+          id?: string
+          metadata?: Json | null
+          revoked_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          whop_membership_id?: string | null
+          whop_plan_id?: string | null
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string | null
@@ -729,6 +774,7 @@ export type Database = {
         Args: { user_1: string; user_2: string }
         Returns: string
       }
+      has_learn_access: { Args: never; Returns: boolean }
       increment_post_comments: { Args: { post_id: string }; Returns: undefined }
       increment_post_likes: { Args: { post_id: string }; Returns: undefined }
       log_security_event: {
