@@ -468,3 +468,74 @@ const ChecklistView = ({ onBack }: { onBack: () => void }) => {
     </div>
   );
 };
+
+// --- Access Gate: confirm Liquid Edge access before showing course ---
+const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
+  const [acknowledged, setAcknowledged] = useState(false);
+  return (
+    <div className="pb-24 min-h-screen overflow-y-auto">
+      <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="w-4 h-4 text-primary" />
+          <h1 className="text-lg font-bold tracking-tight">Liquid Edge Course</h1>
+        </div>
+      </div>
+
+      <div className="px-4 pt-6 space-y-4">
+        <Card className="p-5 border-primary/30 bg-primary/5 text-center space-y-3">
+          <div className="mx-auto h-14 w-14 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center">
+            <KeyRound className="w-7 h-7 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Members-only content</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              The Liquid Edge curriculum is gated. Confirm you have access before continuing.
+            </p>
+          </div>
+        </Card>
+
+        <Card className="p-4 space-y-3">
+          <div className="flex items-start gap-2">
+            <ShieldAlert className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              Don't have access yet? Get the full Liquid Edge program first, then come back to unlock the in-app coursework.
+            </p>
+          </div>
+          <a
+            href="https://liquidedge.lovable.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            Visit Liquid Edge <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </Card>
+
+        <Card className="p-4 space-y-3">
+          <button
+            onClick={() => setAcknowledged(!acknowledged)}
+            className="w-full flex items-start gap-2 text-left active:scale-[0.99] transition-all"
+          >
+            {acknowledged
+              ? <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              : <Circle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />}
+            <span className="text-sm">
+              I confirm I have purchased or been granted access to the Liquid Edge program.
+            </span>
+          </button>
+          <Button
+            disabled={!acknowledged}
+            onClick={onConfirm}
+            className="w-full gap-1.5"
+          >
+            Unlock Course <ArrowRight className="w-4 h-4" />
+          </Button>
+          <p className="text-[10px] text-muted-foreground text-center">
+            Misrepresenting access violates the Liquid Edge terms.
+          </p>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
