@@ -8,8 +8,11 @@ import { useLearnProgress } from '@/hooks/useLearnProgress';
 import {
   ArrowLeft, CheckCircle2, Circle, Lock, Lightbulb, AlertTriangle, ShieldAlert,
   BookOpenCheck, RotateCcw, Trophy, Flame, ListChecks, GraduationCap, Sparkles,
+  ExternalLink, ArrowRight, KeyRound,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const ACCESS_KEY = 'charted-learn-access-v1';
 
 const calloutMap = {
   tip: { icon: Lightbulb, label: 'Tip', classes: 'border-primary/40 bg-primary/5' },
