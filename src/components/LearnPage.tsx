@@ -498,16 +498,16 @@ const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
           <div className="flex items-start gap-2">
             <ShieldAlert className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
             <p className="text-xs text-muted-foreground">
-              Don't have access yet? Get the full Liquid Edge program first, then come back to unlock the in-app coursework.
+              Don't have access yet? Purchase the Liquid Edge program first, then return here to unlock the in-app coursework.
             </p>
           </div>
           <a
-            href="https://liquidedge.lovable.app"
+            href="https://whop.com/checkout/plan_LJPPmg7nvE8OA"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            className="flex items-center justify-center gap-1.5 w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-semibold active:scale-[0.99] transition-all"
           >
-            Visit Liquid Edge <ExternalLink className="w-3.5 h-3.5" />
+            Get Access on Whop <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </Card>
 
