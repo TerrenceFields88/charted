@@ -497,9 +497,10 @@ const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
         <Card className="p-4 space-y-3">
           <div className="flex items-start gap-2">
             <ShieldAlert className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-muted-foreground">
-            Don't have access yet? Purchase the Liquid Edge program first, then return here to unlock the in-app coursework.
-          </p>
+            <p className="text-xs text-muted-foreground">
+              Don't have access yet? Purchase the Liquid Edge program first, then return here to unlock the in-app coursework.
+            </p>
+          </div>
           <a
             href="https://whop.com/checkout/plan_LJPPmg7nvE8OA"
             target="_blank"
