@@ -8,8 +8,11 @@ import { useLearnProgress } from '@/hooks/useLearnProgress';
 import {
   ArrowLeft, CheckCircle2, Circle, Lock, Lightbulb, AlertTriangle, ShieldAlert,
   BookOpenCheck, RotateCcw, Trophy, Flame, ListChecks, GraduationCap, Sparkles,
+  ExternalLink, ArrowRight, KeyRound,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const ACCESS_KEY = 'charted-learn-access-v1';
 
 const calloutMap = {
   tip: { icon: Lightbulb, label: 'Tip', classes: 'border-primary/40 bg-primary/5' },
@@ -27,7 +30,20 @@ type View = { kind: 'home' } | { kind: 'lesson'; id: string } | { kind: 'checkli
 
 export const LearnPage = () => {
   const [view, setView] = useState<View>({ kind: 'home' });
+  const [hasAccess, setHasAccess] = useState<boolean>(() => {
+    try { return localStorage.getItem(ACCESS_KEY) === 'true'; } catch { return false; }
+  });
   const { progress, markComplete, setQuiz, reset } = useLearnProgress();
+
+  if (!hasAccess) {
+    return (
+      <AccessGate onConfirm={() => {
+        try { localStorage.setItem(ACCESS_KEY, 'true'); } catch {}
+        setHasAccess(true);
+      }} />
+    );
+  }
+
 
   const completedCount = Object.values(progress.completed).filter(Boolean).length;
   const total = allLessons.length;
@@ -39,12 +55,17 @@ export const LearnPage = () => {
   const isUnlocked = (prereqs: string[]) => prereqs.every((p) => progress.completed[p]);
 
   if (view.kind === 'lesson') {
+    const idx = allLessons.findIndex((l) => l.id === view.id);
+    const next = idx >= 0 && idx < allLessons.length - 1 ? allLessons[idx + 1] : null;
+    const nextUnlocked = next ? next.prerequisites.every((p) => progress.completed[p] || p === view.id) : false;
     return (
       <LessonView
         lessonId={view.id}
         onBack={() => setView({ kind: 'home' })}
         onComplete={(id, score) => { setQuiz(id, score); markComplete(id); }}
         completed={progress.completed}
+        nextLesson={next && nextUnlocked ? { id: next.id, title: next.title } : null}
+        onGoToNext={(id) => setView({ kind: 'lesson', id })}
       />
     );
   }
@@ -167,12 +188,14 @@ export const LearnPage = () => {
 
 // --- Lesson View ---
 const LessonView = ({
-  lessonId, onBack, onComplete, completed,
+  lessonId, onBack, onComplete, completed, nextLesson, onGoToNext,
 }: {
   lessonId: string;
   onBack: () => void;
   onComplete: (id: string, score: number) => void;
   completed: Record<string, boolean>;
+  nextLesson: { id: string; title: string } | null;
+  onGoToNext: (id: string) => void;
 }) => {
   const lesson = allLessons.find((l) => l.id === lessonId);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -334,7 +357,18 @@ const LessonView = ({
                 </Button>
               )}
               {passed && (
-                <Button size="sm" onClick={onBack}>Back to course</Button>
+                <div className="flex flex-col gap-2">
+                  {nextLesson ? (
+                    <Button size="sm" onClick={() => onGoToNext(nextLesson.id)} className="gap-1.5">
+                      Next: {nextLesson.title} <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  ) : (
+                    <Button size="sm" onClick={onBack} className="gap-1.5">
+                      <Trophy className="w-3.5 h-3.5" /> Course complete — back to roadmap
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={onBack}>Back to course</Button>
+                </div>
               )}
             </div>
           )}
@@ -434,3 +468,74 @@ const ChecklistView = ({ onBack }: { onBack: () => void }) => {
     </div>
   );
 };
+
+// --- Access Gate: confirm Liquid Edge access before showing course ---
+const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
+  const [acknowledged, setAcknowledged] = useState(false);
+  return (
+    <div className="pb-24 min-h-screen overflow-y-auto">
+      <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="w-4 h-4 text-primary" />
+          <h1 className="text-lg font-bold tracking-tight">Liquid Edge Course</h1>
+        </div>
+      </div>
+
+      <div className="px-4 pt-6 space-y-4">
+        <Card className="p-5 border-primary/30 bg-primary/5 text-center space-y-3">
+          <div className="mx-auto h-14 w-14 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center">
+            <KeyRound className="w-7 h-7 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Members-only content</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              The Liquid Edge curriculum is gated. Confirm you have access before continuing.
+            </p>
+          </div>
+        </Card>
+
+        <Card className="p-4 space-y-3">
+          <div className="flex items-start gap-2">
+            <ShieldAlert className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              Don't have access yet? Get the full Liquid Edge program first, then come back to unlock the in-app coursework.
+            </p>
+          </div>
+          <a
+            href="https://liquidedge.lovable.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            Visit Liquid Edge <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </Card>
+
+        <Card className="p-4 space-y-3">
+          <button
+            onClick={() => setAcknowledged(!acknowledged)}
+            className="w-full flex items-start gap-2 text-left active:scale-[0.99] transition-all"
+          >
+            {acknowledged
+              ? <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              : <Circle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />}
+            <span className="text-sm">
+              I confirm I have purchased or been granted access to the Liquid Edge program.
+            </span>
+          </button>
+          <Button
+            disabled={!acknowledged}
+            onClick={onConfirm}
+            className="w-full gap-1.5"
+          >
+            Unlock Course <ArrowRight className="w-4 h-4" />
+          </Button>
+          <p className="text-[10px] text-muted-foreground text-center">
+            Misrepresenting access violates the Liquid Edge terms.
+          </p>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
