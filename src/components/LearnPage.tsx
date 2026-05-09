@@ -188,12 +188,14 @@ export const LearnPage = () => {
 
 // --- Lesson View ---
 const LessonView = ({
-  lessonId, onBack, onComplete, completed,
+  lessonId, onBack, onComplete, completed, nextLesson, onGoToNext,
 }: {
   lessonId: string;
   onBack: () => void;
   onComplete: (id: string, score: number) => void;
   completed: Record<string, boolean>;
+  nextLesson: { id: string; title: string } | null;
+  onGoToNext: (id: string) => void;
 }) => {
   const lesson = allLessons.find((l) => l.id === lessonId);
   const [answers, setAnswers] = useState<Record<number, number>>({});
