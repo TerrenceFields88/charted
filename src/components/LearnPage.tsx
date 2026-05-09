@@ -55,12 +55,17 @@ export const LearnPage = () => {
   const isUnlocked = (prereqs: string[]) => prereqs.every((p) => progress.completed[p]);
 
   if (view.kind === 'lesson') {
+    const idx = allLessons.findIndex((l) => l.id === view.id);
+    const next = idx >= 0 && idx < allLessons.length - 1 ? allLessons[idx + 1] : null;
+    const nextUnlocked = next ? next.prerequisites.every((p) => progress.completed[p] || p === view.id) : false;
     return (
       <LessonView
         lessonId={view.id}
         onBack={() => setView({ kind: 'home' })}
         onComplete={(id, score) => { setQuiz(id, score); markComplete(id); }}
         completed={progress.completed}
+        nextLesson={next && nextUnlocked ? { id: next.id, title: next.title } : null}
+        onGoToNext={(id) => setView({ kind: 'lesson', id })}
       />
     );
   }
