@@ -357,7 +357,18 @@ const LessonView = ({
                 </Button>
               )}
               {passed && (
-                <Button size="sm" onClick={onBack}>Back to course</Button>
+                <div className="flex flex-col gap-2">
+                  {nextLesson ? (
+                    <Button size="sm" onClick={() => onGoToNext(nextLesson.id)} className="gap-1.5">
+                      Next: {nextLesson.title} <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  ) : (
+                    <Button size="sm" onClick={onBack} className="gap-1.5">
+                      <Trophy className="w-3.5 h-3.5" /> Course complete — back to roadmap
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={onBack}>Back to course</Button>
+                </div>
               )}
             </div>
           )}
