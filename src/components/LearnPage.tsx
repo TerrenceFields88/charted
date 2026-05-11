@@ -1,18 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { modules, allLessons, PRE_TRADE_CHECKLIST, type Level } from '@/data/liquidEdgeCurriculum';
 import { useLearnProgress } from '@/hooks/useLearnProgress';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowLeft, CheckCircle2, Circle, Lock, Lightbulb, AlertTriangle, ShieldAlert,
   BookOpenCheck, RotateCcw, Trophy, Flame, ListChecks, GraduationCap, Sparkles,
-  ExternalLink, ArrowRight, KeyRound,
+  ExternalLink, ArrowRight, KeyRound, Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ACCESS_KEY = 'charted-learn-access-v1';
+const WHOP_PLAN_URL = 'https://whop.com/checkout/plan_LJPPmg7nvE8OA';
 
 const calloutMap = {
   tip: { icon: Lightbulb, label: 'Tip', classes: 'border-primary/40 bg-primary/5' },
@@ -29,20 +32,52 @@ const levelColor: Record<Level, string> = {
 type View = { kind: 'home' } | { kind: 'lesson'; id: string } | { kind: 'checklist' };
 
 export const LearnPage = () => {
+  const { user } = useAuth();
   const [view, setView] = useState<View>({ kind: 'home' });
   const [hasAccess, setHasAccess] = useState<boolean>(() => {
     try { return localStorage.getItem(ACCESS_KEY) === 'true'; } catch { return false; }
   });
   const { progress, markComplete, setQuiz, reset } = useLearnProgress();
 
-  if (!hasAccess) {
-    return (
-      <AccessGate onConfirm={() => {
+  // Auto-unlock: poll the server for Whop-granted access on mount, on focus,
+  // and every 8s while the gate is showing (covers the user returning from Whop).
+  const pollRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const check = async () => {
+      const { data, error } = await supabase.rpc('has_learn_access');
+      if (!cancelled && !error && data === true) {
         try { localStorage.setItem(ACCESS_KEY, 'true'); } catch {}
         setHasAccess(true);
-      }} />
+      }
+    };
+    check();
+    const onFocus = () => check();
+    window.addEventListener('focus', onFocus);
+    if (!hasAccess) {
+      pollRef.current = window.setInterval(check, 8000);
+    }
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      if (pollRef.current) window.clearInterval(pollRef.current);
+    };
+  }, [user, hasAccess]);
+
+  if (!hasAccess) {
+    return (
+      <AccessGate
+        userId={user?.id ?? null}
+        userEmail={user?.email ?? null}
+        onConfirm={() => {
+          try { localStorage.setItem(ACCESS_KEY, 'true'); } catch {}
+          setHasAccess(true);
+        }}
+      />
     );
   }
+
 
 
   const completedCount = Object.values(progress.completed).filter(Boolean).length;
@@ -470,8 +505,30 @@ const ChecklistView = ({ onBack }: { onBack: () => void }) => {
 };
 
 // --- Access Gate: confirm Liquid Edge access before showing course ---
-const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
+const AccessGate = ({
+  onConfirm,
+  userId,
+  userEmail,
+}: {
+  onConfirm: () => void;
+  userId: string | null;
+  userEmail: string | null;
+}) => {
   const [acknowledged, setAcknowledged] = useState(false);
+
+  // Build Whop checkout URL with metadata so the webhook can match the buyer
+  // back to this Charted user (by id) or fall back to email.
+  const checkoutUrl = useMemo(() => {
+    const url = new URL(WHOP_PLAN_URL);
+    if (userId) url.searchParams.set('metadata[user_id]', userId);
+    if (userEmail) {
+      url.searchParams.set('metadata[email]', userEmail);
+      // Whop also pre-fills the checkout email field
+      url.searchParams.set('email', userEmail);
+    }
+    return url.toString();
+  }, [userId, userEmail]);
+
   return (
     <div className="pb-24 min-h-screen overflow-y-auto">
       <div className="sticky top-0 glass border-b border-border/50 z-40 px-4 py-3">
@@ -489,7 +546,7 @@ const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
           <div>
             <h2 className="text-lg font-bold">Members-only content</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              The Liquid Edge curriculum is gated. Confirm you have access before continuing.
+              The Liquid Edge curriculum is gated. Purchase on Whop and your access unlocks here automatically.
             </p>
           </div>
         </Card>
@@ -498,20 +555,31 @@ const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
           <div className="flex items-start gap-2">
             <ShieldAlert className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
             <p className="text-xs text-muted-foreground">
-              Don't have access yet? Purchase the Liquid Edge program first, then return here to unlock the in-app coursework.
+              {userId
+                ? "We'll auto-unlock this tab the moment Whop confirms your purchase — no need to come back and click anything."
+                : 'Sign in first so we can auto-unlock this tab the moment your Whop purchase clears.'}
             </p>
           </div>
           <a
-            href="https://whop.com/checkout/plan_LJPPmg7nvE8OA"
+            href={checkoutUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-1.5 w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-semibold active:scale-[0.99] transition-all"
           >
             Get Access on Whop <ExternalLink className="w-3.5 h-3.5" />
           </a>
+          {userId && (
+            <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Watching for your unlock…
+            </div>
+          )}
         </Card>
 
         <Card className="p-4 space-y-3">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+            Already a member?
+          </div>
           <button
             onClick={() => setAcknowledged(!acknowledged)}
             className="w-full flex items-start gap-2 text-left active:scale-[0.99] transition-all"
@@ -527,8 +595,9 @@ const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
             disabled={!acknowledged}
             onClick={onConfirm}
             className="w-full gap-1.5"
+            variant="secondary"
           >
-            Unlock Course <ArrowRight className="w-4 h-4" />
+            Unlock manually <ArrowRight className="w-4 h-4" />
           </Button>
           <p className="text-[10px] text-muted-foreground text-center">
             Misrepresenting access violates the Liquid Edge terms.
@@ -538,4 +607,5 @@ const AccessGate = ({ onConfirm }: { onConfirm: () => void }) => {
     </div>
   );
 };
+
 
