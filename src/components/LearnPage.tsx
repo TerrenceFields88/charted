@@ -32,20 +32,52 @@ const levelColor: Record<Level, string> = {
 type View = { kind: 'home' } | { kind: 'lesson'; id: string } | { kind: 'checklist' };
 
 export const LearnPage = () => {
+  const { user } = useAuth();
   const [view, setView] = useState<View>({ kind: 'home' });
   const [hasAccess, setHasAccess] = useState<boolean>(() => {
     try { return localStorage.getItem(ACCESS_KEY) === 'true'; } catch { return false; }
   });
   const { progress, markComplete, setQuiz, reset } = useLearnProgress();
 
-  if (!hasAccess) {
-    return (
-      <AccessGate onConfirm={() => {
+  // Auto-unlock: poll the server for Whop-granted access on mount, on focus,
+  // and every 8s while the gate is showing (covers the user returning from Whop).
+  const pollRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const check = async () => {
+      const { data, error } = await supabase.rpc('has_learn_access');
+      if (!cancelled && !error && data === true) {
         try { localStorage.setItem(ACCESS_KEY, 'true'); } catch {}
         setHasAccess(true);
-      }} />
+      }
+    };
+    check();
+    const onFocus = () => check();
+    window.addEventListener('focus', onFocus);
+    if (!hasAccess) {
+      pollRef.current = window.setInterval(check, 8000);
+    }
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      if (pollRef.current) window.clearInterval(pollRef.current);
+    };
+  }, [user, hasAccess]);
+
+  if (!hasAccess) {
+    return (
+      <AccessGate
+        userId={user?.id ?? null}
+        userEmail={user?.email ?? null}
+        onConfirm={() => {
+          try { localStorage.setItem(ACCESS_KEY, 'true'); } catch {}
+          setHasAccess(true);
+        }}
+      />
     );
   }
+
 
 
   const completedCount = Object.values(progress.completed).filter(Boolean).length;
