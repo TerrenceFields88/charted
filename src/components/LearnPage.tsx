@@ -1,18 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { modules, allLessons, PRE_TRADE_CHECKLIST, type Level } from '@/data/liquidEdgeCurriculum';
 import { useLearnProgress } from '@/hooks/useLearnProgress';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowLeft, CheckCircle2, Circle, Lock, Lightbulb, AlertTriangle, ShieldAlert,
   BookOpenCheck, RotateCcw, Trophy, Flame, ListChecks, GraduationCap, Sparkles,
-  ExternalLink, ArrowRight, KeyRound,
+  ExternalLink, ArrowRight, KeyRound, Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ACCESS_KEY = 'charted-learn-access-v1';
+const WHOP_PLAN_URL = 'https://whop.com/checkout/plan_LJPPmg7nvE8OA';
 
 const calloutMap = {
   tip: { icon: Lightbulb, label: 'Tip', classes: 'border-primary/40 bg-primary/5' },
