@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_coach_reports: {
+        Row: {
+          consistency_score: number | null
+          created_at: string
+          discipline_score: number | null
+          emotional_insights: Json
+          focus_tasks: Json
+          headline: string
+          id: string
+          metadata: Json | null
+          mistakes: Json
+          overall_rating: number | null
+          period_end: string | null
+          period_start: string | null
+          report_type: string
+          risk_mgmt_score: number | null
+          strengths: Json
+          summary: string
+          tier: string | null
+          user_id: string
+        }
+        Insert: {
+          consistency_score?: number | null
+          created_at?: string
+          discipline_score?: number | null
+          emotional_insights?: Json
+          focus_tasks?: Json
+          headline: string
+          id?: string
+          metadata?: Json | null
+          mistakes?: Json
+          overall_rating?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          report_type?: string
+          risk_mgmt_score?: number | null
+          strengths?: Json
+          summary: string
+          tier?: string | null
+          user_id: string
+        }
+        Update: {
+          consistency_score?: number | null
+          created_at?: string
+          discipline_score?: number | null
+          emotional_insights?: Json
+          focus_tasks?: Json
+          headline?: string
+          id?: string
+          metadata?: Json | null
+          mistakes?: Json
+          overall_rating?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          report_type?: string
+          risk_mgmt_score?: number | null
+          strengths?: Json
+          summary?: string
+          tier?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_signals: {
         Row: {
           actual_exit_price: number | null
@@ -632,6 +695,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trader_dna: {
+        Row: {
+          archetype: string
+          archetype_confidence: number
+          best_session: string | null
+          biases: Json
+          created_at: string
+          id: string
+          last_calculated_at: string
+          recommended_strategies: Json
+          strengths: Json
+          summary: string | null
+          updated_at: string
+          user_id: string
+          weaknesses: Json
+          worst_session: string | null
+        }
+        Insert: {
+          archetype?: string
+          archetype_confidence?: number
+          best_session?: string | null
+          biases?: Json
+          created_at?: string
+          id?: string
+          last_calculated_at?: string
+          recommended_strategies?: Json
+          strengths?: Json
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+          weaknesses?: Json
+          worst_session?: string | null
+        }
+        Update: {
+          archetype?: string
+          archetype_confidence?: number
+          best_session?: string | null
+          biases?: Json
+          created_at?: string
+          id?: string
+          last_calculated_at?: string
+          recommended_strategies?: Json
+          strengths?: Json
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+          weaknesses?: Json
+          worst_session?: string | null
+        }
+        Relationships: []
       }
       trades: {
         Row: {
