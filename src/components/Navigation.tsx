@@ -1,4 +1,4 @@
-import { Home, TrendingUp, PlusCircle, GraduationCap, User } from 'lucide-react';
+import { Home, TrendingUp, PlusCircle, Brain, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -13,7 +13,7 @@ const tabs = [
   { id: 'feed', label: 'Home', icon: Home },
   { id: 'markets', label: 'Markets', icon: TrendingUp },
   { id: 'create', label: 'Post', icon: PlusCircle, isFab: true },
-  { id: 'learn', label: 'Learn', icon: GraduationCap },
+  { id: 'coach', label: 'Coach', icon: Brain },
   { id: 'profile', label: 'Profile', icon: User },
 ];
 
