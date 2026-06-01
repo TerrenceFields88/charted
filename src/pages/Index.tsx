@@ -34,6 +34,7 @@ const Index = () => {
       case 'journal': return <TradeJournalPage />;
       case 'learn': return <LearnPage />;
       case 'watchlist': return <WatchlistPage />;
+      case 'coach': return <AICoachPage />;
       case 'profile': return <ProfilePage />;
       default: return <FeedPage />;
     }
