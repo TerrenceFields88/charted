@@ -22,7 +22,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const navigate = useNavigate();
 
   const handleTabClick = (tabId: string) => {
-    const requiresAuth = ['create', 'profile', 'journal'].includes(tabId);
+    const requiresAuth = ['create', 'profile', 'journal', 'coach'].includes(tabId);
     if (requiresAuth && !user) {
       toast({ title: 'Login Required', description: 'Please log in to access this feature.' });
       navigate('/auth');
