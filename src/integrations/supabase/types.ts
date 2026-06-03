@@ -586,6 +586,104 @@ export type Database = {
           },
         ]
       }
+      prediction_votes: {
+        Row: {
+          created_at: string
+          id: string
+          prediction_id: string
+          user_id: string
+          vote: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prediction_id: string
+          user_id: string
+          vote: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prediction_id?: string
+          user_id?: string
+          vote?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_votes_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "predictions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictions: {
+        Row: {
+          agree_count: number
+          chart_image_url: string | null
+          confidence: number
+          created_at: string
+          direction: string
+          disagree_count: number
+          entry_price: number | null
+          expires_at: string | null
+          id: string
+          resolved_at: string | null
+          resolved_price: number | null
+          status: string
+          stop_loss: number | null
+          symbol: string
+          target_price: number | null
+          thesis: string | null
+          timeframe: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agree_count?: number
+          chart_image_url?: string | null
+          confidence?: number
+          created_at?: string
+          direction: string
+          disagree_count?: number
+          entry_price?: number | null
+          expires_at?: string | null
+          id?: string
+          resolved_at?: string | null
+          resolved_price?: number | null
+          status?: string
+          stop_loss?: number | null
+          symbol: string
+          target_price?: number | null
+          thesis?: string | null
+          timeframe?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agree_count?: number
+          chart_image_url?: string | null
+          confidence?: number
+          created_at?: string
+          direction?: string
+          disagree_count?: number
+          entry_price?: number | null
+          expires_at?: string | null
+          id?: string
+          resolved_at?: string | null
+          resolved_price?: number | null
+          status?: string
+          stop_loss?: number | null
+          symbol?: string
+          target_price?: number | null
+          thesis?: string | null
+          timeframe?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -747,6 +845,60 @@ export type Database = {
         }
         Relationships: []
       }
+      trader_scores: {
+        Row: {
+          accuracy_percentage: number
+          avg_confidence: number
+          best_streak: number
+          correct_predictions: number
+          created_at: string
+          current_streak: number
+          id: string
+          last_calculated_at: string
+          pending_predictions: number
+          rank_tier: string
+          reputation_points: number
+          total_predictions: number
+          updated_at: string
+          user_id: string
+          wrong_predictions: number
+        }
+        Insert: {
+          accuracy_percentage?: number
+          avg_confidence?: number
+          best_streak?: number
+          correct_predictions?: number
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_calculated_at?: string
+          pending_predictions?: number
+          rank_tier?: string
+          reputation_points?: number
+          total_predictions?: number
+          updated_at?: string
+          user_id: string
+          wrong_predictions?: number
+        }
+        Update: {
+          accuracy_percentage?: number
+          avg_confidence?: number
+          best_streak?: number
+          correct_predictions?: number
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_calculated_at?: string
+          pending_predictions?: number
+          rank_tier?: string
+          reputation_points?: number
+          total_predictions?: number
+          updated_at?: string
+          user_id?: string
+          wrong_predictions?: number
+        }
+        Relationships: []
+      }
       trades: {
         Row: {
           brokerage_account_id: string | null
@@ -899,6 +1051,10 @@ export type Database = {
           p_table_name?: string
           p_user_id: string
         }
+        Returns: undefined
+      }
+      recalculate_trader_score: {
+        Args: { p_user_id: string }
         Returns: undefined
       }
       sanitize_content: { Args: { content: string }; Returns: string }
