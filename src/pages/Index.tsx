@@ -11,6 +11,7 @@ import { TradeJournalPage } from '@/components/TradeJournalPage';
 import { LearnPage } from '@/components/LearnPage';
 import { WatchlistPage } from '@/components/WatchlistPage';
 import { AICoachPage } from '@/components/AICoachPage';
+import { PredictionsPage } from '@/components/PredictionsPage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
