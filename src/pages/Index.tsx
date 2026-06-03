@@ -36,6 +36,7 @@ const Index = () => {
       case 'learn': return <LearnPage />;
       case 'watchlist': return <WatchlistPage />;
       case 'coach': return <AICoachPage />;
+      case 'predictions': return <PredictionsPage />;
       case 'profile': return <ProfilePage />;
       default: return <FeedPage />;
     }
