@@ -12,6 +12,7 @@ import { LearnPage } from '@/components/LearnPage';
 import { WatchlistPage } from '@/components/WatchlistPage';
 import { AICoachPage } from '@/components/AICoachPage';
 import { PredictionsPage } from '@/components/PredictionsPage';
+import { ChartAnalysisPage } from '@/components/ChartAnalysisPage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
@@ -37,6 +38,7 @@ const Index = () => {
       case 'watchlist': return <WatchlistPage />;
       case 'coach': return <AICoachPage />;
       case 'predictions': return <PredictionsPage />;
+      case 'chart-analysis': return <ChartAnalysisPage />;
       case 'profile': return <ProfilePage />;
       default: return <FeedPage />;
     }

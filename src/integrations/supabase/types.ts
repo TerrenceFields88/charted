@@ -227,6 +227,84 @@ export type Database = {
         }
         Relationships: []
       }
+      chart_analyses: {
+        Row: {
+          bias: string
+          confidence: number
+          created_at: string
+          entry_price: number | null
+          id: string
+          image_url: string | null
+          key_observations: Json
+          pattern: string | null
+          raw_response: Json | null
+          resistance_levels: Json
+          risk_reward: number | null
+          risks: Json
+          setup_name: string | null
+          stop_loss: number | null
+          summary: string | null
+          support_levels: Json
+          symbol: string | null
+          target_price: number | null
+          timeframe: string | null
+          timeframe_outlook: string | null
+          trend: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bias: string
+          confidence?: number
+          created_at?: string
+          entry_price?: number | null
+          id?: string
+          image_url?: string | null
+          key_observations?: Json
+          pattern?: string | null
+          raw_response?: Json | null
+          resistance_levels?: Json
+          risk_reward?: number | null
+          risks?: Json
+          setup_name?: string | null
+          stop_loss?: number | null
+          summary?: string | null
+          support_levels?: Json
+          symbol?: string | null
+          target_price?: number | null
+          timeframe?: string | null
+          timeframe_outlook?: string | null
+          trend?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bias?: string
+          confidence?: number
+          created_at?: string
+          entry_price?: number | null
+          id?: string
+          image_url?: string | null
+          key_observations?: Json
+          pattern?: string | null
+          raw_response?: Json | null
+          resistance_levels?: Json
+          risk_reward?: number | null
+          risks?: Json
+          setup_name?: string | null
+          stop_loss?: number | null
+          summary?: string | null
+          support_levels?: Json
+          symbol?: string | null
+          target_price?: number | null
+          timeframe?: string | null
+          timeframe_outlook?: string | null
+          trend?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
