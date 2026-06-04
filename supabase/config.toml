@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.chart-analyzer]
 verify_jwt = false
+
+[functions.charted-chat]
+verify_jwt = false
