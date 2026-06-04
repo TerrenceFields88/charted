@@ -105,16 +105,24 @@ export const AICoachPage = () => {
       </div>
 
       <div className="px-4 pt-4 space-y-4">
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent('charted:nav', { detail: 'predictions' }))}
-          className="w-full p-3 rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/20 flex items-center justify-between active:scale-[0.98] transition-transform"
-        >
-          <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold">Predictions & Leaderboard</span>
-          </div>
-          <span className="text-xs text-muted-foreground">Open →</span>
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('charted:nav', { detail: 'predictions' }))}
+            className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 flex flex-col items-start active:scale-[0.98] transition-transform"
+          >
+            <Target className="w-4 h-4 text-primary mb-1" />
+            <span className="text-xs font-semibold">Predictions</span>
+            <span className="text-[10px] text-muted-foreground">Leaderboard</span>
+          </button>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('charted:nav', { detail: 'chart-analysis' }))}
+            className="p-3 rounded-xl bg-gradient-to-br from-accent/10 to-transparent border border-accent/20 flex flex-col items-start active:scale-[0.98] transition-transform"
+          >
+            <Sparkles className="w-4 h-4 text-accent mb-1" />
+            <span className="text-xs font-semibold">Chart Analysis</span>
+            <span className="text-[10px] text-muted-foreground">Upload & read</span>
+          </button>
+        </div>
 
         {loading ? (
           <>
