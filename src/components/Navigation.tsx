@@ -1,4 +1,4 @@
-import { Home, TrendingUp, PlusCircle, Brain, User } from 'lucide-react';
+import { Home, TrendingUp, PlusCircle, Sparkles, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -13,7 +13,7 @@ const tabs = [
   { id: 'feed', label: 'Home', icon: Home },
   { id: 'markets', label: 'Markets', icon: TrendingUp },
   { id: 'create', label: 'Post', icon: PlusCircle, isFab: true },
-  { id: 'coach', label: 'Coach', icon: Brain },
+  { id: 'chat', label: 'Chat', icon: Sparkles },
   { id: 'profile', label: 'Profile', icon: User },
 ];
 
@@ -22,7 +22,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const navigate = useNavigate();
 
   const handleTabClick = (tabId: string) => {
-    const requiresAuth = ['create', 'profile', 'journal', 'coach'].includes(tabId);
+    const requiresAuth = ['create', 'profile', 'journal', 'coach', 'chat'].includes(tabId);
     if (requiresAuth && !user) {
       toast({ title: 'Login Required', description: 'Please log in to access this feature.' });
       navigate('/auth');
