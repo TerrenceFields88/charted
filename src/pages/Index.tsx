@@ -17,7 +17,7 @@ import { ChatPage } from '@/components/ChatPage';
 import { LeaderboardPage } from '@/components/LeaderboardPage';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('feed');
+  const [activeTab, setActiveTab] = useState('chat');
 
   useEffect(() => {
     const handler = (e: Event) => {
