@@ -48,12 +48,16 @@ const Index = () => {
     }
   };
 
+  const showTicker = activeTab !== 'chat';
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto relative min-h-screen">
-        <div className="sticky top-0 z-50">
-          <CommodityTicker />
-        </div>
+        {showTicker && (
+          <div className="sticky top-0 z-50">
+            <CommodityTicker />
+          </div>
+        )}
         {renderContent()}
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
