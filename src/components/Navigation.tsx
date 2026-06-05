@@ -1,4 +1,4 @@
-import { Home, TrendingUp, PlusCircle, Sparkles, User } from 'lucide-react';
+import { Home, TrendingUp, Sparkles, User, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -10,10 +10,10 @@ interface NavigationProps {
 }
 
 const tabs = [
-  { id: 'feed', label: 'Home', icon: Home },
+  { id: 'feed', label: 'Feed', icon: Home },
   { id: 'markets', label: 'Markets', icon: TrendingUp },
-  { id: 'create', label: 'Post', icon: PlusCircle, isFab: true },
-  { id: 'chat', label: 'Chat', icon: Sparkles },
+  { id: 'chat', label: 'Ask AI', icon: Sparkles, isFab: true },
+  { id: 'leaderboard', label: 'Ranks', icon: Trophy },
   { id: 'profile', label: 'Profile', icon: User },
 ];
 
@@ -24,7 +24,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const handleTabClick = (tabId: string) => {
     const requiresAuth = ['create', 'profile', 'journal', 'coach', 'chat'].includes(tabId);
     if (requiresAuth && !user) {
-      toast({ title: 'Login Required', description: 'Please log in to access this feature.' });
+      toast({ title: 'Sign in', description: 'Login to use the AI copilot.' });
       navigate('/auth');
       return;
     }
@@ -32,7 +32,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border/50 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border/40 z-50">
       <div className="max-w-md mx-auto px-3 pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-around py-1">
           {tabs.map((tab) => {
@@ -45,17 +45,20 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
                   className="flex flex-col items-center -mt-6 transition-transform active:scale-90"
-                  aria-label="Create post"
+                  aria-label="Ask AI"
                 >
                   <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-gradient-molten blur-md opacity-70" />
+                    <div className="absolute inset-0 rounded-full bg-gradient-ember blur-xl opacity-70" />
                     <div className={cn(
-                      "relative w-12 h-12 rounded-full flex items-center justify-center shadow-ember transition-all bg-gradient-ember",
-                      isActive && "scale-110"
+                      "relative w-14 h-14 rounded-full flex items-center justify-center shadow-ember transition-all bg-gradient-ember ring-1 ring-primary/40",
+                      isActive && "scale-105"
                     )}>
-                      <PlusCircle className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
+                      <Sparkles className="w-6 h-6 text-primary-foreground" strokeWidth={2.25} />
                     </div>
                   </div>
+                  <span className={cn("text-[9px] mt-1 font-medium tracking-wide", isActive ? "text-primary" : "text-muted-foreground")}>
+                    Ask AI
+                  </span>
                 </button>
               );
             }
