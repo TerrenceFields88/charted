@@ -105,22 +105,30 @@ export const AICoachPage = () => {
       </div>
 
       <div className="px-4 pt-4 space-y-4">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('charted:nav', { detail: 'predictions' }))}
             className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 flex flex-col items-start active:scale-[0.98] transition-transform"
           >
             <Target className="w-4 h-4 text-primary mb-1" />
             <span className="text-xs font-semibold">Predictions</span>
-            <span className="text-[10px] text-muted-foreground">Leaderboard</span>
+            <span className="text-[10px] text-muted-foreground">Track calls</span>
+          </button>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('charted:nav', { detail: 'leaderboard' }))}
+            className="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 flex flex-col items-start active:scale-[0.98] transition-transform"
+          >
+            <TrendingUp className="w-4 h-4 text-amber-400 mb-1" />
+            <span className="text-xs font-semibold">Leaderboard</span>
+            <span className="text-[10px] text-muted-foreground">Top traders</span>
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('charted:nav', { detail: 'chart-analysis' }))}
             className="p-3 rounded-xl bg-gradient-to-br from-accent/10 to-transparent border border-accent/20 flex flex-col items-start active:scale-[0.98] transition-transform"
           >
             <Sparkles className="w-4 h-4 text-accent mb-1" />
-            <span className="text-xs font-semibold">Chart Analysis</span>
-            <span className="text-[10px] text-muted-foreground">Upload & read</span>
+            <span className="text-xs font-semibold">Charts</span>
+            <span className="text-[10px] text-muted-foreground">AI scan</span>
           </button>
         </div>
 
