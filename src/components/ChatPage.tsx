@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
-import { Send, Sparkles, Plus, Menu, Trash2, MessageSquare, Brain, Target, TrendingUp, BookOpen, Loader2, StopCircle } from "lucide-react";
+import { Send, Sparkles, Plus, Menu, Trash2, MessageSquare, Brain, Target, TrendingUp, BookOpen, Loader2, StopCircle, LogOut, UserCog, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Role = "user" | "assistant" | "system";
