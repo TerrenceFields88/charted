@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
-import { Send, Sparkles, Plus, Menu, Trash2, MessageSquare, Brain, Target, TrendingUp, BookOpen, Loader2, StopCircle } from "lucide-react";
+import { Send, Sparkles, Plus, Menu, Trash2, MessageSquare, Brain, Target, TrendingUp, BookOpen, Loader2, StopCircle, LogOut, UserCog, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Role = "user" | "assistant" | "system";
@@ -24,7 +27,9 @@ const STARTER_PROMPTS = [
 const SUGGESTED_FOLLOWUPS = ["What's the macro driver?", "Where's invalidation?", "Give me a tighter entry"];
 
 export const ChatPage = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -175,16 +180,21 @@ export const ChatPage = () => {
   if (!user) {
     return (
       <div className="pb-24 px-4 pt-10 max-w-md mx-auto">
-        <Card className="p-8 text-center space-y-4 bg-card/60 border-border/40 backdrop-blur-xl">
+        <Card className="p-8 text-center space-y-5 bg-card/60 border-border/40 backdrop-blur-xl">
           <div className="w-14 h-14 rounded-2xl bg-gradient-ember mx-auto flex items-center justify-center shadow-ember">
             <Sparkles className="w-7 h-7 text-primary-foreground" />
           </div>
           <h2 className="font-display text-3xl">Your AI trading desk</h2>
           <p className="text-sm text-muted-foreground">Sign in to ask anything — setups, sizing, journaling, psychology. Your personal copilot for commodities futures.</p>
+          <Button onClick={() => navigate('/auth')} className="w-full rounded-full bg-gradient-ember shadow-ember">
+            <LogIn className="w-4 h-4 mr-2" /> Sign in to start
+          </Button>
         </Card>
       </div>
     );
   }
+
+  const initials = (profile?.display_name || profile?.username || user.email || "U").slice(0, 2).toUpperCase();
 
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)] pb-16">
@@ -206,7 +216,7 @@ export const ChatPage = () => {
                 <Plus className="w-4 h-4 mr-1" />New
               </Button>
             </div>
-            <div className="overflow-y-auto h-[calc(100vh-5rem)]">
+            <div className="overflow-y-auto h-[calc(100vh-12rem)]">
               {conversations.length === 0 ? (
                 <p className="text-xs text-muted-foreground p-6 text-center font-display-italic text-base">No conversations yet.</p>
               ) : conversations.map(c => (
@@ -228,6 +238,27 @@ export const ChatPage = () => {
                   </button>
                 </div>
               ))}
+            </div>
+            {/* Account footer */}
+            <div className="absolute bottom-0 left-0 right-0 border-t border-border/40 bg-card/95 backdrop-blur-xl p-3 space-y-2">
+              <div className="flex items-center gap-3 px-1">
+                <Avatar className="w-9 h-9 ring-1 ring-primary/30">
+                  <AvatarImage src={profile?.avatar_url ?? undefined} />
+                  <AvatarFallback className="bg-gradient-ember text-primary-foreground text-xs">{initials}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold truncate">{profile?.display_name || profile?.username || "Trader"}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="outline" className="rounded-full text-xs" onClick={() => { setDrawerOpen(false); navigate('/edit-profile'); }}>
+                  <UserCog className="w-3.5 h-3.5 mr-1" /> Profile
+                </Button>
+                <Button size="sm" variant="ghost" className="rounded-full text-xs hover:text-destructive" onClick={async () => { await signOut(); setDrawerOpen(false); }}>
+                  <LogOut className="w-3.5 h-3.5 mr-1" /> Sign out
+                </Button>
+              </div>
             </div>
           </SheetContent>
         </Sheet>

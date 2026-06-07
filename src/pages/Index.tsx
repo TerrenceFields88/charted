@@ -30,10 +30,8 @@ const Index = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'feed': return <FeedPage />;
       case 'markets': return <MarketsPage />;
       case 'messages': return <MessagesPage />;
-      case 'create': return <CreatePage />;
       case 'analyst': return <AIAnalystPage />;
       case 'journal': return <TradeJournalPage />;
       case 'learn': return <LearnPage />;
@@ -44,7 +42,8 @@ const Index = () => {
       case 'chat': return <ChatPage />;
       case 'leaderboard': return <LeaderboardPage />;
       case 'profile': return <ProfilePage />;
-      default: return <FeedPage />;
+      case 'create': return <CreatePage />;
+      default: return <ChatPage />;
     }
   };
 

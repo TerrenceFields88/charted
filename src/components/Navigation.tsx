@@ -1,4 +1,4 @@
-import { Home, TrendingUp, Sparkles, User, Trophy } from 'lucide-react';
+import { TrendingUp, Sparkles, Trophy, Brain, BookOpenCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -10,11 +10,11 @@ interface NavigationProps {
 }
 
 const tabs = [
-  { id: 'feed', label: 'Feed', icon: Home },
   { id: 'markets', label: 'Markets', icon: TrendingUp },
+  { id: 'coach', label: 'Coach', icon: Brain },
   { id: 'chat', label: 'Ask AI', icon: Sparkles, isFab: true },
+  { id: 'journal', label: 'Journal', icon: BookOpenCheck },
   { id: 'leaderboard', label: 'Ranks', icon: Trophy },
-  { id: 'profile', label: 'Profile', icon: User },
 ];
 
 export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
