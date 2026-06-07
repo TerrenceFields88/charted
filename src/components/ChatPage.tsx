@@ -27,7 +27,9 @@ const STARTER_PROMPTS = [
 const SUGGESTED_FOLLOWUPS = ["What's the macro driver?", "Where's invalidation?", "Give me a tighter entry"];
 
 export const ChatPage = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
