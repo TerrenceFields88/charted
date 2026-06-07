@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { CommodityTicker } from '@/components/CommodityTicker';
+import { HomePage } from '@/components/HomePage';
 import { FeedPage } from '@/components/FeedPage';
 import { MarketsPage } from '@/components/MarketsPage';
 import { CreatePage } from '@/components/CreatePage';
@@ -17,7 +18,7 @@ import { ChatPage } from '@/components/ChatPage';
 import { LeaderboardPage } from '@/components/LeaderboardPage';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('chat');
+  const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -30,6 +31,8 @@ const Index = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'home': return <HomePage onNavigate={setActiveTab} />;
+      case 'feed': return <FeedPage />;
       case 'markets': return <MarketsPage />;
       case 'messages': return <MessagesPage />;
       case 'analyst': return <AIAnalystPage />;
@@ -43,11 +46,11 @@ const Index = () => {
       case 'leaderboard': return <LeaderboardPage />;
       case 'profile': return <ProfilePage />;
       case 'create': return <CreatePage />;
-      default: return <ChatPage />;
+      default: return <HomePage onNavigate={setActiveTab} />;
     }
   };
 
-  const showTicker = activeTab !== 'chat';
+  const showTicker = activeTab !== 'chat' && activeTab !== 'home';
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,3 +68,4 @@ const Index = () => {
 };
 
 export default Index;
+
