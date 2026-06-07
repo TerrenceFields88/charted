@@ -180,16 +180,21 @@ export const ChatPage = () => {
   if (!user) {
     return (
       <div className="pb-24 px-4 pt-10 max-w-md mx-auto">
-        <Card className="p-8 text-center space-y-4 bg-card/60 border-border/40 backdrop-blur-xl">
+        <Card className="p-8 text-center space-y-5 bg-card/60 border-border/40 backdrop-blur-xl">
           <div className="w-14 h-14 rounded-2xl bg-gradient-ember mx-auto flex items-center justify-center shadow-ember">
             <Sparkles className="w-7 h-7 text-primary-foreground" />
           </div>
           <h2 className="font-display text-3xl">Your AI trading desk</h2>
           <p className="text-sm text-muted-foreground">Sign in to ask anything — setups, sizing, journaling, psychology. Your personal copilot for commodities futures.</p>
+          <Button onClick={() => navigate('/auth')} className="w-full rounded-full bg-gradient-ember shadow-ember">
+            <LogIn className="w-4 h-4 mr-2" /> Sign in to start
+          </Button>
         </Card>
       </div>
     );
   }
+
+  const initials = (profile?.display_name || profile?.username || user.email || "U").slice(0, 2).toUpperCase();
 
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)] pb-16">
